@@ -8,921 +8,1002 @@
 <title>El Local</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0d0d;
-    --surface: #1a1a1a;
-    --surface2: #252525;
-    --border: #333;
-    --accent: #e8ff3c;
-    --accent2: #ff3c3c;
-    --accent3: #3cffb4;
-    --text: #f0f0f0;
-    --muted: #888;
-    --danger: #ff3c3c;
-    --warning: #ffab3c;
-    --good: #3cffb4;
-    --h-font: 'Bebas Neue', cursive;
-    --b-font: 'Space Mono', monospace;
-  }
+:root {
+  --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #252525; --border: #333;
+  --accent: #e8ff3c; --danger: #ff3c3c; --warning: #ffab3c; --good: #3cffb4;
+  --text: #f0f0f0; --muted: #888;
+  --h-font: 'Bebas Neue', cursive; --b-font: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html, body { width: 100%; height: 100dvh; background: var(--bg); color: var(--text); font-family: var(--b-font); overflow: hidden; user-select: none; }
+#app { display: flex; flex-direction: column; height: 100dvh; max-width: 430px; margin: 0 auto; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* HEADER */
+#header { padding: 8px 12px 5px; background: var(--surface); border-bottom: 2px solid var(--accent); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+#header h1 { font-family: var(--h-font); font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+.hud-pill { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 3px 9px; font-size: 11px; }
+.hud-pill span { font-size: 10px; color: var(--muted); }
+.hud-pill.danger { border-color: var(--danger); color: var(--danger); }
+.hud-pill.good { border-color: var(--good); color: var(--good); }
+.hud-pill.warn { border-color: var(--warning); color: var(--warning); }
+#hud { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
-  html, body {
-    width: 100%; height: 100dvh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--b-font);
-    overflow: hidden;
-    user-select: none;
-  }
+/* SCENE CANVAS */
+#scene-wrap { flex: 1; position: relative; overflow: hidden; background: #111; }
+canvas#scene { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 
-  #app {
-    display: flex; flex-direction: column;
-    height: 100dvh; max-width: 430px;
-    margin: 0 auto; position: relative;
-  }
+/* NOTIFICATION */
+#notif-area { position: absolute; top: 6px; left: 8px; right: 8px; z-index: 10; pointer-events: none; }
+.notif { background: rgba(26,26,26,0.95); border-left: 3px solid var(--accent); padding: 6px 10px; margin-bottom: 4px; border-radius: 0 6px 6px 0; font-size: 10px; line-height: 1.4; animation: notifIn 0.25s ease-out; }
+.notif.danger { border-color: var(--danger); }
+.notif.good { border-color: var(--good); }
+.notif-sender { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+@keyframes notifIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
 
-  /* ===== HEADER ===== */
-  #header {
-    padding: 10px 14px 6px;
-    background: var(--surface);
-    border-bottom: 2px solid var(--accent);
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0;
-  }
-  #header h1 {
-    font-family: var(--h-font);
-    font-size: 28px; letter-spacing: 2px;
-    color: var(--accent); line-height: 1;
-  }
-  #day-info { text-align: right; }
-  #day-info .day-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
-  #day-info .day-val { font-size: 18px; font-weight: 700; color: var(--text); }
-  #time-bar-wrap {
-    height: 4px; background: var(--surface2);
-    border-radius: 2px; margin-top: 2px; width: 80px;
-  }
-  #time-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 1s linear; }
+/* CHAR TABS */
+#char-tabs { display: flex; gap: 4px; padding: 5px 8px; background: var(--bg); overflow-x: auto; flex-shrink: 0; scrollbar-width: none; }
+#char-tabs::-webkit-scrollbar { display: none; }
+.char-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 7px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; min-width: 50px; background: var(--surface); transition: border-color 0.15s; }
+.char-tab.active { border-color: var(--accent); background: #1e1e00; }
+.char-tab.ko { border-color: var(--danger); background: #1e0000; }
+.tab-emoji { font-size: 18px; }
+.tab-name { font-size: 7px; color: var(--muted); text-transform: uppercase; }
+.tab-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.tab-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
 
-  /* ===== STATUS STRIP ===== */
-  #status-strip {
-    display: flex; gap: 8px;
-    padding: 6px 14px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .strip-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .strip-label { font-size: 8px; color: var(--muted); text-transform: uppercase; }
-  .strip-val { font-size: 13px; font-weight: 700; }
-  .strip-val.danger { color: var(--danger); animation: blink 1s infinite; }
-  .strip-val.warning { color: var(--warning); }
-  .strip-val.good { color: var(--good); }
+/* STAT PANEL */
+#stat-panel { background: var(--surface); border-top: 1px solid var(--border); padding: 6px 12px 5px; flex-shrink: 0; }
+#stat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+#stat-emoji { font-size: 22px; }
+#stat-name { font-family: var(--h-font); font-size: 20px; color: var(--accent); letter-spacing: 2px; }
+#stat-state { font-size: 8px; color: var(--muted); text-transform: uppercase; }
+#stat-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; }
+.sbar { display: flex; align-items: center; gap: 4px; }
+.sbar-lbl { font-size: 8px; color: var(--muted); width: 48px; flex-shrink: 0; }
+.sbar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.sbar-fill { height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s; }
+.sbar-num { font-size: 8px; width: 22px; text-align: right; }
 
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+/* ACTIONS */
+#actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; padding: 6px 8px 8px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
+.abtn { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 3px 5px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; transition: transform 0.1s, background 0.1s; }
+.abtn:active { transform: scale(0.9); background: #333; }
+.abtn .ai { font-size: 20px; }
+.abtn .al { font-size: 7px; color: var(--muted); text-transform: uppercase; text-align: center; }
+.abtn.hl { border-color: var(--accent); }
+.abtn.off { opacity: 0.3; pointer-events: none; }
 
-  /* ===== MAIN SCENE ===== */
-  #scene {
-    flex: 1; position: relative; overflow: hidden;
-    background: radial-gradient(ellipse at 50% 80%, #1c1a10 0%, #0d0d0d 70%);
-  }
+/* EVENT / GAMEOVER */
+#overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding: 20px; }
+#overlay.on { display: flex; }
+.ev-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 12px; padding: 18px; width: 100%; text-align: center; }
+.ev-icon { font-size: 44px; margin-bottom: 6px; }
+.ev-title { font-family: var(--h-font); font-size: 28px; color: var(--accent); letter-spacing: 2px; margin-bottom: 5px; }
+.ev-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.ev-btns { display: flex; gap: 7px; }
+.ev-btn { flex: 1; padding: 11px 6px; border-radius: 8px; border: none; font-family: var(--b-font); font-size: 10px; font-weight: 700; cursor: pointer; }
+.ev-btn:active { opacity: 0.7; }
+.ev-btn.p { background: var(--accent); color: #000; }
+.ev-btn.s { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.ev-btn.d { background: var(--danger); color: #fff; }
 
-  /* Floor */
-  #scene::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
-    background: linear-gradient(to top, #1a1508 0%, transparent 100%);
-    pointer-events: none;
-  }
+/* TIME BAR */
+#timebar-wrap { height: 3px; background: var(--surface2); flex-shrink: 0; }
+#timebar { height: 100%; background: var(--accent); transition: width 1s linear; }
 
-  /* Trash visual */
-  #trash-layer {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    display: flex; align-items: flex-end; flex-wrap: wrap;
-    padding: 0 4px;
-    pointer-events: none;
-    transition: opacity 0.5s;
-  }
-  .trash-item {
-    font-size: 18px; margin: 1px;
-    filter: saturate(0.6) brightness(0.7);
-    animation: trashWobble 3s ease-in-out infinite;
-  }
-  @keyframes trashWobble { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
-
-  /* Characters area */
-  #characters-area {
-    position: absolute; bottom: 28%; left: 0; right: 0;
-    display: flex; justify-content: space-around; align-items: flex-end;
-    padding: 0 8px;
-  }
-
-  .char-sprite {
-    display: flex; flex-direction: column; align-items: center;
-    cursor: pointer; position: relative;
-    transition: transform 0.2s;
-  }
-  .char-sprite:active { transform: scale(0.92); }
-  .char-sprite.selected .char-body { outline: 3px solid var(--accent); border-radius: 8px; }
-  .char-sprite.collapsed .char-body { filter: grayscale(1) brightness(0.5); }
-  .char-sprite.party .char-body { animation: partyBounce 0.4s ease-in-out infinite alternate; }
-  @keyframes partyBounce { from{transform:translateY(0)} to{transform:translateY(-6px)} }
-
-  .char-body {
-    font-size: 36px; line-height: 1;
-    border-radius: 6px; padding: 2px;
-    transition: filter 0.3s;
-  }
-  .char-name {
-    font-size: 8px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1px;
-    margin-top: 2px;
-  }
-  .char-status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    position: absolute; top: 0; right: 0;
-  }
-  .char-mood-bubble {
-    position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 2px 5px;
-    font-size: 11px; white-space: nowrap;
-    pointer-events: none;
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .char-sprite:hover .char-mood-bubble,
-  .char-sprite.selected .char-mood-bubble { opacity: 1; }
-
-  /* ===== NPC NOTIFICATIONS ===== */
-  #notif-area {
-    position: absolute; top: 8px; left: 14px; right: 14px;
-    pointer-events: none; z-index: 10;
-  }
-  .notif {
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
-    padding: 7px 10px; margin-bottom: 5px;
-    border-radius: 0 6px 6px 0;
-    font-size: 11px; line-height: 1.4;
-    animation: notifSlide 0.3s ease-out;
-    pointer-events: auto;
-  }
-  .notif.danger { border-color: var(--danger); }
-  .notif.good { border-color: var(--good); }
-  .notif-sender { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  @keyframes notifSlide { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-
-  /* ===== SELECTED CHAR PANEL ===== */
-  #char-panel {
-    background: var(--surface);
-    border-top: 2px solid var(--border);
-    padding: 8px 14px 6px;
-    flex-shrink: 0;
-    max-height: 140px;
-  }
-  #char-panel-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
-  }
-  #char-panel-emoji { font-size: 26px; }
-  #char-panel-name { font-family: var(--h-font); font-size: 22px; color: var(--accent); letter-spacing: 2px; }
-  #char-panel-state { font-size: 9px; color: var(--muted); text-transform: uppercase; }
-
-  #stats-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
-  }
-  .stat-row {
-    display: flex; align-items: center; gap: 5px;
-  }
-  .stat-label { font-size: 8px; color: var(--muted); width: 52px; text-transform: uppercase; flex-shrink: 0; }
-  .stat-bar-wrap { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .stat-bar { height: 100%; border-radius: 3px; transition: width 0.4s ease, background-color 0.4s; }
-  .stat-val { font-size: 9px; width: 24px; text-align: right; }
-
-  /* ===== ACTION BUTTONS ===== */
-  #actions {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 6px; padding: 8px 10px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .action-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px; padding: 8px 4px 6px;
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    cursor: pointer; transition: background 0.15s, transform 0.1s, border-color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .action-btn:active { transform: scale(0.93); background: #333; }
-  .action-btn.disabled { opacity: 0.3; pointer-events: none; }
-  .action-btn .btn-icon { font-size: 22px; }
-  .action-btn .btn-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
-  .action-btn.highlight { border-color: var(--accent); }
-  .action-btn.danger-btn { border-color: var(--danger); }
-
-  /* ===== CHAR SELECTOR TABS ===== */
-  #char-tabs {
-    display: flex; gap: 4px;
-    padding: 6px 10px;
-    background: var(--bg);
-    overflow-x: auto; flex-shrink: 0;
-    scrollbar-width: none;
-  }
-  #char-tabs::-webkit-scrollbar { display: none; }
-  .char-tab {
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-    padding: 4px 8px; border-radius: 8px;
-    border: 1px solid var(--border);
-    cursor: pointer; transition: background 0.15s, border-color 0.15s;
-    min-width: 52px; background: var(--surface);
-  }
-  .char-tab:active { background: var(--surface2); }
-  .char-tab.active { border-color: var(--accent); background: #1e1e00; }
-  .char-tab.collapsed-tab { border-color: var(--danger); background: #1e0000; }
-  .char-tab .tab-emoji { font-size: 20px; }
-  .char-tab .tab-name { font-size: 7px; color: var(--muted); text-transform: uppercase; }
-  .char-tab .tab-hp-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-  .char-tab .tab-hp-fill { height: 100%; background: var(--good); border-radius: 2px; transition: width 0.4s; }
-
-  /* ===== EVENT OVERLAY ===== */
-  #event-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 20; padding: 24px;
-    display: none;
-  }
-  #event-overlay.active { display: flex; }
-  .event-box {
-    background: var(--surface);
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    padding: 20px 18px; width: 100%;
-    text-align: center;
-  }
-  .event-icon { font-size: 52px; margin-bottom: 8px; }
-  .event-title { font-family: var(--h-font); font-size: 30px; color: var(--accent); letter-spacing: 2px; margin-bottom: 6px; }
-  .event-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
-  .event-btns { display: flex; gap: 8px; }
-  .event-btn {
-    flex: 1; padding: 12px 8px;
-    border-radius: 8px; border: none;
-    font-family: var(--b-font); font-size: 11px; font-weight: 700;
-    cursor: pointer; transition: opacity 0.15s;
-  }
-  .event-btn:active { opacity: 0.7; }
-  .event-btn.primary { background: var(--accent); color: #000; }
-  .event-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .event-btn.danger { background: var(--danger); color: #fff; }
-
-  /* ===== GAME OVER ===== */
-  #gameover {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.95);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 30; padding: 24px;
-    display: none;
-  }
-  #gameover.active { display: flex; }
-  #gameover h2 { font-family: var(--h-font); font-size: 52px; color: var(--danger); letter-spacing: 4px; text-align: center; }
-  #gameover p { font-size: 13px; color: var(--muted); text-align: center; margin: 12px 0 20px; line-height: 1.6; }
-  #restart-btn {
-    padding: 14px 32px; background: var(--accent); color: #000;
-    border: none; border-radius: 8px;
-    font-family: var(--b-font); font-size: 13px; font-weight: 700;
-    cursor: pointer;
-  }
-
-  /* Chaos mode */
-  body.chaos-mode #scene { animation: chaosFlash 0.3s infinite alternate; }
-  @keyframes chaosFlash { from{filter:hue-rotate(0deg)} to{filter:hue-rotate(30deg) brightness(1.1)} }
+/* DAY/NIGHT OVERLAY ON SCENE */
+#daynight { position: absolute; inset: 0; pointer-events: none; transition: background 4s; }
 </style>
 </head>
 <body>
 <div id="app">
-
-  <!-- HEADER -->
   <div id="header">
     <div>
       <h1>EL LOCAL</h1>
-      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Simulador de supervivencia</div>
+      <div style="font-size:8px;color:var(--muted);letter-spacing:1px;">DÍA <span id="hday">1</span>/30</div>
     </div>
-    <div id="day-info">
-      <div class="day-label">Día</div>
-      <div class="day-val" id="day-display">1 / 30</div>
-      <div id="time-bar-wrap"><div id="time-bar" style="width:0%"></div></div>
-    </div>
-  </div>
-
-  <!-- GLOBAL STATUS STRIP -->
-  <div id="status-strip">
-    <div class="strip-item">
-      <span class="strip-label">💶 Fondo</span>
-      <span class="strip-val" id="strip-money">€0</span>
-    </div>
-    <div class="strip-item">
-      <span class="strip-label">🗑️ Basura</span>
-      <span class="strip-val" id="strip-trash">0%</span>
-    </div>
-    <div class="strip-item">
-      <span class="strip-label">😤 Caos</span>
-      <span class="strip-val" id="strip-chaos">0%</span>
-    </div>
-    <div class="strip-item">
-      <span class="strip-label">⭐ Rep.</span>
-      <span class="strip-val" id="strip-rep">50</span>
+    <div id="hud">
+      <div class="hud-pill" id="hp-money"><span>💶</span><b id="hv-money">€400</b></div>
+      <div class="hud-pill" id="hp-trash"><span>🗑️</span><b id="hv-trash">10%</b></div>
+      <div class="hud-pill" id="hp-rep"><span>⭐</span><b id="hv-rep">50</b></div>
     </div>
   </div>
+  <div id="timebar-wrap"><div id="timebar" style="width:0%"></div></div>
 
-  <!-- MAIN SCENE -->
-  <div id="scene">
+  <div id="scene-wrap">
+    <canvas id="scene"></canvas>
+    <div id="daynight"></div>
     <div id="notif-area"></div>
-    <div id="trash-layer"></div>
-    <div id="characters-area"></div>
-
-    <!-- EVENT OVERLAY -->
-    <div id="event-overlay">
-      <div class="event-box">
-        <div class="event-icon" id="ev-icon">⚠️</div>
-        <div class="event-title" id="ev-title">EVENTO</div>
-        <div class="event-desc" id="ev-desc">Descripción del evento</div>
-        <div class="event-btns" id="ev-btns"></div>
+    <div id="overlay">
+      <div class="ev-box">
+        <div class="ev-icon" id="ev-icon">⚠️</div>
+        <div class="ev-title" id="ev-title">EVENTO</div>
+        <div class="ev-desc" id="ev-desc"></div>
+        <div class="ev-btns" id="ev-btns"></div>
       </div>
-    </div>
-
-    <!-- GAME OVER -->
-    <div id="gameover">
-      <h2>GAME<br>OVER</h2>
-      <p id="gameover-reason">Los desahuciaron. Ni pa' pipas.</p>
-      <button id="restart-btn" onclick="initGame()">VOLVER A INTENTARLO</button>
     </div>
   </div>
 
-  <!-- SELECTED CHAR PANEL -->
-  <div id="char-panel">
-    <div id="char-panel-header">
-      <span id="char-panel-emoji">🧍</span>
-      <div>
-        <div id="char-panel-name">NOMBRE</div>
-        <div id="char-panel-state">Estado normal</div>
-      </div>
-    </div>
-    <div id="stats-grid"></div>
-  </div>
-
-  <!-- CHAR SELECTOR TABS -->
   <div id="char-tabs"></div>
-
-  <!-- ACTION BUTTONS -->
+  <div id="stat-panel">
+    <div id="stat-head">
+      <span id="stat-emoji">🧑‍🎤</span>
+      <div><div id="stat-name">TÚ</div><div id="stat-state">En el local</div></div>
+    </div>
+    <div id="stat-bars"></div>
+  </div>
   <div id="actions">
-    <div class="action-btn" onclick="doAction('eat')">
-      <span class="btn-icon">🍕</span><span class="btn-label">Comer</span>
-    </div>
-    <div class="action-btn" onclick="doAction('sleep')">
-      <span class="btn-icon">😴</span><span class="btn-label">Dormir</span>
-    </div>
-    <div class="action-btn" onclick="doAction('clean')">
-      <span class="btn-icon">🧹</span><span class="btn-label">Limpiar</span>
-    </div>
-    <div class="action-btn" onclick="doAction('party')">
-      <span class="btn-icon">🎉</span><span class="btn-label">Fiesta</span>
-    </div>
-    <div class="action-btn" onclick="doAction('work')">
-      <span class="btn-icon">💼</span><span class="btn-label">Currar</span>
-    </div>
-    <div class="action-btn" onclick="doAction('seco')">
-      <span class="btn-icon">🌿</span><span class="btn-label">El Seco</span>
-    </div>
-    <div class="action-btn" onclick="doAction('ratas')">
-      <span class="btn-icon">🐀</span><span class="btn-label">Ratas</span>
-    </div>
-    <div class="action-btn" onclick="doAction('nextday')">
-      <span class="btn-icon">⏭️</span><span class="btn-label">Avanzar</span>
-    </div>
+    <div class="abtn hl" onclick="act('eat')"><span class="ai">🍕</span><span class="al">Comer</span></div>
+    <div class="abtn" onclick="act('sleep')"><span class="ai">😴</span><span class="al">Dormir</span></div>
+    <div class="abtn" onclick="act('clean')"><span class="ai">🧹</span><span class="al">Limpiar</span></div>
+    <div class="abtn" onclick="act('party')"><span class="ai">🎉</span><span class="al">Fiesta</span></div>
+    <div class="abtn" onclick="act('work')"><span class="ai">💼</span><span class="al">Currar</span></div>
+    <div class="abtn" onclick="act('seco')"><span class="ai">🌿</span><span class="al">El Seco</span></div>
+    <div class="abtn" onclick="act('ratas')"><span class="ai">🐀</span><span class="al">Ratas</span></div>
+    <div class="abtn" onclick="act('skip')"><span class="ai">⏭️</span><span class="al">Avanzar</span></div>
   </div>
 </div>
 
 <script>
-// ================================================================
-//  EL LOCAL — Game Engine
-// ================================================================
+// ══════════════════════════════════════════════════════
+//  PIXEL ART RENDERER — The Sims 1 lateral style
+// ══════════════════════════════════════════════════════
 
-// ── CONFIG ─────────────────────────────────────────────────────
-const CFG = {
-  days: 30,
-  rent: 800,        // coste total mensual
-  startMoney: 400,
-  trashPerDay: 8,   // % basura que sube por día sin limpiar
-  rentDay: 30,      // día en que llega el casero
-  dayDuration: 60,  // segundos por día (modo real-time)
-  statDecayPerDay: {
-    hunger: 20,
-    sleep: 15,
-    boredom: 10,
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const SCALE = 3; // pixels per game-pixel
+
+function resizeCanvas() {
+  const wrap = document.getElementById('scene-wrap');
+  canvas.width  = Math.floor(wrap.clientWidth  / SCALE);
+  canvas.height = Math.floor(wrap.clientHeight / SCALE);
+}
+
+// ── PIXEL DRAWING UTILS ────────────────────────────────
+function px(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w||1,h||1); }
+function drawText(text,x,y,color='#fff',size=1){
+  ctx.save(); ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle=color; ctx.font=`${size*5}px monospace`; ctx.fillText(text,x,y);
+  ctx.restore();
+}
+
+// Pixel font — tiny 3x5 chars
+const PFONT = {
+  'A':[[0,1,0],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
+  'B':[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
+  'C':[[0,1,1],[1,0,0],[1,0,0],[1,0,0],[0,1,1]],
+  'D':[[1,1,0],[1,0,1],[1,0,1],[1,0,1],[1,1,0]],
+  'E':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]],
+  'F':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,0,0]],
+  'G':[[0,1,1],[1,0,0],[1,0,1],[1,0,1],[0,1,1]],
+  'H':[[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
+  'I':[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
+  'J':[[0,0,1],[0,0,1],[0,0,1],[1,0,1],[0,1,1]],
+  'K':[[1,0,1],[1,1,0],[1,0,0],[1,1,0],[1,0,1]],
+  'L':[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
+  'M':[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]],
+  'N':[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]],
+  'O':[[0,1,0],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
+  'P':[[1,1,0],[1,0,1],[1,1,0],[1,0,0],[1,0,0]],
+  'Q':[[0,1,0],[1,0,1],[1,0,1],[1,1,1],[0,1,1]],
+  'R':[[1,1,0],[1,0,1],[1,1,0],[1,1,0],[1,0,1]],
+  'S':[[0,1,1],[1,0,0],[0,1,0],[0,0,1],[1,1,0]],
+  'T':[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
+  'U':[[1,0,1],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
+  'V':[[1,0,1],[1,0,1],[1,0,1],[0,1,0],[0,1,0]],
+  'W':[[1,0,1],[1,0,1],[1,1,1],[1,1,1],[1,0,1]],
+  'X':[[1,0,1],[0,1,0],[0,1,0],[0,1,0],[1,0,1]],
+  'Y':[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
+  'Z':[[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,1,1]],
+  ' ':[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],
+  '!':[[0,1,0],[0,1,0],[0,1,0],[0,0,0],[0,1,0]],
+  '?':[[0,1,0],[1,0,1],[0,0,1],[0,1,0],[0,1,0]],
+  '%':[[1,0,1],[0,0,1],[0,1,0],[1,0,0],[1,0,1]],
+  '.':[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,1,0]],
+  '/':[[0,0,1],[0,0,1],[0,1,0],[1,0,0],[1,0,0]],
+  '0':[[0,1,0],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
+  '1':[[0,1,0],[1,1,0],[0,1,0],[0,1,0],[1,1,1]],
+  '2':[[1,1,0],[0,0,1],[0,1,0],[1,0,0],[1,1,1]],
+  '3':[[1,1,0],[0,0,1],[0,1,0],[0,0,1],[1,1,0]],
+  '4':[[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
+  '5':[[1,1,1],[1,0,0],[1,1,0],[0,0,1],[1,1,0]],
+  '6':[[0,1,1],[1,0,0],[1,1,0],[1,0,1],[0,1,0]],
+  '7':[[1,1,1],[0,0,1],[0,1,0],[0,1,0],[0,1,0]],
+  '8':[[0,1,0],[1,0,1],[0,1,0],[1,0,1],[0,1,0]],
+  '9':[[0,1,0],[1,0,1],[0,1,1],[0,0,1],[0,1,0]],
+  'E':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]],
+};
+function drawPixelText(text, x, y, color='#e8ff3c', scale=1) {
+  let cx = x;
+  for(const ch of text.toUpperCase()) {
+    const g = PFONT[ch] || PFONT[' '];
+    for(let r=0; r<5; r++) for(let c=0; c<3; c++) {
+      if(g[r][c]) { ctx.fillStyle=color; ctx.fillRect(cx+c*scale, y+r*scale, scale, scale); }
+    }
+    cx += 4*scale;
   }
+}
+
+// ══════════════════════════════════════════════════════
+//  ROOM RENDERER
+// ══════════════════════════════════════════════════════
+
+// Color palette — pixel art flat
+const PAL = {
+  wallTop: '#2a1f3d', wall: '#1e1530', wallDark: '#180f28',
+  floor: '#3a2c1a', floorAlt: '#352819', floorDark: '#2a1e10',
+  skirting: '#1a1008',
+  sofaBody: '#4a3060', sofaBack: '#3a2050', sofaCush: '#5a4070', sofaLeg: '#2a1040',
+  bedFrame: '#5a3a1a', bedSheet: '#3a5a7a', bedPillow: '#a0c0d0', bedLeg: '#3a2010',
+  tvBody: '#181818', tvScreen: '#0a2040', tvGlow: '#1a3860', tvStand: '#282828',
+  fridgeBody: '#888898', fridgeDoor: '#9898a8', fridgeHandle: '#555565',
+  tableTop: '#6a4a2a', tableLeg: '#4a3015',
+  lampPost: '#888', lampShade: '#e8d060', lampGlow: 'rgba(232,208,96,0.12)',
+  windowFrame: '#3a2a1a', windowGlass: '#1a3050', windowLight: '#204060', windowSill: '#4a3820',
+  posterBg: '#2a1a3a', posterAcc: '#e8ff3c',
+  rugRed: '#8a2020', rugPat: '#6a1010',
+  doorFrame: '#3a2a1a', doorBody: '#4a3820', doorKnob: '#c8a040',
+  trashBag: '#2a4a2a', trashCan: '#3a3a3a',
+  plantPot: '#6a3a1a', plantLeaf: '#2a5a1a', plantLeafLight: '#3a7a2a',
+  ceilingLamp: '#c0c0c0', ceilingWire: '#888', ceilingGlow: 'rgba(255,240,180,0.08)',
 };
 
-// ── CHARACTER DEFINITIONS ───────────────────────────────────────
-const CHAR_DEFS = [
-  { id:'yo',     name:'Tú',      emoji:'🧑‍🎤', color:'#e8ff3c', bio:'El manager accidental del grupo.' },
-  { id:'felipe', name:'Felipe',  emoji:'🧔',   color:'#ff3c3c', bio:'Hijo del casero. Drama permanente.' },
-  { id:'bea',    name:'Bea',     emoji:'👩‍🦱', color:'#3cffb4', bio:'La única con trabajo fijo... a ratos.' },
-  { id:'kike',   name:'Kike',    emoji:'🧢',   color:'#ff9f3c', bio:'Conoce al Seco de toda la vida.' },
-  { id:'ana',    name:'Ana',     emoji:'🕶️',  color:'#c03cff', bio:'Artista. Desaparece días enteros.' },
-];
+function drawRoom() {
+  const W = canvas.width, H = canvas.height;
+  const floor = Math.floor(H * 0.62);
 
-const STAT_DEFS = [
-  { key:'hunger',   label:'🍔 Hambre',  max:100, dangerBelow:20, color:'#ff9f3c' },
-  { key:'sleep',    label:'😴 Sueño',   max:100, dangerBelow:15, color:'#3c9fff' },
-  { key:'boredom',  label:'🎮 Abur.',   max:100, dangerBelow:20, color:'#c03cff' },
-  { key:'happy',    label:'😊 Feliz',   max:100, dangerBelow:20, color:'#3cffb4' },
-  { key:'drug',     label:'🌿 Alter.',  max:100, dangerAbove:80, color:'#e8ff3c' },
-];
+  // -- CEILING --
+  px(0, 0, W, 2, '#1a1230');
 
-// ── EVENTS ─────────────────────────────────────────────────────
-const DAILY_EVENTS = [
-  {
-    id:'casero', chance:0.12, icon:'👴', title:'LLEGA EL CASERO',
-    desc:'El padre de Felipe se presenta sin avisar. Exige ver el local en condiciones.',
-    choices:[
-      { label:'Pagar €200', action: (g)=>{ g.money-=200; showNotif('Felipe',"Papá dice que la semana que viene vuelve... 😬"); } },
-      { label:'Ignorarle', action: (g)=>{ g.reputation-=20; showNotif('Casero',"Tendréis noticias de mi abogado. 😡", 'danger'); } },
-    ]
-  },
-  {
-    id:'multa', chance:0.10, icon:'🚔', title:'MULTA DE CAPA',
-    desc:'El alcalde (Capa) ha enviado una multa por ruidos y residuos en la vía pública.',
-    choices:[
-      { label:'Pagar €150', action: (g)=>{ g.money-=150; } },
-      { label:'Recurrir', action: (g)=>{ g.chaos+=15; showNotif('Capa',"Recurso denegado. La multa se dobla 🤌", 'danger'); g.money-=300; } },
-    ]
-  },
-  {
-    id:'ratashelp', chance:0.08, icon:'🐀', title:'LOS RATAS SE OFRECEN',
-    desc:'La crew pasa por el local. Si les tratas bien limpian a cambio de una birra.',
-    choices:[
-      { label:'Dejarles pasar', action: (g)=>{ if(g.reputation>=40){ g.trash=Math.max(0,g.trash-35); showNotif('Ratas',"Dejamos esto reluciente 🧹✨", 'good'); } else { showNotif('Ratas',"Mal ambiente aquí, tío. Pasamos.", 'danger'); } } },
-      { label:'Mandarles a paseo', action: (g)=>{ g.reputation-=10; } },
-    ]
-  },
-  {
-    id:'averia', chance:0.09, icon:'🚰', title:'AVERÍA EN EL BAÑO',
-    desc:'La cisterna ha explotado. El suelo está lleno de agua. Llover sobre mojado.',
-    choices:[
-      { label:'Llamar fontanero (€120)', action: (g)=>{ g.money-=120; showNotif('Kike',"Tío, ni fontanero ni leches, yo lo arreglo 🔧", 'good'); } },
-      { label:'Arreglarlo solos', action: (g)=>{ g.trash+=20; g.chaos+=10; showNotif('Felipe',"Ha quedado peor que antes wtf 💀"); } },
-    ]
-  },
-  {
-    id:'visita', chance:0.07, icon:'🎁', title:'VISITA INESPERADA',
-    desc:'Unos amigos de amigos traen comida y bebida. Fiesta improvisada.',
-    choices:[
-      { label:'¡Bienvenidos!', action: (g)=>{ g.chars.forEach(c=>{c.happy=Math.min(100,c.happy+30); c.boredom=Math.max(0,c.boredom-30);}); g.trash+=25; showNotif('Ana',"ESTO ES LO QUE NECESITÁBAMOS 🎉"); } },
-      { label:'No estamos p\'visitas', action: (g)=>{ g.reputation-=5; } },
-    ]
-  },
-  {
-    id:'curro', chance:0.11, icon:'💰', title:'OPORTUNIDAD DE CURRO',
-    desc:'Han ofrecido un trabajo temporal de carga y descarga. €200 pero cansa la vida.',
-    choices:[
-      { label:'Mandar a alguien', action: (g)=>{ const c=g.chars[g.selected]; c.sleep=Math.max(0,c.sleep-30); c.hunger=Math.max(0,c.hunger-20); g.money+=200; showNotif(c.name,'Vuelvo destrozado pero con pasta 💸', 'good'); } },
-      { label:'Pasar', action: (g)=>{ showNotif('Bea',"Tío, la pasta no crece en los árboles..."); } },
-    ]
-  },
-];
+  // -- BACK WALL --
+  for(let y=2; y<floor; y++) {
+    const t = (y-2)/(floor-2);
+    const r = Math.floor(0x1e + (0x22-0x1e)*t);
+    const g = Math.floor(0x15 + (0x18-0x15)*t);
+    const b = Math.floor(0x30 + (0x1a-0x30)*t);
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, y, W, 1);
+  }
 
-// ── STATE ───────────────────────────────────────────────────────
-let G = {};
+  // Ceiling light glow
+  const cx = Math.floor(W/2);
+  ctx.fillStyle = PAL.ceilingGlow;
+  for(let r2=30; r2>0; r2-=5) {
+    ctx.beginPath(); ctx.arc(cx*SCALE/SCALE, 4, r2, 0, Math.PI*2);
+    ctx.fill();
+  }
 
-function createChar(def) {
-  return {
-    ...def,
-    hunger:  70 + Math.random()*20,
-    sleep:   60 + Math.random()*30,
-    boredom: 30 + Math.random()*30,
-    happy:   60 + Math.random()*25,
-    drug:    0,
-    collapsed: false,
-    state: 'normal', // normal, sleeping, partying, working
-  };
+  // Ceiling lamp
+  px(cx-1, 0, 3, 1, PAL.ceilingWire);
+  px(cx-3, 1, 7, 2, PAL.ceilingLamp);
+  px(cx-1, 3, 3, 1, '#ffe8a0');
+
+  // -- WINDOW (left) --
+  drawWindow(8, 10, 22, 24);
+
+  // -- WINDOW (right) --
+  drawWindow(W-30, 10, 22, 24);
+
+  // -- DOOR --
+  drawDoor(Math.floor(W/2)-8, floor-32);
+
+  // -- FLOOR --
+  for(let y=floor; y<H; y++) {
+    const shade = (y-floor)/(H-floor);
+    const r2 = Math.floor(0x3a - shade*14);
+    const g2 = Math.floor(0x2c - shade*12);
+    const b2 = Math.floor(0x1a - shade*10);
+    ctx.fillStyle = `rgb(${r2},${g2},${b2})`;
+    ctx.fillRect(0, y, W, 1);
+  }
+
+  // Floor planks (horizontal lines every 6px)
+  ctx.fillStyle = PAL.floorDark;
+  for(let y=floor+6; y<H; y+=6) ctx.fillRect(0, y, W, 1);
+
+  // Skirting board
+  px(0, floor, W, 3, PAL.skirting);
+
+  // -- RUG --
+  drawRug(Math.floor(W/2)-20, floor+4, 40, 10);
+
+  // -- FURNITURE --
+  drawSofa(6, floor-18);
+  drawTV(W-28, floor-24);
+  drawBed(Math.floor(W/2)+10, floor-22);
+  drawFridge(W-12, floor-26);
+  drawTable(Math.floor(W/2)-22, floor-12);
+  drawLamp(W-42, floor-26);
+  drawPlant(4, floor-18);
+  drawTrashCan(Math.floor(W/2)-5, floor-11);
+
+  // Posters on wall
+  drawPoster(W-20, 12, 10, 14, '#3a1a2a', '#e8ff3c', 'EL\nLOCAL');
+  drawPoster(15, 8, 8, 12, '#1a2a3a', '#3cffb4');
+
+  // Wall graffiti
+  drawPixelText('NO PASARAN', W-58, 6, '#4a3060', 1);
 }
+
+function drawWindow(x, y, w, h) {
+  px(x, y, w, h, PAL.windowGlass);
+  // Cross frame
+  px(x, y, w, 1, PAL.windowFrame); px(x, y+h-1, w, 1, PAL.windowFrame);
+  px(x, y, 1, h, PAL.windowFrame); px(x+w-1, y, 1, h, PAL.windowFrame);
+  px(x+Math.floor(w/2), y, 1, h, PAL.windowFrame);
+  px(x, y+Math.floor(h/2), w, 1, PAL.windowFrame);
+  // Light effect
+  px(x+1, y+1, Math.floor(w/2)-1, 3, 'rgba(100,160,220,0.4)');
+  // Sill
+  px(x-1, y+h, w+2, 2, PAL.windowSill);
+}
+
+function drawDoor(x, y) {
+  px(x, y, 16, Math.floor(canvas.height*0.62)-y, PAL.doorFrame);
+  px(x+1, y+1, 14, Math.floor(canvas.height*0.62)-y-1, PAL.doorBody);
+  // Panels
+  px(x+2, y+3, 5, 7, PAL.doorFrame);  px(x+9, y+3, 5, 7, PAL.doorFrame);
+  px(x+2, y+12, 5, 7, PAL.doorFrame); px(x+9, y+12, 5, 7, PAL.doorFrame);
+  px(x+13, y+10, 2, 2, PAL.doorKnob);
+}
+
+function drawSofa(x, y) {
+  // Legs
+  px(x+1, y+14, 2, 4, PAL.sofaLeg); px(x+16, y+14, 2, 4, PAL.sofaLeg);
+  // Body
+  px(x, y+6, 20, 8, PAL.sofaBody);
+  // Back
+  px(x, y, 20, 7, PAL.sofaBack);
+  // Cushions
+  px(x+1, y+7, 8, 6, PAL.sofaCush); px(x+11, y+7, 8, 6, PAL.sofaCush);
+  // Armrests
+  px(x, y+4, 2, 10, PAL.sofaBack); px(x+18, y+4, 2, 10, PAL.sofaBack);
+  // Highlight
+  px(x+1, y+1, 18, 1, '#7a5090');
+}
+
+function drawTV(x, y) {
+  const W = canvas.width;
+  // Stand
+  px(x+4, y+22, 6, 2, PAL.tvStand); px(x+2, y+23, 10, 2, PAL.tvStand);
+  // Body
+  px(x, y, 14, 22, PAL.tvBody);
+  // Screen
+  px(x+1, y+1, 12, 18, PAL.tvScreen);
+  // Screen glow (animated in game loop)
+  if(G && G.chars.some(c=>c.state==='watching')) {
+    px(x+1, y+1, 12, 18, PAL.tvGlow);
+    px(x+2, y+2, 2, 2, '#4080c0');
+  }
+  // Bezel details
+  px(x+6, y+20, 2, 1, '#444');
+  px(x+1, y+19, 1, 1, '#2a6a2a');
+}
+
+function drawBed(x, y) {
+  // Legs
+  px(x+1, y+18, 2, 4, PAL.bedLeg); px(x+19, y+18, 2, 4, PAL.bedLeg);
+  // Frame
+  px(x, y+6, 22, 12, PAL.bedFrame);
+  // Sheet
+  px(x+1, y+7, 20, 10, PAL.bedSheet);
+  // Pillow
+  px(x+2, y+7, 6, 5, PAL.bedPillow);
+  // Headboard
+  px(x, y, 22, 7, PAL.bedFrame);
+  px(x+1, y+1, 20, 5, '#3a2810');
+  // Highlight
+  px(x+2, y+1, 18, 1, '#5a4020');
+}
+
+function drawFridge(x, y) {
+  px(x, y, 10, 26, PAL.fridgeBody);
+  px(x+1, y+1, 8, 14, PAL.fridgeDoor);
+  px(x+1, y+16, 8, 9, PAL.fridgeDoor);
+  px(x+7, y+7, 2, 3, PAL.fridgeHandle);
+  px(x+7, y+19, 2, 3, PAL.fridgeHandle);
+  // Seal line
+  px(x+1, y+15, 8, 1, '#777787');
+  // Highlight
+  px(x+1, y+1, 1, 24, 'rgba(255,255,255,0.15)');
+}
+
+function drawTable(x, y) {
+  px(x+1, y-1, 16, 2, '#7a5a3a');
+  px(x, y, 18, 2, PAL.tableTop);
+  px(x+2, y+2, 2, 10, PAL.tableLeg);
+  px(x+14, y+2, 2, 10, PAL.tableLeg);
+  // Items on table
+  px(x+5, y-2, 3, 2, '#d04020'); // cup
+  px(x+9, y-3, 4, 3, '#888'); // ashtray
+  px(x+9, y-4, 1, 2, '#ddd'); // cigarette
+}
+
+function drawLamp(x, y) {
+  px(x+2, y+18, 1, 8, PAL.lampPost);
+  px(x, y+14, 5, 4, PAL.lampPost);
+  px(x+1, y+12, 3, 2, PAL.lampShade);
+  px(x, y+10, 5, 2, '#b89a40');
+  px(x+1, y+8, 3, 2, PAL.lampShade);
+  // Glow
+  ctx.fillStyle = 'rgba(232,200,80,0.10)';
+  ctx.beginPath(); ctx.arc((x+2.5)*1, (y+9), 8, 0, Math.PI*2); ctx.fill();
+}
+
+function drawPlant(x, y) {
+  px(x+2, y+12, 6, 6, PAL.plantPot);
+  px(x+3, y+10, 4, 3, '#3a2810');
+  px(x+2, y+6, 2, 5, PAL.plantLeaf);
+  px(x+6, y+4, 2, 7, PAL.plantLeaf);
+  px(x+4, y+2, 3, 6, PAL.plantLeafLight);
+  px(x+1, y+8, 2, 3, PAL.plantLeaf);
+  px(x+7, y+7, 2, 4, PAL.plantLeafLight);
+}
+
+function drawRug(x, y, w, h) {
+  px(x, y, w, h, PAL.rugRed);
+  px(x+1, y+1, w-2, h-2, '#7a1818');
+  for(let i=2; i<w-2; i+=4) px(x+i, y+2, 2, h-4, PAL.rugPat);
+  px(x, y, w, 1, '#aa3030'); px(x, y+h-1, w, 1, '#aa3030');
+}
+
+function drawTrashCan(x, y) {
+  px(x, y+2, 8, 9, PAL.trashCan);
+  px(x+1, y+1, 6, 1, '#555');
+  px(x-1, y, 10, 2, '#444');
+  if(G && G.trash > 30) {
+    px(x+1, y, 3, 2, PAL.trashBag);
+    px(x+4, y-1, 3, 3, '#1a3a1a');
+  }
+  if(G && G.trash > 60) {
+    px(x-2, y-2, 3, 4, PAL.trashBag);
+    px(x+6, y-3, 4, 5, '#1a3a1a');
+  }
+}
+
+function drawPoster(x, y, w, h, bg, accent, text='') {
+  px(x-1, y-1, w+2, h+2, '#2a1a1a');
+  px(x, y, w, h, bg);
+  px(x, y, w, 1, accent); px(x, y+h-1, w, 1, accent);
+  px(x, y, 1, h, accent); px(x+w-1, y, 1, h, accent);
+}
+
+// ══════════════════════════════════════════════════════
+//  CHARACTER SPRITES — pixel art
+// ══════════════════════════════════════════════════════
+
+const CHAR_COLORS = [
+  { skin:'#c88060', hair:'#3a1a00', shirt:'#3c9fff', pants:'#2a3a5a', shoe:'#1a1a1a' }, // Yo
+  { skin:'#d09070', hair:'#5a3010', shirt:'#ff3c3c', pants:'#1a1a3a', shoe:'#2a1a00' }, // Felipe
+  { skin:'#e0b090', hair:'#1a1a1a', shirt:'#3cffb4', pants:'#2a4a3a', shoe:'#1a1a1a' }, // Bea
+  { skin:'#c07050', hair:'#3a2010', shirt:'#ff9f3c', pants:'#3a2a1a', shoe:'#1a1a1a' }, // Kike — cap
+  { skin:'#d0a080', hair:'#1a0a30', shirt:'#c03cff', pants:'#1a0a30', shoe:'#1a1a1a' }, // Ana — sunglasses
+];
+
+const ANIM_FRAMES = 4; // walk cycle frames
+
+function drawCharacter(c, ci, frame) {
+  if(!c.visible) return;
+  const col = CHAR_COLORS[ci];
+  const x = Math.floor(c.px);
+  const y = Math.floor(c.py);
+  const flip = c.dir < 0;
+
+  ctx.save();
+  if(flip) { ctx.scale(-1,1); ctx.translate(-canvas.width*2, 0); }
+  const rx = flip ? canvas.width*2 - x - 6 : x;
+
+  const isWalking = c.state === 'walking' && Math.abs(c.vx) > 0.1;
+  const isSleeping = c.state === 'sleeping';
+  const isParty = c.state === 'partying';
+  const isWorking = c.state === 'working';
+  const isKO = c.collapsed;
+
+  if(isKO) {
+    // Collapsed: lying on floor, rotated effect via horizontal sprite
+    px(rx, y+6, 10, 3, col.pants);
+    px(rx+2, y+4, 5, 4, col.shirt);
+    px(rx+7, y+4, 4, 4, col.skin);
+    px(rx+7, y+3, 4, 3, col.hair);
+    px(rx, y+8, 3, 2, col.shoe); px(rx+7, y+8, 3, 2, col.shoe);
+    // ZZZ
+    drawPixelText('ZZ', rx+8, y, '#aaaaff', 1);
+    ctx.restore(); return;
+  }
+
+  if(isSleeping) {
+    // Sleeping on bed: sitting/slumped
+    drawStandingChar(rx, y, col, ci, 0, true);
+    drawPixelText('Z', rx+6, y-3, '#aaaaff', 1);
+    ctx.restore(); return;
+  }
+
+  if(isParty) {
+    // Party: arms up
+    drawPartyChar(rx, y, col, ci, frame);
+    ctx.restore(); return;
+  }
+
+  // Walking or idle
+  const legOff = isWalking ? (frame%2===0 ? 1 : -1) : 0;
+  drawStandingChar(rx, y, col, ci, legOff, false);
+
+  // Accessories
+  if(ci===3) { // Kike — cap
+    px(rx+1, y-1, 6, 1, '#ff6030');
+    px(rx, y-1, 1, 1, '#ff6030');
+  }
+  if(ci===4) { // Ana — sunglasses
+    px(rx+1, y+3, 2, 1, '#1a1a1a');
+    px(rx+4, y+3, 2, 1, '#1a1a1a');
+    px(rx+3, y+3, 1, 1, '#555');
+  }
+
+  // Bubble
+  if(c.bubble) {
+    const bx = rx + 8, by = y - 8;
+    px(bx, by, 12, 7, '#1a1a1a');
+    px(bx+1, by+1, 10, 5, '#2a2a2a');
+    drawPixelText(c.bubble.slice(0,3), bx+2, by+2, '#e8ff3c', 1);
+    px(bx+2, by+7, 2, 2, '#1a1a1a');
+    px(bx+3, by+9, 1, 1, '#1a1a1a');
+  }
+
+  // Selected highlight
+  if(ci === G.selected) {
+    ctx.fillStyle = 'rgba(232,255,60,0.18)';
+    ctx.fillRect(rx-1, y-1, 8, 15);
+  }
+
+  ctx.restore();
+}
+
+function drawStandingChar(x, y, col, ci, legOff, asleep) {
+  // Legs
+  px(x+1, y+10, 2, 4, col.pants);
+  px(x+4, y+10, 2, 4+legOff, col.pants);
+  // Shoes
+  px(x+1, y+13, 3, 1, col.shoe);
+  px(x+4, y+13+legOff, 3, 1, col.shoe);
+  // Body
+  px(x+1, y+5, 6, 6, col.shirt);
+  // Arms
+  if(!asleep) {
+    px(x, y+5, 1, 5, col.skin);
+    px(x+7, y+5, 1, 5, col.skin);
+  } else {
+    px(x+1, y+8, 6, 2, col.skin);
+  }
+  // Head
+  px(x+1, y, 6, 5, col.skin);
+  // Hair
+  px(x+1, y, 6, 2, col.hair);
+  px(x, y+1, 1, 3, col.hair);
+  px(x+7, y+1, 1, 3, col.hair);
+  // Eyes
+  if(!asleep) {
+    px(x+2, y+3, 1, 1, '#1a1a1a');
+    px(x+5, y+3, 1, 1, '#1a1a1a');
+  } else {
+    px(x+2, y+3, 2, 1, '#1a1a1a');
+    px(x+5, y+3, 2, 1, '#1a1a1a');
+  }
+  // Mouth
+  if(!asleep) { px(x+3, y+4, 2, 1, '#a05030'); }
+}
+
+function drawPartyChar(x, y, col, ci, frame) {
+  // Arms up — different every frame
+  const aOff = frame%2===0 ? -2 : -1;
+  px(x+1, y+10, 2, 4, col.pants);
+  px(x+4, y+10, 2, 4, col.pants);
+  px(x+1, y+13, 3, 1, col.shoe);
+  px(x+4, y+13, 3, 1, col.shoe);
+  px(x+1, y+5, 6, 5, col.shirt);
+  // Arms raised
+  px(x-1, y+3+aOff, 2, 4, col.skin);
+  px(x+7, y+3+aOff, 2, 4, col.skin);
+  // Head
+  px(x+1, y, 6, 5, col.skin);
+  px(x+1, y, 6, 2, col.hair);
+  px(x+2, y+3, 1, 1, '#1a1a1a');
+  px(x+5, y+3, 1, 1, '#1a1a1a');
+  px(x+3, y+4, 2, 1, '#e05030'); // big smile
+  // Confetti
+  const confetti = ['#ff3c3c','#e8ff3c','#3cffb4','#c03cff'];
+  for(let i=0; i<4; i++) {
+    const cx2 = x + Math.sin(frame*0.8+i*2)*6;
+    const cy2 = y - 4 - ((frame*2+i*3)%8);
+    px(Math.floor(cx2), Math.floor(cy2), 1, 1, confetti[i]);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  TRASH OVERLAY (floor level)
+// ══════════════════════════════════════════════════════
+function drawTrashOverlay() {
+  if(!G) return;
+  const W = canvas.width, H = canvas.height;
+  const floor = Math.floor(H * 0.62);
+  const trashCount = Math.floor(G.trash / 8);
+
+  // Deterministic positions based on index
+  const positions = [
+    [12,2], [28,3], [44,1], [60,4], [70,2], [15,5], [35,1], [50,3], [65,5], [8,4],
+    [22,2], [38,5], [55,1], [72,3], [18,4],
+  ];
+  const trashSprites = [
+    c => { px(c[0],c[1],4,3,PAL.trashBag); px(c[0]+1,c[1]-1,2,1,'#1a3a1a'); },
+    c => { px(c[0],c[1],3,4,'#3a5a3a'); px(c[0]+1,c[1]-1,1,1,'#2a4a2a'); },
+    c => { px(c[0],c[1]+1,4,2,'#8a3020'); px(c[0]+1,c[1],2,1,'#6a2010'); }, // can
+    c => { px(c[0],c[1],5,2,'#4a3a2a'); px(c[0]+1,c[1]-1,3,1,'#3a2a1a'); }, // box
+    c => { px(c[0],c[1],2,4,'#5a3a7a'); px(c[0]+1,c[1]-1,1,1,'#3a1a5a'); }, // bottle
+  ];
+
+  for(let i=0; i<Math.min(trashCount, positions.length); i++) {
+    const [ox, oy] = positions[i];
+    const tx = Math.floor(ox * W / 80);
+    const ty = floor + 3 + oy;
+    const sprite = trashSprites[i % trashSprites.length];
+    sprite([tx, ty]);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════════
+const CHAR_DEFS = [
+  { name:'Yo',     emoji:'🧑‍🎤' },
+  { name:'Felipe', emoji:'🧔' },
+  { name:'Bea',    emoji:'👩‍🦱' },
+  { name:'Kike',   emoji:'🧢' },
+  { name:'Ana',    emoji:'🕶️' },
+];
+
+let G = null;
+let animFrame = 0;
+let tickTimer = null;
+let lastTime = 0;
 
 function initGame() {
+  resizeCanvas();
+  const W = canvas.width, H = canvas.height;
+  const floor = Math.floor(H * 0.62);
+
   G = {
-    day: 1,
-    timeInDay: 0,      // 0-100
-    money: CFG.startMoney,
-    trash: 10,
-    chaos: 0,
-    reputation: 50,
-    chars: CHAR_DEFS.map(createChar),
-    selected: 0,
-    running: true,
-    gameover: false,
-    rentPaid: false,
+    day: 1, time: 0, money: 400, trash: 10, chaos: 0, reputation: 50,
+    selected: 0, running: true, gameover: false,
+    chars: CHAR_DEFS.map((d, i) => ({
+      ...d,
+      hunger:  65 + Math.random()*25,
+      sleep:   60 + Math.random()*30,
+      boredom: 20 + Math.random()*30,
+      happy:   60 + Math.random()*25,
+      drug:    0,
+      collapsed: false,
+      state: 'idle',
+      // Pixel position in scene
+      px: 20 + i * Math.floor((W-40)/5),
+      py: floor - 14,
+      tx: 20 + i * Math.floor((W-40)/5), // target x
+      vx: 0,
+      dir: 1,
+      visible: true,
+      bubble: null,
+      bubbleTimer: 0,
+    })),
   };
-  document.getElementById('gameover').classList.remove('active');
-  document.getElementById('event-overlay').classList.remove('active');
-  document.body.classList.remove('chaos-mode');
-  renderAll();
-  startTick();
+
+  document.getElementById('overlay').classList.remove('on');
+  document.querySelector('#overlay .ev-box').style.borderColor = 'var(--accent)';
+  document.querySelector('.ev-title').style.color = 'var(--accent)';
+  startLoop();
 }
 
-// ── TICK LOOP ───────────────────────────────────────────────────
-let tickInterval = null;
-let dayTickCount = 0;
+// ══════════════════════════════════════════════════════
+//  MAIN LOOP
+// ══════════════════════════════════════════════════════
+let rafId = null;
+let secondAcc = 0;
+const DAY_SECONDS = 60;
 
-function startTick() {
-  if(tickInterval) clearInterval(tickInterval);
-  dayTickCount = 0;
-  // tick every second, 60 ticks = 1 day
-  tickInterval = setInterval(tick, 1000);
+function startLoop() {
+  if(rafId) cancelAnimationFrame(rafId);
+  lastTime = performance.now();
+  rafId = requestAnimationFrame(loop);
 }
 
-function tick() {
-  if(!G.running || G.gameover) return;
+function loop(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+  animFrame = Math.floor(now / 200) % ANIM_FRAMES;
 
-  G.timeInDay += (100 / CFG.dayDuration);
-  dayTickCount++;
+  if(G.running && !G.gameover) {
+    update(dt);
+  }
 
-  // Update stats every 3 seconds (natural decay)
-  if(dayTickCount % 3 === 0) {
+  render();
+  rafId = requestAnimationFrame(loop);
+}
+
+function update(dt) {
+  secondAcc += dt;
+
+  // Progress time
+  G.time += dt / DAY_SECONDS;
+  document.getElementById('timebar').style.width = (G.time * 100) + '%';
+
+  // Char AI movement
+  G.chars.forEach((c, i) => {
+    if(c.collapsed) return;
+    // Random wander
+    if(Math.random() < 0.005 && c.state === 'idle') {
+      const W = canvas.width;
+      c.tx = 10 + Math.random() * (W - 20);
+    }
+    // Move toward target
+    const dx = c.tx - c.px;
+    if(Math.abs(dx) > 2) {
+      c.vx = Math.sign(dx) * 15;
+      c.dir = Math.sign(dx);
+      c.state = 'walking';
+    } else {
+      c.vx = 0;
+      if(c.state === 'walking') c.state = 'idle';
+    }
+    c.px += c.vx * dt;
+    c.px = Math.max(4, Math.min(canvas.width - 12, c.px));
+
+    // Bubble timer
+    if(c.bubbleTimer > 0) { c.bubbleTimer -= dt; if(c.bubbleTimer <= 0) c.bubble = null; }
+  });
+
+  // Stat decay (every real second)
+  if(secondAcc >= 1) {
+    secondAcc -= 1;
     G.chars.forEach(c => {
       if(c.collapsed) return;
       if(c.state !== 'sleeping') {
-        c.hunger  = Math.max(0, c.hunger  - 1);
-        c.sleep   = Math.max(0, c.sleep   - 0.5);
+        c.hunger  = Math.max(0, c.hunger  - 1.2);
+        c.sleep   = Math.max(0, c.sleep   - 0.8);
         c.boredom = Math.max(0, c.boredom - 0.5);
+        c.happy   = Math.max(0, c.happy   - 0.3);
       } else {
-        // sleeping: recover sleep, lose a bit of hunger
-        c.sleep   = Math.min(100, c.sleep   + 2);
-        c.hunger  = Math.max(0,   c.hunger  - 0.3);
-        c.boredom = Math.max(0,   c.boredom + 0.5); // bored from sleeping too much
+        c.sleep  = Math.min(100, c.sleep  + 3);
+        c.hunger = Math.max(0,   c.hunger - 0.4);
+        c.boredom= Math.max(0,   c.boredom- 0.3);
       }
-      if(c.state === 'partying') {
-        c.happy   = Math.min(100, c.happy   + 0.8);
-        c.boredom = Math.min(100, c.boredom + 1);
-        c.hunger  = Math.max(0,   c.hunger  - 1.5);
-        c.drug    = Math.min(100, c.drug    + 0.3);
-      }
-      // Drug decay
-      c.drug = Math.max(0, c.drug - 0.2);
-      // Happiness affected by stats
+      c.drug = Math.max(0, c.drug - 0.5);
       if(c.hunger < 20) c.happy = Math.max(0, c.happy - 0.5);
       if(c.sleep  < 20) c.happy = Math.max(0, c.happy - 0.5);
-      if(c.drug   > 70) c.happy = Math.min(100, c.happy + 0.3);
-      // Check collapse
-      if((c.hunger <= 0 || c.sleep <= 0) && !c.collapsed) {
-        c.collapsed = true;
-        c.state = 'collapsed';
+      if(!c.collapsed && (c.hunger <= 0 || c.sleep <= 0)) {
+        c.collapsed = true; c.state = 'ko';
         showNotif(c.name, `${c.name} ha colapsado 💀`, 'danger');
-        checkChaos();
       }
     });
+    G.trash = Math.min(100, G.trash + 0.3);
   }
 
-  // Trash grows passively
-  if(dayTickCount % 10 === 0) {
-    G.trash = Math.min(100, G.trash + 0.5);
+  // Day end
+  if(G.time >= 1) {
+    G.time = 0;
+    endDay();
   }
 
-  // Chaos affected by trash
-  G.chaos = Math.min(100, G.chaos + (G.trash > 70 ? 0.05 : 0));
-  G.chaos = Math.max(0, G.chaos - 0.02);
+  // Day/night visual
+  const t = G.time;
+  const isNight = t > 0.75 || t < 0.15;
+  document.getElementById('daynight').style.background =
+    isNight ? 'rgba(0,0,30,0.35)' : 'rgba(255,200,100,0.04)';
 
-  // Chaos mode visual
-  if(G.chaos > 75) document.body.classList.add('chaos-mode');
-  else document.body.classList.remove('chaos-mode');
-
-  // Day ends
-  if(G.timeInDay >= 100) endDay();
-  else updateTimeBar();
-
-  renderStats();
-  renderStripValues();
-  renderCharSprites();
+  renderHUD();
+  renderStatPanel();
   renderCharTabs();
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawRoom();
+  drawTrashOverlay();
+  G.chars.forEach((c, i) => drawCharacter(c, i, animFrame));
 }
 
 function endDay() {
-  G.timeInDay = 0;
-  dayTickCount = 0;
   G.day++;
+  G.money -= 25; // daily expenses
+  G.trash = Math.min(100, G.trash + 5);
 
-  // Daily costs
-  G.money -= 30; // gastos diarios (luz, comida base)
-  G.trash = Math.min(100, G.trash + CFG.trashPerDay);
-
-  // Rent day
-  if(G.day > CFG.rentDay) {
-    triggerGameOver('El casero os ha desahuciado. No había pasta pa\' la renta. 💸');
-    return;
+  if(G.day > 30) { triggerWin(); return; }
+  if(G.day === 30 && G.money < 800) {
+    triggerGameOver(`Sin los €800 del alquiler. El padre de Felipe os da 24h. 👴`); return;
   }
-  if(G.day === CFG.rentDay && G.money < CFG.rent) {
-    triggerGameOver(`Faltaban €${CFG.rent - G.money} para el alquiler. El padre de Felipe os ha echado a patadas. 👴😤`);
-    return;
-  }
-  if(G.day === CFG.rentDay) {
-    G.money -= CFG.rent;
-    showNotif('Casero', `Alquiler cobrado. Quedan €${G.money}. Hasta el mes que viene 🤑`, 'good');
+  if(G.day === 30) {
+    G.money -= 800;
+    showNotif('Casero', `Alquiler cobrado. Quedan €${G.money} 👴`, 'good');
   }
 
-  // Chaos check: multiple collapses
   const collapsed = G.chars.filter(c=>c.collapsed).length;
-  if(collapsed >= 3) {
-    triggerGameOver('Tres de los cinco colapsaron. Nadie quedó para pagar el alquiler. 💀');
-    return;
-  }
+  if(collapsed >= 3) { triggerGameOver('Tres personas en el suelo. Nadie cuida el local. 💀'); return; }
 
-  // Random event
+  document.getElementById('hday').textContent = G.day;
   maybeTriggerEvent();
-
-  if(G.day > CFG.days) {
-    triggerWin();
-    return;
-  }
-
-  showNotif('Sistema', `Día ${G.day} — La basura: ${Math.round(G.trash)}% 🗑️`);
+  showNotif('', `DÍA ${G.day} — Basura: ${Math.round(G.trash)}% 🗑️`);
 }
+
+// ══════════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════════
+const EVENTS = [
+  { id:'casero', chance:0.12, icon:'👴', title:'LLEGA EL CASERO',
+    desc:'El padre de Felipe se presenta. Quiere ver el local en condiciones o paga de adelanto.',
+    choices:[
+      { label:'Dar €200', cls:'p', fn:g=>{ g.money-=200; showNotif('Casero','Hasta pronto. No os lo mereces.','good'); } },
+      { label:'Cerrar la puerta', cls:'d', fn:g=>{ g.reputation-=20; showNotif('Casero','¡Llamaré a mi abogado!','danger'); } },
+    ]},
+  { id:'multa', chance:0.09, icon:'🚔', title:'MULTA DE CAPA',
+    desc:'El alcalde manda una multa por ruidos y residuos. €150 o el caos sube.',
+    choices:[
+      { label:'Pagar €150', cls:'p', fn:g=>{ g.money-=150; } },
+      { label:'Recurrir', cls:'s', fn:g=>{ g.chaos+=20; g.money-=300; showNotif('Capa','Recurso denegado. Se dobla. 🤌','danger'); } },
+    ]},
+  { id:'ratas', chance:0.08, icon:'🐀', title:'LOS RATAS PASAN POR AQUI',
+    desc:'La crew ofrece ayuda con la limpieza si les tratas bien. ¿Les dejas entrar?',
+    choices:[
+      { label:'Pasar, chaval', cls:'p', fn:g=>{ if(g.reputation>=35){ g.trash=Math.max(0,g.trash-30); showNotif('Ratas','Dejamos esto reluciente 🧹','good'); } else showNotif('Ratas','Mal rollo. Pasamos.','danger'); } },
+      { label:'Mandarles a paseo', cls:'s', fn:g=>{ g.reputation-=10; } },
+    ]},
+  { id:'averia', chance:0.09, icon:'🚰', title:'AVERÍA EN EL BAÑO',
+    desc:'La cisterna ha explotado. Hay agua por todas partes.',
+    choices:[
+      { label:'Fontanero (€120)', cls:'p', fn:g=>{ g.money-=120; showNotif('Fontanero','Arreglado. Por esta vez.','good'); } },
+      { label:'Arreglar solos', cls:'d', fn:g=>{ g.trash+=20; g.chaos+=10; showNotif('Kike','Ha quedado peor lmao 💀'); } },
+    ]},
+  { id:'visita', chance:0.07, icon:'🎁', title:'VISITA SORPRESA',
+    desc:'Amigos de amigos aparecen con bebida. Fiesta improvisada guaranteed.',
+    choices:[
+      { label:'¡Adelante!', cls:'p', fn:g=>{ g.chars.forEach(c=>{c.happy=Math.min(100,c.happy+25);c.boredom=Math.max(0,c.boredom-25);}); g.trash+=20; showNotif('Ana','MODO FIESTA ACTIVADO 🎉'); } },
+      { label:'No estamos', cls:'s', fn:g=>{ g.reputation-=5; } },
+    ]},
+];
 
 function maybeTriggerEvent() {
-  for(const ev of DAILY_EVENTS) {
-    if(Math.random() < ev.chance) {
-      triggerEvent(ev);
-      return;
-    }
+  for(const ev of EVENTS) {
+    if(Math.random() < ev.chance) { triggerEvent(ev); return; }
   }
 }
 
-// ── EVENTS ─────────────────────────────────────────────────────
 function triggerEvent(ev) {
   G.running = false;
-  const overlay = document.getElementById('event-overlay');
   document.getElementById('ev-icon').textContent = ev.icon;
   document.getElementById('ev-title').textContent = ev.title;
   document.getElementById('ev-desc').textContent = ev.desc;
-  const btnsEl = document.getElementById('ev-btns');
-  btnsEl.innerHTML = '';
-  ev.choices.forEach(choice => {
-    const btn = document.createElement('button');
-    btn.className = 'event-btn ' + (choice.danger ? 'danger' : choice.secondary ? 'secondary' : 'primary');
-    btn.textContent = choice.label;
-    btn.onclick = () => {
-      choice.action(G);
-      overlay.classList.remove('active');
+  const btns = document.getElementById('ev-btns');
+  btns.innerHTML = '';
+  ev.choices.forEach(ch => {
+    const b = document.createElement('button');
+    b.className = 'ev-btn ' + ch.cls;
+    b.textContent = ch.label;
+    b.onclick = () => {
+      ch.fn(G);
+      document.getElementById('overlay').classList.remove('on');
       G.running = true;
-      renderAll();
     };
-    btnsEl.appendChild(btn);
+    btns.appendChild(b);
   });
-  overlay.classList.add('active');
+  document.getElementById('overlay').classList.add('on');
 }
 
-// ── ACTIONS ─────────────────────────────────────────────────────
-function doAction(type) {
+// ══════════════════════════════════════════════════════
+//  ACTIONS
+// ══════════════════════════════════════════════════════
+function act(type) {
   const c = G.chars[G.selected];
   if(c.collapsed && type !== 'sleep') {
-    showNotif(c.name, `${c.name} está colapsado/a, primero descansa 💀`);
-    return;
+    showNotif(c.name, `${c.name} está KO, primero duerme 💀`); return;
   }
-
   switch(type) {
     case 'eat':
-      if(G.money < 15) { showNotif('Sistema', 'Sin pasta ni pa\' comer 😭', 'danger'); return; }
-      G.money -= 15;
-      c.hunger = Math.min(100, c.hunger + 45);
-      c.happy  = Math.min(100, c.happy  + 10);
-      showNotif(c.name, `${c.name} se zampa algo rico 🍕`, 'good');
+      if(G.money < 12) { showNotif('','Sin pasta pa comer 😭','danger'); return; }
+      G.money -= 12; c.hunger = Math.min(100, c.hunger+45); c.happy = Math.min(100, c.happy+8);
+      setBubble(G.selected, 'NOM'); showNotif(c.name, `${c.name} se pega un banquete 🍕`, 'good');
       break;
-
     case 'sleep':
       if(c.state === 'sleeping') {
-        c.state = 'normal';
-        showNotif(c.name, `${c.name} se despierta (sueño: ${Math.round(c.sleep)}%)`);
+        c.state = 'idle'; showNotif(c.name, `${c.name} se despierta`);
       } else {
-        c.state = 'sleeping';
-        c.collapsed = false;
-        showNotif(c.name, `${c.name} se va a dormir 😴`, 'good');
+        c.state = 'sleeping'; c.collapsed = false;
+        // Move to bed area
+        const W = canvas.width;
+        c.tx = Math.floor(W * 0.65);
+        setBubble(G.selected, 'ZZZ'); showNotif(c.name, `${c.name} se va a dormir 😴`, 'good');
       }
       break;
-
     case 'clean':
-      if(c.sleep < 20) { showNotif(c.name, `${c.name} está demasiado cansado para limpiar`); return; }
-      const cleaned = 25 + Math.random()*15;
+      if(c.sleep < 20) { showNotif(c.name, 'Demasiado cansado para limpiar'); return; }
+      const cleaned = 20 + Math.random()*15;
       G.trash = Math.max(0, G.trash - cleaned);
-      c.sleep = Math.max(0, c.sleep - 15);
-      c.boredom = Math.max(0, c.boredom - 5);
-      G.reputation = Math.min(100, G.reputation + 5);
-      showNotif(c.name, `${c.name} limpia el local 🧹 (-${Math.round(cleaned)}% basura)`, 'good');
+      c.sleep = Math.max(0, c.sleep - 12); G.reputation = Math.min(100, G.reputation+4);
+      setBubble(G.selected, 'BRR'); showNotif(c.name, `${c.name} limpia 🧹 (-${Math.round(cleaned)}%)`, 'good');
       break;
-
     case 'party':
-      if(G.money < 30) { showNotif('Sistema', 'Sin pasta pa\' fiesta 🥲', 'danger'); return; }
-      G.money -= 30;
-      G.chars.forEach(ch => {
-        if(!ch.collapsed) {
-          ch.state = ch.state === 'partying' ? 'normal' : 'partying';
-        }
-      });
-      G.trash = Math.min(100, G.trash + 20);
-      G.chaos = Math.min(100, G.chaos + 10);
-      showNotif('Sistema', '¡FIESTA EN EL LOCAL! 🎉 La basura sube...');
-      break;
-
-    case 'work':
-      if(c.sleep < 25) { showNotif(c.name, `${c.name} necesita dormir antes de currar`); return; }
-      c.state = 'working';
-      const earned = 60 + Math.floor(Math.random()*80);
-      G.money += earned;
-      c.sleep   = Math.max(0, c.sleep   - 25);
-      c.hunger  = Math.max(0, c.hunger  - 20);
-      c.boredom = Math.max(0, c.boredom - 10);
-      showNotif(c.name, `${c.name} curra y saca €${earned} 💼`, 'good');
-      setTimeout(()=>{ if(c.state==='working') c.state='normal'; }, 5000);
-      break;
-
-    case 'seco':
-      if(G.money < 25) { showNotif('El Seco', 'No tienes pasta tío, vuelve cuando cobres 🌿', 'danger'); return; }
+      if(G.money < 25) { showNotif('','Sin pasta pa fiesta 🥲','danger'); return; }
       G.money -= 25;
-      c.happy  = Math.min(100, c.happy  + 30);
-      c.drug   = Math.min(100, c.drug   + 35);
-      c.sleep  = Math.max(0,   c.sleep  - 10);
-      showNotif('El Seco', `Material de primera para ${c.name}. Que aproveche 🌿`, 'good');
-      if(c.drug > 80) {
-        showNotif(c.name, `${c.name} está muy alterado/a... 😵`, 'danger');
-      }
+      G.chars.forEach((ch,i) => { if(!ch.collapsed) { ch.state = ch.state==='partying'?'idle':'partying'; ch.tx = 30 + i*(canvas.width-60)/5; } });
+      G.trash = Math.min(100, G.trash+18); G.chaos = Math.min(100, G.chaos+8);
+      showNotif('', '¡FIESTA EN EL LOCAL! 🎉');
       break;
-
+    case 'work':
+      if(c.sleep < 20) { showNotif(c.name, 'Necesita dormir antes de currar'); return; }
+      const earn = 55 + Math.floor(Math.random()*70);
+      G.money += earn; c.sleep = Math.max(0, c.sleep-22); c.hunger = Math.max(0, c.hunger-18);
+      setBubble(G.selected, '€€€'); showNotif(c.name, `${c.name} curra: +€${earn} 💼`, 'good');
+      break;
+    case 'seco':
+      if(G.money < 25) { showNotif('El Seco','Sin pasta tío 🌿','danger'); return; }
+      G.money -= 25; c.happy = Math.min(100, c.happy+28); c.drug = Math.min(100, c.drug+35);
+      setBubble(G.selected, '!!!'); showNotif('El Seco', `Material de primera 🌿`, 'good');
+      if(c.drug > 75) showNotif(c.name, `${c.name} está MUY alterado 😵`, 'danger');
+      break;
     case 'ratas':
-      if(G.reputation < 30) {
-        showNotif('Los Ratas', 'Iros a la mierda, habéis quemado el puente 🐀', 'danger');
-        return;
-      }
-      G.reputation = Math.max(0, G.reputation - 5);
-      const helpRoll = Math.random();
-      if(helpRoll < 0.5) {
-        G.trash = Math.max(0, G.trash - 20);
-        showNotif('Los Ratas', '¡Os ayudamos con la basura esta vez! 🐀🧹', 'good');
-      } else if(helpRoll < 0.8) {
-        const aviso = Math.floor(Math.random()*50) + 20;
-        G.money += aviso;
-        showNotif('Los Ratas', `Os pasan €${aviso} de un trabajo rápido 💸`, 'good');
-      } else {
-        showNotif('Los Ratas', 'Esta vez nada. Pero os deben una 🤝');
-      }
+      if(G.reputation < 30) { showNotif('Los Ratas','Os habéis ganado la enemistad 🐀','danger'); return; }
+      G.reputation -= 5;
+      const r = Math.random();
+      if(r < 0.5) { G.trash = Math.max(0, G.trash-18); showNotif('Los Ratas','Limpiamos un poco 🐀🧹','good'); }
+      else if(r < 0.8) { const a2 = Math.floor(Math.random()*40)+15; G.money+=a2; showNotif('Los Ratas',`Os pasan €${a2} 💸`,'good'); }
+      else showNotif('Los Ratas','Esta vez nada. Os deben una 🤝');
       break;
-
-    case 'nextday':
-      if(!G.running) return;
-      // Manual day skip
-      G.timeInDay = 99;
+    case 'skip':
+      G.time = 0.99;
       break;
   }
-  renderAll();
 }
 
-function checkChaos() {
-  const collapsed = G.chars.filter(c=>c.collapsed).length;
-  if(collapsed >= 3) G.chaos = Math.min(100, G.chaos + 20);
+function setBubble(i, text, duration=2.5) {
+  G.chars[i].bubble = text;
+  G.chars[i].bubbleTimer = duration;
 }
 
-// ── GAME OVER / WIN ─────────────────────────────────────────────
-function triggerGameOver(reason) {
-  G.gameover = true;
-  G.running = false;
-  clearInterval(tickInterval);
-  document.getElementById('gameover-reason').textContent = reason;
-  document.getElementById('gameover').classList.add('active');
+// ══════════════════════════════════════════════════════
+//  RENDER UI
+// ══════════════════════════════════════════════════════
+function renderHUD() {
+  const m = document.getElementById('hv-money');
+  const t = document.getElementById('hv-trash');
+  const r = document.getElementById('hv-rep');
+  m.textContent = `€${G.money}`;
+  t.textContent = `${Math.round(G.trash)}%`;
+  r.textContent = `${Math.round(G.reputation)}`;
+  document.getElementById('hp-money').className = 'hud-pill' + (G.money<100?' danger':G.money<300?' warn':' good');
+  document.getElementById('hp-trash').className = 'hud-pill' + (G.trash>70?' danger':G.trash>40?' warn':'');
+  document.getElementById('hp-rep').className   = 'hud-pill' + (G.reputation<30?' danger':G.reputation>70?' good':'');
 }
 
-function triggerWin() {
-  G.gameover = true;
-  G.running = false;
-  clearInterval(tickInterval);
-  document.getElementById('gameover-reason').textContent =
-    `¡Sobrevivisteis el mes! €${G.money} en el fondo, ${Math.round(G.trash)}% de basura y con las justas. Leyendas. 🏆`;
-  document.getElementById('gameover').classList.add('active');
-  document.querySelector('#gameover h2').textContent = '¡UN MES!';
-  document.querySelector('#gameover h2').style.color = 'var(--accent)';
-}
+const STAT_DEFS = [
+  { k:'hunger', lbl:'🍔 Hambre', col:'#ff9f3c', low:20 },
+  { k:'sleep',  lbl:'😴 Sueño',  col:'#3c9fff', low:15 },
+  { k:'boredom',lbl:'🎮 Abur.',  col:'#c03cff', low:20 },
+  { k:'happy',  lbl:'😊 Feliz',  col:'#3cffb4', low:20 },
+  { k:'drug',   lbl:'🌿 Alter.', col:'#e8ff3c', high:75 },
+];
 
-// ── NOTIFICATIONS ───────────────────────────────────────────────
-function showNotif(sender, msg, type='') {
-  const area = document.getElementById('notif-area');
-  const el = document.createElement('div');
-  el.className = 'notif ' + type;
-  el.innerHTML = `<div class="notif-sender">${sender}</div>${msg}`;
-  area.appendChild(el);
-  setTimeout(()=>{ el.style.transition='opacity 0.5s'; el.style.opacity='0'; setTimeout(()=>el.remove(),500); }, 3000);
-}
-
-// ── RENDER ───────────────────────────────────────────────────────
-function renderAll() {
-  renderCharSprites();
-  renderCharTabs();
-  renderStats();
-  renderStripValues();
-  renderTrash();
-  updateTimeBar();
-}
-
-function updateTimeBar() {
-  document.getElementById('time-bar').style.width = G.timeInDay + '%';
-  document.getElementById('day-display').textContent = `${G.day} / ${CFG.days}`;
-}
-
-function renderStripValues() {
-  const moneyEl = document.getElementById('strip-money');
-  moneyEl.textContent = `€${G.money}`;
-  moneyEl.className = 'strip-val ' + (G.money < 100 ? 'danger' : G.money < 300 ? 'warning' : 'good');
-
-  const trashEl = document.getElementById('strip-trash');
-  trashEl.textContent = Math.round(G.trash) + '%';
-  trashEl.className = 'strip-val ' + (G.trash > 75 ? 'danger' : G.trash > 50 ? 'warning' : '');
-
-  const chaosEl = document.getElementById('strip-chaos');
-  chaosEl.textContent = Math.round(G.chaos) + '%';
-  chaosEl.className = 'strip-val ' + (G.chaos > 70 ? 'danger' : G.chaos > 40 ? 'warning' : '');
-
-  const repEl = document.getElementById('strip-rep');
-  repEl.textContent = Math.round(G.reputation);
-  repEl.className = 'strip-val ' + (G.reputation < 25 ? 'danger' : G.reputation > 70 ? 'good' : '');
-}
-
-function getStatColor(key, val) {
-  const def = STAT_DEFS.find(s=>s.key===key);
-  if(!def) return '#888';
-  if(def.dangerBelow && val < def.dangerBelow) return '#ff3c3c';
-  if(def.dangerAbove && val > def.dangerAbove) return '#ff3c3c';
-  if(val < 35) return '#ffab3c';
-  return def.color;
-}
-
-function renderStats() {
+function renderStatPanel() {
   const c = G.chars[G.selected];
-  document.getElementById('char-panel-emoji').textContent = c.emoji;
-  document.getElementById('char-panel-name').textContent = c.name.toUpperCase();
+  document.getElementById('stat-emoji').textContent = c.emoji;
+  document.getElementById('stat-name').textContent = c.name.toUpperCase();
+  const states = { idle:'En el local', walking:'Caminando...', sleeping:'Durmiendo 😴', partying:'De fiesta 🎉', working:'Currando 💼', ko:'COLAPSADO 💀' };
+  document.getElementById('stat-state').textContent = states[c.state] || 'Normal';
 
-  const states = { normal:'En el local', sleeping:'Durmiendo 😴', partying:'De fiesta 🎉', working:'Currando 💼', collapsed:'COLAPSADO 💀' };
-  document.getElementById('char-panel-state').textContent = states[c.state] || 'Normal';
-
-  const grid = document.getElementById('stats-grid');
-  grid.innerHTML = '';
+  const bars = document.getElementById('stat-bars');
+  bars.innerHTML = '';
   STAT_DEFS.forEach(def => {
-    const val = Math.max(0, Math.min(100, c[def.key]));
-    const color = getStatColor(def.key, val);
+    const v = Math.max(0, Math.min(100, c[def.k]));
+    const danger = (def.low && v < def.low) || (def.high && v > def.high);
+    const col = danger ? '#ff3c3c' : v < 35 ? '#ffab3c' : def.col;
     const row = document.createElement('div');
-    row.className = 'stat-row';
-    row.innerHTML = `
-      <span class="stat-label">${def.label}</span>
-      <div class="stat-bar-wrap">
-        <div class="stat-bar" style="width:${val}%;background:${color}"></div>
-      </div>
-      <span class="stat-val" style="color:${color}">${Math.round(val)}</span>
-    `;
-    grid.appendChild(row);
+    row.className = 'sbar';
+    row.innerHTML = `<span class="sbar-lbl">${def.lbl}</span><div class="sbar-track"><div class="sbar-fill" style="width:${v}%;background:${col}"></div></div><span class="sbar-num" style="color:${col}">${Math.round(v)}</span>`;
+    bars.appendChild(row);
   });
-}
-
-function renderCharSprites() {
-  const area = document.getElementById('characters-area');
-  area.innerHTML = '';
-  G.chars.forEach((c, i) => {
-    const el = document.createElement('div');
-    el.className = 'char-sprite' + (i===G.selected?' selected':'') + (c.collapsed?' collapsed':'') + (c.state==='partying'?' party':'');
-    el.onclick = () => { G.selected = i; renderAll(); };
-
-    const mood = getCharMood(c);
-    el.innerHTML = `
-      <div class="char-mood-bubble">${mood}</div>
-      <div class="char-body">${c.emoji}</div>
-      <div class="char-name">${c.name}</div>
-      <div class="char-status-dot" style="background:${getStatusDot(c)}"></div>
-    `;
-    area.appendChild(el);
-  });
-}
-
-function getCharMood(c) {
-  if(c.collapsed) return '💀 KO';
-  if(c.drug > 70) return '😵 ALTERADO';
-  if(c.happy > 70) return '😊 Bien';
-  if(c.hunger < 20) return '🍔 Hambre!';
-  if(c.sleep < 20) return '😴 Cansado';
-  if(c.boredom < 25) return '😒 Aburrido';
-  return '😐 Ok';
-}
-
-function getStatusDot(c) {
-  if(c.collapsed) return '#ff3c3c';
-  if(c.drug > 70) return '#e8ff3c';
-  if(c.happy > 70) return '#3cffb4';
-  if(c.hunger < 25 || c.sleep < 25) return '#ffab3c';
-  return '#3c9fff';
 }
 
 function renderCharTabs() {
@@ -931,34 +1012,53 @@ function renderCharTabs() {
   G.chars.forEach((c, i) => {
     const hp = Math.round((c.hunger + c.sleep + c.happy) / 3);
     const el = document.createElement('div');
-    el.className = 'char-tab' + (i===G.selected?' active':'') + (c.collapsed?' collapsed-tab':'');
-    el.onclick = () => { G.selected = i; renderAll(); };
-    el.innerHTML = `
-      <span class="tab-emoji">${c.emoji}</span>
-      <span class="tab-name">${c.name}</span>
-      <div class="tab-hp-bar">
-        <div class="tab-hp-fill" style="width:${hp}%;background:${hp<30?'#ff3c3c':hp<60?'#ffab3c':'#3cffb4'}"></div>
-      </div>
-    `;
+    el.className = 'char-tab' + (i===G.selected?' active':'') + (c.collapsed?' ko':'');
+    el.innerHTML = `<span class="tab-emoji">${c.emoji}</span><span class="tab-name">${c.name}</span><div class="tab-bar"><div class="tab-fill" style="width:${hp}%;background:${hp<30?'#ff3c3c':hp<60?'#ffab3c':'#3cffb4'}"></div></div>`;
+    el.onclick = () => { G.selected = i; renderStatPanel(); renderCharTabs(); };
     tabs.appendChild(el);
   });
 }
 
-function renderTrash() {
-  const layer = document.getElementById('trash-layer');
-  const trashEmojis = ['🗑️','🍺','🍕','🧻','👟','📦','🥤','🍾','💊','🧦'];
-  const count = Math.floor(G.trash / 10);
-  layer.innerHTML = '';
-  for(let i=0; i<count; i++) {
-    const t = document.createElement('span');
-    t.className = 'trash-item';
-    t.textContent = trashEmojis[i % trashEmojis.length];
-    t.style.animationDelay = (i*0.3)+'s';
-    layer.appendChild(t);
-  }
+// ══════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════════════════════
+function showNotif(sender, msg, type='') {
+  const area = document.getElementById('notif-area');
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.innerHTML = (sender ? `<div class="notif-sender">${sender}</div>` : '') + msg;
+  area.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(), 400); }, 2800);
 }
 
-// ── BOOT ────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  GAME OVER / WIN
+// ══════════════════════════════════════════════════════
+function triggerGameOver(reason) {
+  G.gameover = true; G.running = false;
+  document.getElementById('ev-icon').textContent = '💀';
+  document.getElementById('ev-title').textContent = 'GAME OVER';
+  document.getElementById('ev-title').style.color = 'var(--danger)';
+  document.getElementById('ev-desc').textContent = reason;
+  const btns = document.getElementById('ev-btns');
+  btns.innerHTML = '<button class="ev-btn p" onclick="initGame()">REINTENTAR</button>';
+  document.querySelector('#overlay .ev-box').style.borderColor = 'var(--danger)';
+  document.getElementById('overlay').classList.add('on');
+}
+function triggerWin() {
+  G.gameover = true; G.running = false;
+  document.getElementById('ev-icon').textContent = '🏆';
+  document.getElementById('ev-title').textContent = '¡UN MES!';
+  document.getElementById('ev-desc').textContent = `Sobrevivisteis. €${G.money} en el fondo, ${Math.round(G.trash)}% de basura. Leyendas absolutas.`;
+  const btns = document.getElementById('ev-btns');
+  btns.innerHTML = '<button class="ev-btn p" onclick="initGame()">OTRO MES</button>';
+  document.getElementById('overlay').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════
+window.addEventListener('resize', () => { resizeCanvas(); });
 initGame();
 </script>
 </body>
