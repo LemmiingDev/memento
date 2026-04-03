@@ -5,1060 +5,1745 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>El Local</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>El Local – Mejorada del Campo</title>
 <style>
-:root {
-  --bg: #0d0d0d; --surface: #1a1a1a; --surface2: #252525; --border: #333;
-  --accent: #e8ff3c; --danger: #ff3c3c; --warning: #ffab3c; --good: #3cffb4;
-  --text: #f0f0f0; --muted: #888;
-  --h-font: 'Bebas Neue', cursive; --b-font: 'Space Mono', monospace;
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+:root{
+  --bg:#0a0a12;--s1:#11111e;--s2:#181828;--s3:#20203a;--bd:#2a2a4a;
+  --pk:#ff2d78;--cy:#00f5ff;--gn:#aaff00;--ye:#ffd600;--pu:#bf5fff;--or:#ff6b00;
+  --tx:#ffffff;--mu:#8888aa;
+  --ff:'Space Mono',monospace;--fh:'Bebas Neue',cursive;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-html, body { width: 100%; height: 100dvh; background: var(--bg); color: var(--text); font-family: var(--b-font); overflow: hidden; user-select: none; }
-#app { display: flex; flex-direction: column; height: 100dvh; max-width: 430px; margin: 0 auto; }
+html,body{width:100%;height:100dvh;background:var(--bg);color:var(--tx);font-family:var(--ff);overflow:hidden;user-select:none;}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;position:relative;}
 
-/* HEADER */
-#header { padding: 8px 12px 5px; background: var(--surface); border-bottom: 2px solid var(--accent); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-#header h1 { font-family: var(--h-font); font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
-.hud-pill { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 3px 9px; font-size: 11px; }
-.hud-pill span { font-size: 10px; color: var(--muted); }
-.hud-pill.danger { border-color: var(--danger); color: var(--danger); }
-.hud-pill.good { border-color: var(--good); color: var(--good); }
-.hud-pill.warn { border-color: var(--warning); color: var(--warning); }
-#hud { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+/* ── HEADER ── */
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 4px;background:var(--s1);border-bottom:2px solid var(--pk);flex-shrink:0;}
+#hdr-left h1{font-family:var(--fh);font-size:22px;letter-spacing:3px;color:var(--pk);line-height:1;text-shadow:0 0 20px var(--pk);}
+#hdr-left .sub{font-size:7px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;}
+#hdr-right{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+.pill{display:flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;border:1px solid var(--bd);font-size:9px;font-weight:700;background:var(--s2);}
+.pill.gn{border-color:var(--gn);color:var(--gn);}
+.pill.pk{border-color:var(--pk);color:var(--pk);}
+.pill.cy{border-color:var(--cy);color:var(--cy);}
+.pill.ye{border-color:var(--ye);color:var(--ye);}
+.pill.pu{border-color:var(--pu);color:var(--pu);}
 
-/* SCENE CANVAS */
-#scene-wrap { flex: 1; position: relative; overflow: hidden; background: #111; }
-canvas#scene { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+/* ── DAY BAR ── */
+#daybar{height:3px;background:var(--s2);flex-shrink:0;}
+#dayfill{height:100%;background:linear-gradient(90deg,var(--pk),var(--cy));transition:width .8s linear;}
 
-/* NOTIFICATION */
-#notif-area { position: absolute; top: 6px; left: 8px; right: 8px; z-index: 10; pointer-events: none; }
-.notif { background: rgba(26,26,26,0.95); border-left: 3px solid var(--accent); padding: 6px 10px; margin-bottom: 4px; border-radius: 0 6px 6px 0; font-size: 10px; line-height: 1.4; animation: notifIn 0.25s ease-out; }
-.notif.danger { border-color: var(--danger); }
-.notif.good { border-color: var(--good); }
-.notif-sender { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-@keyframes notifIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+/* ── SCENE ── */
+#scene{flex:1;position:relative;overflow:hidden;background:var(--bg);}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;}
 
-/* CHAR TABS */
-#char-tabs { display: flex; gap: 4px; padding: 5px 8px; background: var(--bg); overflow-x: auto; flex-shrink: 0; scrollbar-width: none; }
-#char-tabs::-webkit-scrollbar { display: none; }
-.char-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 7px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; min-width: 50px; background: var(--surface); transition: border-color 0.15s; }
-.char-tab.active { border-color: var(--accent); background: #1e1e00; }
-.char-tab.ko { border-color: var(--danger); background: #1e0000; }
-.tab-emoji { font-size: 18px; }
-.tab-name { font-size: 7px; color: var(--muted); text-transform: uppercase; }
-.tab-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-.tab-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+/* ── NOTIFICATIONS ── */
+#nbox{position:absolute;top:6px;left:8px;right:8px;z-index:20;pointer-events:none;}
+.notif{background:rgba(17,17,30,0.97);border-left:3px solid var(--pk);padding:5px 9px 5px 8px;margin-bottom:4px;border-radius:0 7px 7px 0;font-size:9px;line-height:1.5;animation:nin .2s ease-out;}
+.notif.g{border-color:var(--gn);}
+.notif.b{border-color:var(--cy);}
+.notif.y{border-color:var(--ye);}
+.notif.p{border-color:var(--pu);}
+.nsend{font-size:7px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;}
+@keyframes nin{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
 
-/* STAT PANEL */
-#stat-panel { background: var(--surface); border-top: 1px solid var(--border); padding: 6px 12px 5px; flex-shrink: 0; }
-#stat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-#stat-emoji { font-size: 22px; }
-#stat-name { font-family: var(--h-font); font-size: 20px; color: var(--accent); letter-spacing: 2px; }
-#stat-state { font-size: 8px; color: var(--muted); text-transform: uppercase; }
-#stat-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; }
-.sbar { display: flex; align-items: center; gap: 4px; }
-.sbar-lbl { font-size: 8px; color: var(--muted); width: 48px; flex-shrink: 0; }
-.sbar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.sbar-fill { height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s; }
-.sbar-num { font-size: 8px; width: 22px; text-align: right; }
+/* ── ACTION MENU (tap on character or tile) ── */
+#amenu{position:absolute;z-index:30;display:none;flex-direction:column;gap:4px;background:var(--s1);border:2px solid var(--pk);border-radius:10px;padding:8px;min-width:130px;box-shadow:0 0 20px rgba(255,45,120,0.3);}
+#amenu.on{display:flex;}
+#amenu-title{font-family:var(--fh);font-size:16px;color:var(--pk);letter-spacing:1px;margin-bottom:2px;}
+.am-btn{padding:6px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;font-size:9px;cursor:pointer;transition:background .1s,border-color .1s;text-align:left;}
+.am-btn:active{background:var(--s3);}
+.am-btn.red{border-color:var(--pk);color:var(--pk);}
+.am-btn.grn{border-color:var(--gn);color:var(--gn);}
+.am-btn.blu{border-color:var(--cy);color:var(--cy);}
+.am-btn.yel{border-color:var(--ye);color:var(--ye);}
+.am-btn.pur{border-color:var(--pu);color:var(--pu);}
+.am-close{font-size:8px;color:var(--mu);text-align:center;cursor:pointer;margin-top:2px;}
 
-/* ACTIONS */
-#actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; padding: 6px 8px 8px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
-.abtn { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 7px 3px 5px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; transition: transform 0.1s, background 0.1s; }
-.abtn:active { transform: scale(0.9); background: #333; }
-.abtn .ai { font-size: 20px; }
-.abtn .al { font-size: 7px; color: var(--muted); text-transform: uppercase; text-align: center; }
-.abtn.hl { border-color: var(--accent); }
-.abtn.off { opacity: 0.3; pointer-events: none; }
+/* ── SHOP PANEL ── */
+#shop{position:absolute;inset:0;background:rgba(10,10,18,0.98);z-index:40;display:none;flex-direction:column;}
+#shop.on{display:flex;}
+#shop-hdr{padding:10px 14px 7px;border-bottom:2px solid var(--cy);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#shop-hdr h2{font-family:var(--fh);font-size:24px;color:var(--cy);letter-spacing:2px;}
+#shop-money{font-size:11px;font-weight:700;color:var(--gn);}
+#shop-tabs{display:flex;gap:5px;padding:7px 12px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+#shop-tabs::-webkit-scrollbar{display:none;}
+.stab{padding:4px 11px;border-radius:20px;border:1px solid var(--bd);font-size:8px;cursor:pointer;white-space:nowrap;background:var(--s2);transition:all .15s;}
+.stab.on{background:var(--cy);color:#000;border-color:var(--cy);font-weight:700;}
+#shop-list{flex:1;overflow-y:auto;padding:8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;}
+.scard{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:9px 7px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform .12s,border-color .15s;text-align:center;}
+.scard:active{transform:scale(0.94);}
+.scard.owned{border-color:var(--gn);opacity:.55;pointer-events:none;}
+.scard.can{border-color:var(--pk);}
+.scard-ico{font-size:26px;}
+.scard-name{font-size:8px;text-transform:uppercase;letter-spacing:.5px;}
+.scard-fx{font-size:7px;color:var(--cy);}
+.scard-desc{font-size:7px;color:var(--mu);line-height:1.3;}
+.scard-price{font-size:10px;font-weight:700;color:var(--gn);}
+#shop-close{margin:8px 12px 10px;padding:11px;background:var(--s2);border:1px solid var(--pk);border-radius:8px;font-family:var(--ff);font-size:10px;font-weight:700;color:var(--pk);cursor:pointer;flex-shrink:0;}
+#shop-close:active{opacity:.7;}
 
-/* EVENT / GAMEOVER */
-#overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding: 20px; }
-#overlay.on { display: flex; }
-.ev-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 12px; padding: 18px; width: 100%; text-align: center; }
-.ev-icon { font-size: 44px; margin-bottom: 6px; }
-.ev-title { font-family: var(--h-font); font-size: 28px; color: var(--accent); letter-spacing: 2px; margin-bottom: 5px; }
-.ev-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
-.ev-btns { display: flex; gap: 7px; }
-.ev-btn { flex: 1; padding: 11px 6px; border-radius: 8px; border: none; font-family: var(--b-font); font-size: 10px; font-weight: 700; cursor: pointer; }
-.ev-btn:active { opacity: 0.7; }
-.ev-btn.p { background: var(--accent); color: #000; }
-.ev-btn.s { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.ev-btn.d { background: var(--danger); color: #fff; }
+/* ── EVENT OVERLAY ── */
+#evlay{position:absolute;inset:0;background:rgba(10,10,18,0.94);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:50;padding:22px;}
+#evlay.on{display:flex;}
+.evbox{background:var(--s1);border:2px solid var(--pk);border-radius:14px;padding:20px 16px;width:100%;text-align:center;}
+.evbox.cy{border-color:var(--cy);}
+.evbox.gn{border-color:var(--gn);}
+.ev-ico{font-size:48px;margin-bottom:8px;}
+.ev-tit{font-family:var(--fh);font-size:28px;color:var(--pk);letter-spacing:2px;margin-bottom:5px;}
+.ev-tit.cy{color:var(--cy);}
+.ev-tit.gn{color:var(--gn);}
+.ev-dsc{font-size:10px;color:var(--mu);line-height:1.7;margin-bottom:14px;}
+.ev-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.ev-btn{flex:1;min-width:80px;padding:11px 6px;border-radius:8px;border:none;font-family:var(--ff);font-size:9px;font-weight:700;cursor:pointer;line-height:1.3;}
+.ev-btn:active{opacity:.7;}
+.ev-btn.p{background:var(--pk);color:#fff;}
+.ev-btn.c{background:var(--cy);color:#000;}
+.ev-btn.g{background:var(--gn);color:#000;}
+.ev-btn.s{background:var(--s2);color:var(--tx);border:1px solid var(--bd);}
+.ev-btn.d{background:#cc0000;color:#fff;}
 
-/* TIME BAR */
-#timebar-wrap { height: 3px; background: var(--surface2); flex-shrink: 0; }
-#timebar { height: 100%; background: var(--accent); transition: width 1s linear; }
+/* ── BOTTOM BAR ── */
+#bot{display:flex;gap:4px;padding:5px 8px 7px;background:var(--s1);border-top:1px solid var(--bd);flex-shrink:0;}
+.bbt{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:transform .1s;}
+.bbt:active{transform:scale(0.9);}
+.bbt .bi{font-size:18px;}
+.bbt .bl{font-size:6px;color:var(--mu);text-transform:uppercase;letter-spacing:.3px;text-align:center;}
+.bbt.hl{border-color:var(--pk);}
+.bbt.cy{border-color:var(--cy);}
 
-/* DAY/NIGHT OVERLAY ON SCENE */
-#daynight { position: absolute; inset: 0; pointer-events: none; transition: background 4s; }
+/* ── FRIENDS PANEL ── */
+#fpanel{position:absolute;inset:0;background:rgba(10,10,18,0.98);z-index:40;display:none;flex-direction:column;}
+#fpanel.on{display:flex;}
+#fp-hdr{padding:10px 14px 7px;border-bottom:2px solid var(--pu);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#fp-hdr h2{font-family:var(--fh);font-size:24px;color:var(--pu);letter-spacing:2px;}
+#fp-list{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.fcard{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.fcard.invited{border-color:var(--gn);}
+.fcard-ico{font-size:28px;flex-shrink:0;}
+.fcard-info{flex:1;}
+.fcard-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.fcard-role{font-size:8px;color:var(--mu);margin-bottom:3px;}
+.fcard-traits{display:flex;gap:3px;flex-wrap:wrap;}
+.ftrait{font-size:7px;padding:1px 5px;border-radius:10px;border:1px solid var(--bd);}
+.ftrait.g{border-color:var(--gn);color:var(--gn);}
+.ftrait.r{border-color:var(--pk);color:var(--pk);}
+.fcard-btn{padding:6px 10px;border-radius:7px;border:none;font-family:var(--ff);font-size:8px;font-weight:700;cursor:pointer;}
+.fcard-btn.inv{background:var(--pu);color:#fff;}
+.fcard-btn.kick{background:var(--s3);color:var(--pk);border:1px solid var(--pk);}
+#fp-close{margin:8px 12px 10px;padding:11px;background:var(--s2);border:1px solid var(--pu);border-radius:8px;font-family:var(--ff);font-size:10px;font-weight:700;color:var(--pu);cursor:pointer;flex-shrink:0;}
+
+/* ── STATS PANEL ── */
+#stpanel{position:absolute;inset:0;background:rgba(10,10,18,0.98);z-index:40;display:none;flex-direction:column;}
+#stpanel.on{display:flex;}
+#stp-hdr{padding:10px 14px 7px;border-bottom:2px solid var(--ye);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#stp-hdr h2{font-family:var(--fh);font-size:24px;color:var(--ye);letter-spacing:2px;}
+#stp-body{flex:1;overflow-y:auto;padding:12px;}
+.stat-section{margin-bottom:14px;}
+.stat-section-title{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.stat-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.stat-lbl{font-size:9px;width:80px;flex-shrink:0;}
+.stat-track{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden;}
+.stat-fill{height:100%;border-radius:4px;transition:width .5s,background .5s;}
+.stat-val{font-size:9px;font-weight:700;width:28px;text-align:right;}
+.xp-row{display:flex;justify-content:space-between;font-size:9px;margin-bottom:3px;}
+.xp-track{height:9px;background:var(--s3);border-radius:5px;overflow:hidden;margin-bottom:10px;}
+.xp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--pk),var(--ye));transition:width .5s;}
+#stp-close{margin:8px 12px 10px;padding:11px;background:var(--s2);border:1px solid var(--ye);border-radius:8px;font-family:var(--ff);font-size:10px;font-weight:700;color:var(--ye);cursor:pointer;flex-shrink:0;}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="header">
-    <div>
+
+  <!-- HEADER -->
+  <div id="hdr">
+    <div id="hdr-left">
       <h1>EL LOCAL</h1>
-      <div style="font-size:8px;color:var(--muted);letter-spacing:1px;">DÍA <span id="hday">1</span>/30</div>
+      <div class="sub">Polígono · Mejorada del Campo · Día <span id="hday">1</span></div>
     </div>
-    <div id="hud">
-      <div class="hud-pill" id="hp-money"><span>💶</span><b id="hv-money">€400</b></div>
-      <div class="hud-pill" id="hp-trash"><span>🗑️</span><b id="hv-trash">10%</b></div>
-      <div class="hud-pill" id="hp-rep"><span>⭐</span><b id="hv-rep">50</b></div>
+    <div id="hdr-right">
+      <div class="pill gn">💶 <span id="hp-money">400</span>€</div>
+      <div class="pill ye">⭐ <span id="hp-seg">0</span></div>
+      <div class="pill pk">🗑️ <span id="hp-trash">0</span>%</div>
+      <div class="pill cy">❤️ <span id="hp-hp">100</span></div>
     </div>
   </div>
-  <div id="timebar-wrap"><div id="timebar" style="width:0%"></div></div>
+  <div id="daybar"><div id="dayfill" style="width:0%"></div></div>
 
-  <div id="scene-wrap">
-    <canvas id="scene"></canvas>
-    <div id="daynight"></div>
-    <div id="notif-area"></div>
-    <div id="overlay">
-      <div class="ev-box">
-        <div class="ev-icon" id="ev-icon">⚠️</div>
-        <div class="ev-title" id="ev-title">EVENTO</div>
-        <div class="ev-desc" id="ev-desc"></div>
+  <!-- SCENE -->
+  <div id="scene">
+    <canvas id="iso"></canvas>
+    <div id="nbox"></div>
+
+    <!-- ACTION MENU -->
+    <div id="amenu">
+      <div id="amenu-title">ACCIÓN</div>
+      <div id="amenu-btns"></div>
+      <div class="am-close" onclick="closeMenu()">✕ cerrar</div>
+    </div>
+
+    <!-- SHOP -->
+    <div id="shop">
+      <div id="shop-hdr">
+        <h2>🛒 TIENDA</h2>
+        <div id="shop-money">💶 <span id="sm">400</span>€</div>
+      </div>
+      <div id="shop-tabs"></div>
+      <div id="shop-list"></div>
+      <button id="shop-close" onclick="closeShop()">✕ CERRAR</button>
+    </div>
+
+    <!-- FRIENDS PANEL -->
+    <div id="fpanel">
+      <div id="fp-hdr">
+        <h2>👥 AMIGOS</h2>
+        <div style="font-size:9px;color:var(--mu)"><span id="fp-count">0</span>/15 en el local</div>
+      </div>
+      <div id="fp-list"></div>
+      <button id="fp-close" onclick="closeFriends()">✕ CERRAR</button>
+    </div>
+
+    <!-- STATS PANEL -->
+    <div id="stpanel">
+      <div id="stp-hdr">
+        <h2>📊 TUS STATS</h2>
+        <div style="font-size:9px;color:var(--mu)">Nivel <span id="stp-lvl">1</span></div>
+      </div>
+      <div id="stp-body"></div>
+      <button id="stp-close" onclick="closeStats()">✕ CERRAR</button>
+    </div>
+
+    <!-- EVENT OVERLAY -->
+    <div id="evlay">
+      <div class="evbox" id="evbox">
+        <div class="ev-ico" id="ev-ico">⚠️</div>
+        <div class="ev-tit" id="ev-tit">EVENTO</div>
+        <div class="ev-dsc" id="ev-dsc"></div>
         <div class="ev-btns" id="ev-btns"></div>
       </div>
     </div>
   </div>
 
-  <div id="char-tabs"></div>
-  <div id="stat-panel">
-    <div id="stat-head">
-      <span id="stat-emoji">🧑‍🎤</span>
-      <div><div id="stat-name">TÚ</div><div id="stat-state">En el local</div></div>
-    </div>
-    <div id="stat-bars"></div>
-  </div>
-  <div id="actions">
-    <div class="abtn hl" onclick="act('eat')"><span class="ai">🍕</span><span class="al">Comer</span></div>
-    <div class="abtn" onclick="act('sleep')"><span class="ai">😴</span><span class="al">Dormir</span></div>
-    <div class="abtn" onclick="act('clean')"><span class="ai">🧹</span><span class="al">Limpiar</span></div>
-    <div class="abtn" onclick="act('party')"><span class="ai">🎉</span><span class="al">Fiesta</span></div>
-    <div class="abtn" onclick="act('work')"><span class="ai">💼</span><span class="al">Currar</span></div>
-    <div class="abtn" onclick="act('seco')"><span class="ai">🌿</span><span class="al">El Seco</span></div>
-    <div class="abtn" onclick="act('ratas')"><span class="ai">🐀</span><span class="al">Ratas</span></div>
-    <div class="abtn" onclick="act('skip')"><span class="ai">⏭️</span><span class="al">Avanzar</span></div>
+  <!-- BOTTOM BAR -->
+  <div id="bot">
+    <div class="bbt hl" onclick="openWork()"><span class="bi">💼</span><span class="bl">Currar</span></div>
+    <div class="bbt" onclick="openShop()"><span class="bi">🛒</span><span class="bl">Tienda</span></div>
+    <div class="bbt" onclick="openFriends()"><span class="bi">👥</span><span class="bl">Amigos</span></div>
+    <div class="bbt" onclick="openStats()"><span class="bi">📊</span><span class="bl">Stats</span></div>
+    <div class="bbt cy" onclick="act('skip')"><span class="bi">⏭️</span><span class="bl">Avanzar</span></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  PIXEL ART RENDERER — The Sims 1 lateral style
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  ISO ENGINE
+// ═══════════════════════════════════════════════════════
+const cv  = document.getElementById('iso');
+const ctx = cv.getContext('2d');
+let CW, CH, SC = 2;
 
-const canvas = document.getElementById('scene');
-const ctx = canvas.getContext('2d');
-const SCALE = 3; // pixels per game-pixel
-
-function resizeCanvas() {
-  const wrap = document.getElementById('scene-wrap');
-  canvas.width  = Math.floor(wrap.clientWidth  / SCALE);
-  canvas.height = Math.floor(wrap.clientHeight / SCALE);
+function resize() {
+  const el = document.getElementById('scene');
+  CW = el.clientWidth; CH = el.clientHeight;
+  cv.width  = CW * SC; cv.height = CH * SC;
+  cv.style.width = CW+'px'; cv.style.height = CH+'px';
+  ctx.scale(SC, SC);
+  ctx.imageSmoothingEnabled = false;
 }
 
-// ── PIXEL DRAWING UTILS ────────────────────────────────
-function px(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w||1,h||1); }
-function drawText(text,x,y,color='#fff',size=1){
-  ctx.save(); ctx.imageSmoothingEnabled=false;
-  ctx.fillStyle=color; ctx.font=`${size*5}px monospace`; ctx.fillText(text,x,y);
+// Tile size
+const TW = 36, TH = 18;
+const WALL_H = 52;
+
+// Grid → screen
+function iso(gx, gy, gz = 0) {
+  const ox = CW / 2, oy = CH * 0.30;
+  return {
+    x: ox + (gx - gy) * TW / 2,
+    y: oy + (gx + gy) * TH / 2 - gz * TH
+  };
+}
+
+// Screen → closest grid tile
+function screenToGrid(sx, sy) {
+  const ox = CW / 2, oy = CH * 0.30;
+  const rx = sx - ox, ry = sy - oy;
+  const gx = (rx / (TW/2) + ry / (TH/2)) / 2;
+  const gy = (ry / (TH/2) - rx / (TW/2)) / 2;
+  return { gx: Math.floor(gx), gy: Math.floor(gy) };
+}
+
+const GRID = 9; // 9×9 nave
+
+// ═══════════════════════════════════════════════════════
+//  PALETTE Y2K
+// ═══════════════════════════════════════════════════════
+const C = {
+  // Nave — suelo parqué claro, paredes blancas sucias
+  floorA:  '#e8dcc8', floorB:  '#dfd0b8',
+  floorL:  '#c4b090', floorR:  '#b8a07a',
+  wallF:   '#f0ece2', wallFd:  '#e4ddd0', wallFdd: '#d8d0c0',
+  wallS:   '#ddd8cc', wallT:   '#faf8f4',
+  skirt:   '#c8b898', skirtD:  '#b8a888',
+  conc:    '#c8c0b0', // concrete floor (empty area)
+  // Accent Y2K
+  pk: '#ff2d78', cy: '#00f5ff', gn: '#aaff00',
+  ye: '#ffd600', pu: '#bf5fff', or: '#ff6b00',
+};
+
+// ═══════════════════════════════════════════════════════
+//  DRAW ROOM
+// ═══════════════════════════════════════════════════════
+function drawRoom() {
+  // Floor tiles
+  for (let x = 0; x < GRID; x++) {
+    for (let y = 0; y < GRID; y++) {
+      drawFloorTile(x, y);
+    }
+  }
+
+  // Left wall (x = 0, y = 0..GRID)
+  for (let y = 0; y < GRID; y++) {
+    drawWallLeft(0, y);
+  }
+
+  // Back wall (y = 0, x = 0..GRID)
+  for (let x = 0; x < GRID; x++) {
+    drawWallBack(x, 0);
+  }
+
+  // Corner cap
+  drawWallCap(0, 0);
+
+  // Wall top caps (left wall)
+  for (let y = 1; y < GRID; y++) drawWallCapLeft(0, y);
+  // Wall top caps (back wall)
+  for (let x = 1; x < GRID; x++) drawWallCapBack(x, 0);
+
+  // Corner vertical edge
+  const sc = iso(0, 0);
+  ctx.beginPath();
+  ctx.moveTo(sc.x, sc.y); ctx.lineTo(sc.x, sc.y - WALL_H);
+  ctx.strokeStyle = C.conc; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Graffiti on left wall
+  drawGraffitiLeft();
+
+  // Window on back wall
+  drawWindow(4, 0);
+  drawWindow(7, 0);
+
+  // Door on left wall
+  drawDoor(0, 5);
+
+  // Nave sign
+  drawSign();
+}
+
+function drawFloorTile(gx, gy) {
+  const s = iso(gx, gy);
+  const alt = (gx + gy) % 2 === 0;
+  // Top face diamond
+  ctx.beginPath();
+  ctx.moveTo(s.x,          s.y);
+  ctx.lineTo(s.x + TW/2,   s.y + TH/2);
+  ctx.lineTo(s.x,           s.y + TH);
+  ctx.lineTo(s.x - TW/2,   s.y + TH/2);
+  ctx.closePath();
+  ctx.fillStyle = alt ? C.floorA : C.floorB;
+  ctx.fill();
+  // Plank grain
+  ctx.strokeStyle = 'rgba(160,130,90,0.13)';
+  ctx.lineWidth = 0.4;
+  ctx.stroke();
+  // Horizontal plank line
+  if (gx % 2 === 0) {
+    ctx.beginPath();
+    ctx.moveTo(s.x - TW/2, s.y + TH/2);
+    ctx.lineTo(s.x + TW/2, s.y + TH/2);
+    ctx.strokeStyle = 'rgba(140,110,70,0.10)';
+    ctx.lineWidth = 0.4;
+    ctx.stroke();
+  }
+}
+
+function drawWallBack(gx, gy) {
+  const s = iso(gx, gy);
+  // Right face of back wall
+  ctx.beginPath();
+  ctx.moveTo(s.x,         s.y);
+  ctx.lineTo(s.x + TW/2,  s.y + TH/2);
+  ctx.lineTo(s.x + TW/2,  s.y + TH/2 - WALL_H);
+  ctx.lineTo(s.x,          s.y - WALL_H);
+  ctx.closePath();
+  ctx.fillStyle = C.wallF;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(100,90,70,0.08)';
+  ctx.lineWidth = 0.4; ctx.stroke();
+  // Subtle stain
+  ctx.fillStyle = 'rgba(180,160,120,0.05)';
+  ctx.fillRect(s.x + 2, s.y - WALL_H + 12, 8, 16);
+  // Skirting
+  ctx.beginPath();
+  ctx.moveTo(s.x,        s.y);
+  ctx.lineTo(s.x+TW/2,   s.y+TH/2);
+  ctx.lineTo(s.x+TW/2,   s.y+TH/2 - 5);
+  ctx.lineTo(s.x,         s.y - 5);
+  ctx.closePath();
+  ctx.fillStyle = C.skirtD; ctx.fill();
+}
+
+function drawWallLeft(gx, gy) {
+  const s = iso(gx, gy);
+  ctx.beginPath();
+  ctx.moveTo(s.x - TW/2,  s.y + TH/2);
+  ctx.lineTo(s.x,           s.y);
+  ctx.lineTo(s.x,           s.y - WALL_H);
+  ctx.lineTo(s.x - TW/2,   s.y + TH/2 - WALL_H);
+  ctx.closePath();
+  ctx.fillStyle = C.wallS; ctx.fill();
+  ctx.strokeStyle = 'rgba(100,90,70,0.08)';
+  ctx.lineWidth = 0.4; ctx.stroke();
+  // Skirting
+  ctx.beginPath();
+  ctx.moveTo(s.x - TW/2,  s.y + TH/2);
+  ctx.lineTo(s.x,           s.y);
+  ctx.lineTo(s.x,           s.y - 5);
+  ctx.lineTo(s.x - TW/2,   s.y + TH/2 - 5);
+  ctx.closePath();
+  ctx.fillStyle = C.skirt; ctx.fill();
+}
+
+function drawWallCap(gx, gy) {
+  const s = iso(gx, gy);
+  const ty = s.y - WALL_H;
+  ctx.beginPath();
+  ctx.moveTo(s.x,          ty);
+  ctx.lineTo(s.x + TW/2,   ty + TH/2);
+  ctx.lineTo(s.x,           ty + TH);
+  ctx.lineTo(s.x - TW/2,   ty + TH/2);
+  ctx.closePath();
+  ctx.fillStyle = C.wallT; ctx.fill();
+  ctx.strokeStyle = 'rgba(100,90,70,0.15)';
+  ctx.lineWidth = 0.4; ctx.stroke();
+}
+
+function drawWallCapLeft(gx, gy) {
+  const s = iso(gx, gy);
+  const ty = s.y - WALL_H;
+  ctx.beginPath();
+  ctx.moveTo(s.x - TW/2,   ty + TH/2);
+  ctx.lineTo(s.x,            ty);
+  ctx.lineTo(s.x,            ty + TH);
+  ctx.lineTo(s.x - TW/2,    ty + TH*1.5);
+  ctx.closePath();
+  ctx.fillStyle = '#e0dcd0'; ctx.fill();
+}
+
+function drawWallCapBack(gx, gy) {
+  const s = iso(gx, gy);
+  const ty = s.y - WALL_H;
+  ctx.beginPath();
+  ctx.moveTo(s.x,          ty);
+  ctx.lineTo(s.x + TW/2,   ty + TH/2);
+  ctx.lineTo(s.x + TW/2,   ty + TH*1.5);
+  ctx.lineTo(s.x,           ty + TH);
+  ctx.closePath();
+  ctx.fillStyle = '#d8d4c8'; ctx.fill();
+}
+
+function drawWindow(gx, gy) {
+  const s = iso(gx, gy);
+  const wx = s.x, wy = s.y - WALL_H + 10;
+  const ww = TW/2 - 2, wh = WALL_H * 0.55;
+  // Frame
+  ctx.fillStyle = '#c8b888'; ctx.fillRect(wx + 2, wy, ww, wh);
+  // Glass
+  ctx.fillStyle = 'rgba(100,180,255,0.25)'; ctx.fillRect(wx + 4, wy + 2, ww - 4, wh - 4);
+  // Light strip
+  ctx.fillStyle = 'rgba(200,230,255,0.35)'; ctx.fillRect(wx + 4, wy + 2, 3, wh - 4);
+  // Cross
+  ctx.fillStyle = '#c8b888';
+  ctx.fillRect(wx + 4, wy + wh/2 - 0.5, ww - 4, 1);
+  ctx.fillRect(wx + 4 + ww/2 - 2, wy + 2, 1, wh - 4);
+}
+
+function drawDoor(gx, gy) {
+  const s = iso(gx, gy);
+  const dh = WALL_H * 0.75;
+  // Door frame
+  ctx.fillStyle = '#b8a888';
+  ctx.fillRect(s.x - TW/2 + 4, s.y + TH/2 - dh - 2, TW/2 - 6, dh + 2);
+  // Door body
+  ctx.fillStyle = '#d4c4a0';
+  ctx.fillRect(s.x - TW/2 + 6, s.y + TH/2 - dh, TW/2 - 10, dh);
+  // Panels
+  ctx.fillStyle = '#c8b890';
+  ctx.fillRect(s.x - TW/2 + 8, s.y + TH/2 - dh + 4, TW/2 - 18, dh/2 - 6);
+  ctx.fillRect(s.x - TW/2 + 8, s.y + TH/2 - dh/2 + 2, TW/2 - 18, dh/2 - 6);
+  // Knob
+  ctx.fillStyle = '#ffd600';
+  ctx.beginPath();
+  ctx.arc(s.x - TW/2 + TW/2 - 11, s.y + TH/2 - dh/2, 2, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawGraffitiLeft() {
+  const s = iso(0, 3);
+  const gx = s.x - TW/2 + 4, gy = s.y - WALL_H + 14;
+  // Tag shape using bezier
+  ctx.save();
+  ctx.strokeStyle = C.pk; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6;
+  ctx.beginPath(); ctx.moveTo(gx,gx); // simplified blob
+  ctx.arc(gx + 8, gy + 5, 6, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.strokeStyle = C.cy; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(gx+2, gy+14); ctx.lineTo(gx+18, gy+14);
+  ctx.stroke();
   ctx.restore();
 }
 
-// Pixel font — tiny 3x5 chars
-const PFONT = {
-  'A':[[0,1,0],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
-  'B':[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
-  'C':[[0,1,1],[1,0,0],[1,0,0],[1,0,0],[0,1,1]],
-  'D':[[1,1,0],[1,0,1],[1,0,1],[1,0,1],[1,1,0]],
-  'E':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]],
-  'F':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,0,0]],
-  'G':[[0,1,1],[1,0,0],[1,0,1],[1,0,1],[0,1,1]],
-  'H':[[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
-  'I':[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
-  'J':[[0,0,1],[0,0,1],[0,0,1],[1,0,1],[0,1,1]],
-  'K':[[1,0,1],[1,1,0],[1,0,0],[1,1,0],[1,0,1]],
-  'L':[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
-  'M':[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]],
-  'N':[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]],
-  'O':[[0,1,0],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
-  'P':[[1,1,0],[1,0,1],[1,1,0],[1,0,0],[1,0,0]],
-  'Q':[[0,1,0],[1,0,1],[1,0,1],[1,1,1],[0,1,1]],
-  'R':[[1,1,0],[1,0,1],[1,1,0],[1,1,0],[1,0,1]],
-  'S':[[0,1,1],[1,0,0],[0,1,0],[0,0,1],[1,1,0]],
-  'T':[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
-  'U':[[1,0,1],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
-  'V':[[1,0,1],[1,0,1],[1,0,1],[0,1,0],[0,1,0]],
-  'W':[[1,0,1],[1,0,1],[1,1,1],[1,1,1],[1,0,1]],
-  'X':[[1,0,1],[0,1,0],[0,1,0],[0,1,0],[1,0,1]],
-  'Y':[[1,0,1],[1,0,1],[0,1,0],[0,1,0],[0,1,0]],
-  'Z':[[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,1,1]],
-  ' ':[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]],
-  '!':[[0,1,0],[0,1,0],[0,1,0],[0,0,0],[0,1,0]],
-  '?':[[0,1,0],[1,0,1],[0,0,1],[0,1,0],[0,1,0]],
-  '%':[[1,0,1],[0,0,1],[0,1,0],[1,0,0],[1,0,1]],
-  '.':[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,1,0]],
-  '/':[[0,0,1],[0,0,1],[0,1,0],[1,0,0],[1,0,0]],
-  '0':[[0,1,0],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
-  '1':[[0,1,0],[1,1,0],[0,1,0],[0,1,0],[1,1,1]],
-  '2':[[1,1,0],[0,0,1],[0,1,0],[1,0,0],[1,1,1]],
-  '3':[[1,1,0],[0,0,1],[0,1,0],[0,0,1],[1,1,0]],
-  '4':[[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
-  '5':[[1,1,1],[1,0,0],[1,1,0],[0,0,1],[1,1,0]],
-  '6':[[0,1,1],[1,0,0],[1,1,0],[1,0,1],[0,1,0]],
-  '7':[[1,1,1],[0,0,1],[0,1,0],[0,1,0],[0,1,0]],
-  '8':[[0,1,0],[1,0,1],[0,1,0],[1,0,1],[0,1,0]],
-  '9':[[0,1,0],[1,0,1],[0,1,1],[0,0,1],[0,1,0]],
-  'E':[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]],
-};
-function drawPixelText(text, x, y, color='#e8ff3c', scale=1) {
-  let cx = x;
-  for(const ch of text.toUpperCase()) {
-    const g = PFONT[ch] || PFONT[' '];
-    for(let r=0; r<5; r++) for(let c=0; c<3; c++) {
-      if(g[r][c]) { ctx.fillStyle=color; ctx.fillRect(cx+c*scale, y+r*scale, scale, scale); }
-    }
-    cx += 4*scale;
-  }
+function drawSign() {
+  // Cartel "NAVE 7" en la pared de fondo
+  const s = iso(2, 0);
+  ctx.save();
+  ctx.fillStyle = '#111'; ctx.fillRect(s.x + 4, s.y - WALL_H + 8, 28, 12);
+  ctx.fillStyle = C.gn;
+  ctx.font = 'bold 7px monospace';
+  ctx.fillText('NAVE 7', s.x + 6, s.y - WALL_H + 18);
+  ctx.restore();
 }
 
-// ══════════════════════════════════════════════════════
-//  ROOM RENDERER
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  FURNITURE SYSTEM
+// ═══════════════════════════════════════════════════════
+const SHOP_ITEMS = [
+  // BÁSICOS
+  { id:'sofa',     cat:'Básicos',   name:'Sofá',          price:80,  ico:'🛋️',  fx:'+feliz pasivo',   desc:'El equipo descansa mejor',
+    w:2,h:1,zh:1.1, colors:{t:'#9b59b6',f:'#8e44ad',s:'#7d3c98',x:'#b39ddb'} },
+  { id:'bed',      cat:'Básicos',   name:'Cama',          price:120, ico:'🛏️',  fx:'+sueño x2',       desc:'Dormir aquí recupera energía rápido',
+    w:2,h:2,zh:0.9, colors:{t:'#42a5f5',f:'#1976d2',s:'#1565c0',x:'#90caf9'} },
+  { id:'fridge',   cat:'Básicos',   name:'Nevera',        price:90,  ico:'🧊',  fx:'comida gratis',   desc:'Siempre algo que mascar',
+    w:1,h:1,zh:2.4, colors:{t:'#81ecec',f:'#00cec9',s:'#00b894',x:'#55efc4'} },
+  { id:'table',    cat:'Básicos',   name:'Mesa',          price:45,  ico:'🪑',  fx:'+hambre efic.',   desc:'Sitio donde comer y trabajar',
+    w:2,h:1,zh:0.7, colors:{t:'#d4a55a',f:'#b8843a',s:'#a07030',x:'#e8c07a'} },
+  { id:'lamp',     cat:'Básicos',   name:'Lámpara',       price:35,  ico:'💡',  fx:'ambiente +rep.',  desc:'La nave parece menos una cárcel',
+    w:1,h:1,zh:2.0, colors:{t:'#ffd600',f:'#e0a000',s:'#c08000',x:'#fff0a0'} },
+  { id:'mattress', cat:'Básicos',   name:'Colchoneta',    price:20,  ico:'🛌',  fx:'+sueño lento',    desc:'Básico pero funciona',
+    w:2,h:1,zh:0.3, colors:{t:'#fd79a8',f:'#d45080',s:'#b03060',x:'#ffb8d0'} },
+  // TRABAJO
+  { id:'mic',      cat:'Trabajo',   name:'Micro + atril', price:150, ico:'🎤',  fx:'desbloquea CANTAR', desc:'Sube seguidores cantando o haciendo directos',
+    w:1,h:1,zh:1.8, colors:{t:'#636e72',f:'#2d3436',s:'#1a1a2e',x:'#b2bec3'} },
+  { id:'tattoostool', cat:'Trabajo', name:'Tatuadora',    price:200, ico:'💉',  fx:'desbloquea TATUAR', desc:'Clientes pagan bien, pero necesita práctica',
+    w:1,h:1,zh:0.9, colors:{t:'#2d3436',f:'#1a1a2e',s:'#111118',x:'#636e72'} },
+  { id:'camera',   cat:'Trabajo',   name:'Cámara',        price:180, ico:'📷',  fx:'desbloquea FOTOS',  desc:'Sesiones de fotos y contenido para redes',
+    w:1,h:1,zh:0.8, colors:{t:'#1a1a2e',f:'#0a0a18',s:'#050510',x:'#636e72'} },
+  { id:'playstation', cat:'Trabajo', name:'PlayStation',  price:100, ico:'🎮',  fx:'desbloquea STREAM', desc:'Streamea y gana seguidores jugando',
+    w:1,h:1,zh:0.6, colors:{t:'#0a3060',f:'#001848',s:'#000830',x:'#003090'} },
+  // AMBIENTE
+  { id:'speaker',  cat:'Ambiente',  name:'Bafle',         price:160, ico:'🔊',  fx:'fiesta x2',       desc:'Las fiestas son otro nivel',
+    w:1,h:1,zh:1.7, colors:{t:'#2d3436',f:'#1a1a2e',s:'#111118',x:'#fd79a8'} },
+  { id:'bar',      cat:'Ambiente',  name:'Barra de bar',  price:200, ico:'🍺',  fx:'+rep. +ingresos', desc:'Los ratas y los amigos siempre vuelven',
+    w:3,h:1,zh:1.4, colors:{t:'#3d2b1a',f:'#2a1a08',s:'#1a1008',x:'#ffd700'} },
+  { id:'beanbag',  cat:'Ambiente',  name:'Puf',           price:30,  ico:'🫐',  fx:'+relax pasivo',   desc:'El rincón de los vagos',
+    w:1,h:1,zh:0.6, colors:{t:'#6c5ce7',f:'#5a4bd1',s:'#4a3bbf',x:'#a29bfe'} },
+  { id:'plant',    cat:'Ambiente',  name:'Planta',        price:25,  ico:'🌿',  fx:'-basura/día',     desc:'Oxigena la nave. Sorprendentemente útil',
+    w:1,h:1,zh:1.2, colors:{t:'#00b894',f:'#009374',s:'#007354',x:'#55efc4'} },
+  { id:'poster',   cat:'Ambiente',  name:'Póster',        price:10,  ico:'🖼️', fx:'+rep.',            desc:'La estética importa en Mejorada',
+    w:1,h:1,zh:0.05, colors:{t:'#1a1a2e',f:'#0a0a18',s:'#050510',x:'#bf5fff'} },
+  { id:'trash_bin',cat:'Ambiente',  name:'Cubo basura',   price:15,  ico:'🗑️', fx:'-basura pasivo',  desc:'Sin él todo acaba en el suelo',
+    w:1,h:1,zh:0.9, colors:{t:'#636e72',f:'#2d3436',s:'#1a1a2e',x:'#74b9ff'} },
+];
 
-// Color palette — pixel art flat
-const PAL = {
-  wallTop: '#2a1f3d', wall: '#1e1530', wallDark: '#180f28',
-  floor: '#3a2c1a', floorAlt: '#352819', floorDark: '#2a1e10',
-  skirting: '#1a1008',
-  sofaBody: '#4a3060', sofaBack: '#3a2050', sofaCush: '#5a4070', sofaLeg: '#2a1040',
-  bedFrame: '#5a3a1a', bedSheet: '#3a5a7a', bedPillow: '#a0c0d0', bedLeg: '#3a2010',
-  tvBody: '#181818', tvScreen: '#0a2040', tvGlow: '#1a3860', tvStand: '#282828',
-  fridgeBody: '#888898', fridgeDoor: '#9898a8', fridgeHandle: '#555565',
-  tableTop: '#6a4a2a', tableLeg: '#4a3015',
-  lampPost: '#888', lampShade: '#e8d060', lampGlow: 'rgba(232,208,96,0.12)',
-  windowFrame: '#3a2a1a', windowGlass: '#1a3050', windowLight: '#204060', windowSill: '#4a3820',
-  posterBg: '#2a1a3a', posterAcc: '#e8ff3c',
-  rugRed: '#8a2020', rugPat: '#6a1010',
-  doorFrame: '#3a2a1a', doorBody: '#4a3820', doorKnob: '#c8a040',
-  trashBag: '#2a4a2a', trashCan: '#3a3a3a',
-  plantPot: '#6a3a1a', plantLeaf: '#2a5a1a', plantLeafLight: '#3a7a2a',
-  ceilingLamp: '#c0c0c0', ceilingWire: '#888', ceilingGlow: 'rgba(255,240,180,0.08)',
-};
+// Isometric box renderer
+function isoBox(gx, gy, fw, fh, zh, col) {
+  const s = iso(gx + fw/2, gy + fh/2);
+  const W2 = fw * TW/2, H2 = fh * TH/2, ZH = zh * TH * 2.2;
 
-function drawRoom() {
-  const W = canvas.width, H = canvas.height;
-  const floor = Math.floor(H * 0.62);
+  // Left face
+  ctx.beginPath();
+  ctx.moveTo(s.x-W2, s.y);
+  ctx.lineTo(s.x,    s.y+H2);
+  ctx.lineTo(s.x,    s.y+H2-ZH);
+  ctx.lineTo(s.x-W2, s.y-ZH);
+  ctx.closePath();
+  ctx.fillStyle = col.s||'#555'; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.5; ctx.stroke();
 
-  // -- CEILING --
-  px(0, 0, W, 2, '#1a1230');
+  // Right face
+  ctx.beginPath();
+  ctx.moveTo(s.x,    s.y+H2);
+  ctx.lineTo(s.x+W2, s.y);
+  ctx.lineTo(s.x+W2, s.y-ZH);
+  ctx.lineTo(s.x,    s.y+H2-ZH);
+  ctx.closePath();
+  ctx.fillStyle = col.f||'#777'; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.5; ctx.stroke();
 
-  // -- BACK WALL --
-  for(let y=2; y<floor; y++) {
-    const t = (y-2)/(floor-2);
-    const r = Math.floor(0x1e + (0x22-0x1e)*t);
-    const g = Math.floor(0x15 + (0x18-0x15)*t);
-    const b = Math.floor(0x30 + (0x1a-0x30)*t);
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
-    ctx.fillRect(0, y, W, 1);
+  // Top face
+  ctx.beginPath();
+  ctx.moveTo(s.x,    s.y-ZH);
+  ctx.lineTo(s.x+W2, s.y-ZH);
+  ctx.lineTo(s.x,    s.y+H2-ZH);
+  ctx.lineTo(s.x-W2, s.y-ZH);
+  ctx.closePath();
+  ctx.fillStyle = col.t||'#999'; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
+
+  return { s, W2, H2, ZH };
+}
+
+function drawFurnitureItem(item) {
+  const def = SHOP_ITEMS.find(d => d.id === item.id);
+  if (!def) return;
+  const { gx, gy } = item;
+  const c = def.colors;
+
+  const { s, W2, H2, ZH } = isoBox(gx, gy, def.w, def.h, def.zh, c);
+
+  // Special details per item
+  if (def.id === 'sofa') {
+    // Cushions on top
+    const cy2 = s.y - ZH;
+    ctx.beginPath(); ctx.ellipse(s.x - W2*0.3, cy2 + TH*0.3, TW*0.2, TH*0.28, 0, 0, Math.PI*2);
+    ctx.fillStyle = c.x; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(s.x + W2*0.1, cy2 + TH*0.3, TW*0.2, TH*0.28, 0, 0, Math.PI*2);
+    ctx.fillStyle = c.x; ctx.fill();
+    // Backrest
+    ctx.beginPath();
+    ctx.moveTo(s.x - W2, s.y - ZH);
+    ctx.lineTo(s.x + W2, s.y - ZH);
+    ctx.lineTo(s.x + W2, s.y - ZH - TH*1.4);
+    ctx.lineTo(s.x - W2, s.y - ZH - TH*1.4);
+    ctx.closePath();
+    ctx.fillStyle = c.s; ctx.fill();
   }
 
-  // Ceiling light glow
-  const cx = Math.floor(W/2);
-  ctx.fillStyle = PAL.ceilingGlow;
-  for(let r2=30; r2>0; r2-=5) {
-    ctx.beginPath(); ctx.arc(cx*SCALE/SCALE, 4, r2, 0, Math.PI*2);
+  if (def.id === 'bed') {
+    // Sheet texture stripe
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(s.x - W2 + i*10, s.y - ZH);
+      ctx.lineTo(s.x + i*10,       s.y - ZH + H2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // Pillow
+    ctx.beginPath();
+    ctx.ellipse(s.x - W2*0.4, s.y - ZH + TH*0.5, TW*0.25, TH*0.3, 0.2, 0, Math.PI*2);
+    ctx.fillStyle = '#e3f2fd'; ctx.fill();
+    // Headboard back
+    ctx.fillStyle = c.s;
+    ctx.fillRect(s.x - W2, s.y - ZH - TH*2, W2*2, TH*1.8);
+  }
+
+  if (def.id === 'fridge') {
+    // Handle
+    ctx.strokeStyle = '#dfe6e9'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(s.x + W2*0.6, s.y - ZH*0.3);
+    ctx.lineTo(s.x + W2*0.6, s.y - ZH*0.7);
+    ctx.stroke();
+    // Door split
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y - ZH*0.5);
+    ctx.lineTo(s.x + W2, s.y - ZH*0.5 + TH*0.25);
+    ctx.stroke();
+  }
+
+  if (def.id === 'mic') {
+    // Pole
+    ctx.strokeStyle = '#b2bec3'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y - ZH - TH*2); ctx.stroke();
+    // Mic head
+    ctx.beginPath(); ctx.arc(s.x, s.y - ZH - TH*2.2, TW*0.18, 0, Math.PI*2);
+    ctx.fillStyle = '#636e72'; ctx.fill();
+    ctx.beginPath(); ctx.arc(s.x, s.y - ZH - TH*2.2, TW*0.11, 0, Math.PI*2);
+    ctx.fillStyle = '#2d3436'; ctx.fill();
+  }
+
+  if (def.id === 'playstation') {
+    // Screen
+    ctx.fillStyle = '#0f3460';
+    ctx.fillRect(s.x - W2*0.6, s.y - ZH - TH*2.5, W2*1.6, TH*2);
+    ctx.fillStyle = 'rgba(0,245,255,0.15)';
+    ctx.fillRect(s.x - W2*0.55, s.y - ZH - TH*2.4, W2*1.5, TH*1.8);
+    // Controller hint
+    ctx.fillStyle = '#2d3436';
+    ctx.fillRect(s.x - 6, s.y - ZH + 2, 12, 5);
+  }
+
+  if (def.id === 'speaker') {
+    // Speaker cone
+    ctx.beginPath();
+    ctx.arc(s.x + W2*0.4, s.y - ZH*0.5 + TH*0.2, TW*0.22, 0, Math.PI*2);
+    ctx.fillStyle = '#1a1a2e'; ctx.fill();
+    ctx.beginPath();
+    ctx.arc(s.x + W2*0.4, s.y - ZH*0.5 + TH*0.2, TW*0.1, 0, Math.PI*2);
+    ctx.fillStyle = c.x; ctx.fill();
+  }
+
+  if (def.id === 'bar') {
+    // Counter top wood
+    ctx.fillStyle = '#8d6e63';
+    ctx.beginPath();
+    ctx.moveTo(s.x - W2, s.y - ZH);
+    ctx.lineTo(s.x + W2, s.y - ZH);
+    ctx.lineTo(s.x, s.y - ZH + H2);
+    ctx.lineTo(s.x - W2*2, s.y - ZH + H2*0.5);
+    ctx.closePath(); ctx.fill();
+    // Brass rail
+    ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(s.x - W2 + 2, s.y - ZH*0.3);
+    ctx.lineTo(s.x + W2 - 2, s.y - ZH*0.3 - TH*0.2);
+    ctx.stroke();
+  }
+
+  if (def.id === 'plant') {
+    // Leaves
+    const lx = s.x, ly = s.y - ZH - TH;
+    [[-4,-8,10,14],[-8,-14,8,12],[4,-12,9,13],[0,-20,7,10]].forEach(([dx,dy,rx,ry]) => {
+      ctx.beginPath();
+      ctx.ellipse(lx+dx, ly+dy, rx, ry, dx*0.08, 0, Math.PI*2);
+      ctx.fillStyle = c.t; ctx.fill();
+    });
+    // Pot
+    ctx.beginPath();
+    ctx.ellipse(lx, ly, TW*0.2, TH*0.28, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#e17055'; ctx.fill();
+  }
+
+  if (def.id === 'lamp') {
+    const lx = s.x, ly = s.y - ZH;
+    ctx.strokeStyle = '#b2bec3'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx, ly - TH*3.8); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(lx-TW*0.3, ly-TH*3.2);
+    ctx.lineTo(lx+TW*0.3, ly-TH*3.2);
+    ctx.lineTo(lx+TW*0.18, ly-TH*4);
+    ctx.lineTo(lx-TW*0.18, ly-TH*4);
+    ctx.closePath(); ctx.fillStyle = c.x; ctx.fill();
+    ctx.fillStyle='rgba(255,220,0,0.07)';
+    ctx.beginPath(); ctx.arc(lx, ly-TH*3.5, TW*0.9, 0, Math.PI*2); ctx.fill();
+  }
+
+  if (def.id === 'poster') {
+    // Flat on wall (not a box, override)
+    // Drawn on back wall at placement
+    const ws = iso(gx, 0);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(ws.x + 6, ws.y - WALL_H + 14, 20, 26);
+    ctx.strokeStyle = c.x; ctx.lineWidth = 1;
+    ctx.strokeRect(ws.x + 6, ws.y - WALL_H + 14, 20, 26);
+    ctx.fillStyle = c.x; ctx.fillRect(ws.x + 10, ws.y - WALL_H + 18, 12, 2);
+    ctx.fillStyle = 'rgba(191,95,255,0.3)'; ctx.fillRect(ws.x + 10, ws.y - WALL_H + 24, 8, 12);
+  }
+
+  if (def.id === 'beanbag') {
+    ctx.beginPath();
+    ctx.ellipse(s.x, s.y - TH*0.4, TW*0.38, TH*0.55, 0, 0, Math.PI*2);
+    ctx.fillStyle = c.t; ctx.fill();
+    ctx.strokeStyle = c.s; ctx.lineWidth = 0.5; ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(s.x-4, s.y - TH*0.6, TW*0.12, TH*0.18, 0.4, 0, Math.PI*2);
+    ctx.fillStyle = c.x; ctx.fill();
+  }
+
+  if (def.id === 'trash_bin') {
+    ctx.strokeStyle = c.x; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(s.x - 4, s.y - ZH); ctx.lineTo(s.x + 4, s.y - ZH);
+    ctx.stroke();
+  }
+
+  if (def.id === 'tattoostool') {
+    // Arm rest detail
+    ctx.fillStyle = '#c0c0c0';
+    ctx.beginPath();
+    ctx.ellipse(s.x, s.y - ZH - 2, TW*0.35, TH*0.3, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.ellipse(s.x, s.y - ZH - 2, TW*0.22, TH*0.18, 0, 0, Math.PI*2);
     ctx.fill();
   }
 
-  // Ceiling lamp
-  px(cx-1, 0, 3, 1, PAL.ceilingWire);
-  px(cx-3, 1, 7, 2, PAL.ceilingLamp);
-  px(cx-1, 3, 3, 1, '#ffe8a0');
-
-  // -- WINDOW (left) --
-  drawWindow(8, 10, 22, 24);
-
-  // -- WINDOW (right) --
-  drawWindow(W-30, 10, 22, 24);
-
-  // -- DOOR --
-  drawDoor(Math.floor(W/2)-8, floor-32);
-
-  // -- FLOOR --
-  for(let y=floor; y<H; y++) {
-    const shade = (y-floor)/(H-floor);
-    const r2 = Math.floor(0x3a - shade*14);
-    const g2 = Math.floor(0x2c - shade*12);
-    const b2 = Math.floor(0x1a - shade*10);
-    ctx.fillStyle = `rgb(${r2},${g2},${b2})`;
-    ctx.fillRect(0, y, W, 1);
+  if (def.id === 'camera') {
+    // Lens
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(s.x - 8, s.y - ZH - TH, 16, 12);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y - ZH - TH + 6, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#00f5ff'; ctx.fill();
+    ctx.beginPath();
+    ctx.arc(s.x, s.y - ZH - TH + 6, 2, 0, Math.PI*2);
+    ctx.fillStyle = '#000020'; ctx.fill();
   }
 
-  // Floor planks (horizontal lines every 6px)
-  ctx.fillStyle = PAL.floorDark;
-  for(let y=floor+6; y<H; y+=6) ctx.fillRect(0, y, W, 1);
-
-  // Skirting board
-  px(0, floor, W, 3, PAL.skirting);
-
-  // -- RUG --
-  drawRug(Math.floor(W/2)-20, floor+4, 40, 10);
-
-  // -- FURNITURE --
-  drawSofa(6, floor-18);
-  drawTV(W-28, floor-24);
-  drawBed(Math.floor(W/2)+10, floor-22);
-  drawFridge(W-12, floor-26);
-  drawTable(Math.floor(W/2)-22, floor-12);
-  drawLamp(W-42, floor-26);
-  drawPlant(4, floor-18);
-  drawTrashCan(Math.floor(W/2)-5, floor-11);
-
-  // Posters on wall
-  drawPoster(W-20, 12, 10, 14, '#3a1a2a', '#e8ff3c', 'EL\nLOCAL');
-  drawPoster(15, 8, 8, 12, '#1a2a3a', '#3cffb4');
-
-  // Wall graffiti
-  drawPixelText('NO PASARAN', W-58, 6, '#4a3060', 1);
-}
-
-function drawWindow(x, y, w, h) {
-  px(x, y, w, h, PAL.windowGlass);
-  // Cross frame
-  px(x, y, w, 1, PAL.windowFrame); px(x, y+h-1, w, 1, PAL.windowFrame);
-  px(x, y, 1, h, PAL.windowFrame); px(x+w-1, y, 1, h, PAL.windowFrame);
-  px(x+Math.floor(w/2), y, 1, h, PAL.windowFrame);
-  px(x, y+Math.floor(h/2), w, 1, PAL.windowFrame);
-  // Light effect
-  px(x+1, y+1, Math.floor(w/2)-1, 3, 'rgba(100,160,220,0.4)');
-  // Sill
-  px(x-1, y+h, w+2, 2, PAL.windowSill);
-}
-
-function drawDoor(x, y) {
-  px(x, y, 16, Math.floor(canvas.height*0.62)-y, PAL.doorFrame);
-  px(x+1, y+1, 14, Math.floor(canvas.height*0.62)-y-1, PAL.doorBody);
-  // Panels
-  px(x+2, y+3, 5, 7, PAL.doorFrame);  px(x+9, y+3, 5, 7, PAL.doorFrame);
-  px(x+2, y+12, 5, 7, PAL.doorFrame); px(x+9, y+12, 5, 7, PAL.doorFrame);
-  px(x+13, y+10, 2, 2, PAL.doorKnob);
-}
-
-function drawSofa(x, y) {
-  // Legs
-  px(x+1, y+14, 2, 4, PAL.sofaLeg); px(x+16, y+14, 2, 4, PAL.sofaLeg);
-  // Body
-  px(x, y+6, 20, 8, PAL.sofaBody);
-  // Back
-  px(x, y, 20, 7, PAL.sofaBack);
-  // Cushions
-  px(x+1, y+7, 8, 6, PAL.sofaCush); px(x+11, y+7, 8, 6, PAL.sofaCush);
-  // Armrests
-  px(x, y+4, 2, 10, PAL.sofaBack); px(x+18, y+4, 2, 10, PAL.sofaBack);
-  // Highlight
-  px(x+1, y+1, 18, 1, '#7a5090');
-}
-
-function drawTV(x, y) {
-  const W = canvas.width;
-  // Stand
-  px(x+4, y+22, 6, 2, PAL.tvStand); px(x+2, y+23, 10, 2, PAL.tvStand);
-  // Body
-  px(x, y, 14, 22, PAL.tvBody);
-  // Screen
-  px(x+1, y+1, 12, 18, PAL.tvScreen);
-  // Screen glow (animated in game loop)
-  if(G && G.chars.some(c=>c.state==='watching')) {
-    px(x+1, y+1, 12, 18, PAL.tvGlow);
-    px(x+2, y+2, 2, 2, '#4080c0');
-  }
-  // Bezel details
-  px(x+6, y+20, 2, 1, '#444');
-  px(x+1, y+19, 1, 1, '#2a6a2a');
-}
-
-function drawBed(x, y) {
-  // Legs
-  px(x+1, y+18, 2, 4, PAL.bedLeg); px(x+19, y+18, 2, 4, PAL.bedLeg);
-  // Frame
-  px(x, y+6, 22, 12, PAL.bedFrame);
-  // Sheet
-  px(x+1, y+7, 20, 10, PAL.bedSheet);
-  // Pillow
-  px(x+2, y+7, 6, 5, PAL.bedPillow);
-  // Headboard
-  px(x, y, 22, 7, PAL.bedFrame);
-  px(x+1, y+1, 20, 5, '#3a2810');
-  // Highlight
-  px(x+2, y+1, 18, 1, '#5a4020');
-}
-
-function drawFridge(x, y) {
-  px(x, y, 10, 26, PAL.fridgeBody);
-  px(x+1, y+1, 8, 14, PAL.fridgeDoor);
-  px(x+1, y+16, 8, 9, PAL.fridgeDoor);
-  px(x+7, y+7, 2, 3, PAL.fridgeHandle);
-  px(x+7, y+19, 2, 3, PAL.fridgeHandle);
-  // Seal line
-  px(x+1, y+15, 8, 1, '#777787');
-  // Highlight
-  px(x+1, y+1, 1, 24, 'rgba(255,255,255,0.15)');
-}
-
-function drawTable(x, y) {
-  px(x+1, y-1, 16, 2, '#7a5a3a');
-  px(x, y, 18, 2, PAL.tableTop);
-  px(x+2, y+2, 2, 10, PAL.tableLeg);
-  px(x+14, y+2, 2, 10, PAL.tableLeg);
-  // Items on table
-  px(x+5, y-2, 3, 2, '#d04020'); // cup
-  px(x+9, y-3, 4, 3, '#888'); // ashtray
-  px(x+9, y-4, 1, 2, '#ddd'); // cigarette
-}
-
-function drawLamp(x, y) {
-  px(x+2, y+18, 1, 8, PAL.lampPost);
-  px(x, y+14, 5, 4, PAL.lampPost);
-  px(x+1, y+12, 3, 2, PAL.lampShade);
-  px(x, y+10, 5, 2, '#b89a40');
-  px(x+1, y+8, 3, 2, PAL.lampShade);
-  // Glow
-  ctx.fillStyle = 'rgba(232,200,80,0.10)';
-  ctx.beginPath(); ctx.arc((x+2.5)*1, (y+9), 8, 0, Math.PI*2); ctx.fill();
-}
-
-function drawPlant(x, y) {
-  px(x+2, y+12, 6, 6, PAL.plantPot);
-  px(x+3, y+10, 4, 3, '#3a2810');
-  px(x+2, y+6, 2, 5, PAL.plantLeaf);
-  px(x+6, y+4, 2, 7, PAL.plantLeaf);
-  px(x+4, y+2, 3, 6, PAL.plantLeafLight);
-  px(x+1, y+8, 2, 3, PAL.plantLeaf);
-  px(x+7, y+7, 2, 4, PAL.plantLeafLight);
-}
-
-function drawRug(x, y, w, h) {
-  px(x, y, w, h, PAL.rugRed);
-  px(x+1, y+1, w-2, h-2, '#7a1818');
-  for(let i=2; i<w-2; i+=4) px(x+i, y+2, 2, h-4, PAL.rugPat);
-  px(x, y, w, 1, '#aa3030'); px(x, y+h-1, w, 1, '#aa3030');
-}
-
-function drawTrashCan(x, y) {
-  px(x, y+2, 8, 9, PAL.trashCan);
-  px(x+1, y+1, 6, 1, '#555');
-  px(x-1, y, 10, 2, '#444');
-  if(G && G.trash > 30) {
-    px(x+1, y, 3, 2, PAL.trashBag);
-    px(x+4, y-1, 3, 3, '#1a3a1a');
-  }
-  if(G && G.trash > 60) {
-    px(x-2, y-2, 3, 4, PAL.trashBag);
-    px(x+6, y-3, 4, 5, '#1a3a1a');
+  if (def.id === 'table') {
+    // Items on table
+    ctx.fillStyle = '#cc3322';
+    ctx.beginPath(); ctx.arc(s.x - 8, s.y - ZH - 3, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#888'; ctx.fillRect(s.x + 2, s.y - ZH - 4, 6, 4);
   }
 }
 
-function drawPoster(x, y, w, h, bg, accent, text='') {
-  px(x-1, y-1, w+2, h+2, '#2a1a1a');
-  px(x, y, w, h, bg);
-  px(x, y, w, 1, accent); px(x, y+h-1, w, 1, accent);
-  px(x, y, 1, h, accent); px(x+w-1, y, 1, h, accent);
-}
-
-// ══════════════════════════════════════════════════════
-//  CHARACTER SPRITES — pixel art
-// ══════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+//  CHARACTER SPRITES — isometric
+// ═══════════════════════════════════════════════════════
 const CHAR_COLORS = [
-  { skin:'#c88060', hair:'#3a1a00', shirt:'#3c9fff', pants:'#2a3a5a', shoe:'#1a1a1a' }, // Yo
-  { skin:'#d09070', hair:'#5a3010', shirt:'#ff3c3c', pants:'#1a1a3a', shoe:'#2a1a00' }, // Felipe
-  { skin:'#e0b090', hair:'#1a1a1a', shirt:'#3cffb4', pants:'#2a4a3a', shoe:'#1a1a1a' }, // Bea
-  { skin:'#c07050', hair:'#3a2010', shirt:'#ff9f3c', pants:'#3a2a1a', shoe:'#1a1a1a' }, // Kike — cap
-  { skin:'#d0a080', hair:'#1a0a30', shirt:'#c03cff', pants:'#1a0a30', shoe:'#1a1a1a' }, // Ana — sunglasses
+  { skin:'#f5cba7', hair:'#2c1810', shirt:'#ff2d78', pants:'#1a1a3a', shoe:'#1a1010' },
+  { skin:'#d4a574', hair:'#4a2810', shirt:'#00f5ff', pants:'#2a1a40', shoe:'#100810' },
+  { skin:'#e8c49a', hair:'#1a1a1a', shirt:'#aaff00', pants:'#1a2a1a', shoe:'#101810' },
+  { skin:'#c8935a', hair:'#3a1808', shirt:'#ffd600', pants:'#2a2010', shoe:'#181008' },
+  { skin:'#f0d4b0', hair:'#0a0a18', shirt:'#bf5fff', pants:'#180a28', shoe:'#0a0818' },
 ];
 
-const ANIM_FRAMES = 4; // walk cycle frames
+const NPC_COLORS = [
+  { skin:'#dca070', hair:'#1a0a00', shirt:'#ff6b00', pants:'#1a1818', shoe:'#0a0808' },
+  { skin:'#e8b890', hair:'#3a3010', shirt:'#ff2d78', pants:'#0a0a1a', shoe:'#080808' },
+  { skin:'#c07850', hair:'#2a1800', shirt:'#00f5ff', pants:'#102030', shoe:'#081018' },
+];
 
-function drawCharacter(c, ci, frame) {
-  if(!c.visible) return;
-  const col = CHAR_COLORS[ci];
-  const x = Math.floor(c.px);
-  const y = Math.floor(c.py);
-  const flip = c.dir < 0;
+function drawCharSprite(gx, gy, colorSet, state, facing, selected, bubbleText) {
+  const s = iso(gx, gy, 0);
+  const x = s.x, y = s.y;
+  const c = colorSet;
+  const isLeft = facing === 'left';
+  const flip = isLeft;
 
   ctx.save();
-  if(flip) { ctx.scale(-1,1); ctx.translate(-canvas.width*2, 0); }
-  const rx = flip ? canvas.width*2 - x - 6 : x;
+  if (flip) { ctx.scale(-1,1); ctx.translate(-CW*2, 0); }
+  const rx = flip ? CW*2 - x : x;
 
-  const isWalking = c.state === 'walking' && Math.abs(c.vx) > 0.1;
-  const isSleeping = c.state === 'sleeping';
-  const isParty = c.state === 'partying';
-  const isWorking = c.state === 'working';
-  const isKO = c.collapsed;
+  const walk = state === 'walking';
+  const sleep = state === 'sleeping';
+  const party = state === 'partying';
+  const work  = state === 'working';
+  const ko    = state === 'ko';
+  const t     = Date.now() / 180;
+  const legA  = walk ? Math.sin(t) * 4 : 0;
+  const armA  = walk ? Math.sin(t + Math.PI) * 3 : 0;
+  const bob   = party ? Math.sin(t*2) * 2 : 0;
 
-  if(isKO) {
-    // Collapsed: lying on floor, rotated effect via horizontal sprite
-    px(rx, y+6, 10, 3, col.pants);
-    px(rx+2, y+4, 5, 4, col.shirt);
-    px(rx+7, y+4, 4, 4, col.skin);
-    px(rx+7, y+3, 4, 3, col.hair);
-    px(rx, y+8, 3, 2, col.shoe); px(rx+7, y+8, 3, 2, col.shoe);
-    // ZZZ
-    drawPixelText('ZZ', rx+8, y, '#aaaaff', 1);
+  if (ko) {
+    // Lying down
+    ctx.fillStyle = c.pants;  ctx.fillRect(rx-6, y+2, 13, 4);
+    ctx.fillStyle = c.shirt;  ctx.fillRect(rx-3, y-1, 8, 4);
+    ctx.fillStyle = c.skin;   ctx.fillRect(rx+5, y-3, 6, 5);
+    ctx.fillStyle = c.hair;   ctx.fillRect(rx+5, y-4, 6, 3);
+    ctx.fillStyle = c.shoe;   ctx.fillRect(rx-7, y+4, 4, 2);
+    ctx.fillStyle = c.shoe;   ctx.fillRect(rx-1, y+4, 4, 2);
+    // ZZ
+    ctx.fillStyle = '#aaaaff'; ctx.font='bold 7px monospace';
+    ctx.fillText('z z', rx+9, y-5);
     ctx.restore(); return;
   }
 
-  if(isSleeping) {
-    // Sleeping on bed: sitting/slumped
-    drawStandingChar(rx, y, col, ci, 0, true);
-    drawPixelText('Z', rx+6, y-3, '#aaaaff', 1);
-    ctx.restore(); return;
+  // SHADOW
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(rx, y+8+bob, 7, 3, 0, 0, Math.PI*2); ctx.fill();
+
+  // SHOES
+  ctx.fillStyle = c.shoe;
+  ctx.fillRect(rx-5+legA, y+6+bob, 5, 3);
+  ctx.fillRect(rx+1-legA, y+6+bob, 5, 3);
+
+  // LEGS
+  ctx.fillStyle = c.pants;
+  ctx.fillRect(rx-4+legA, y-1+bob, 4, 8);
+  ctx.fillRect(rx+1-legA, y-1+bob, 4, 8);
+
+  // BODY
+  ctx.fillStyle = c.shirt;
+  ctx.fillRect(rx-5, y-9+bob, 11, 9);
+
+  // ARMS
+  ctx.fillStyle = c.skin;
+  if (party) {
+    ctx.fillRect(rx-8, y-13+bob+armA, 3, 7);
+    ctx.fillRect(rx+6, y-13+bob-armA, 3, 7);
+  } else if (sleep) {
+    ctx.fillRect(rx-6, y-6+bob, 13, 3);
+  } else {
+    ctx.fillRect(rx-8, y-8+bob+armA, 3, 7);
+    ctx.fillRect(rx+6, y-8+bob-armA, 3, 7);
   }
 
-  if(isParty) {
-    // Party: arms up
-    drawPartyChar(rx, y, col, ci, frame);
-    ctx.restore(); return;
+  // HEAD
+  ctx.fillStyle = c.skin;
+  ctx.fillRect(rx-4, y-17+bob, 9, 9);
+
+  // HAIR
+  ctx.fillStyle = c.hair;
+  ctx.fillRect(rx-4, y-17+bob, 9, 3);
+  ctx.fillRect(rx-5, y-16+bob, 2, 5);
+  ctx.fillRect(rx+4, y-16+bob, 2, 5);
+
+  // FACE
+  if (!sleep) {
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(rx-2, y-12+bob, 2, 2);
+    ctx.fillRect(rx+2, y-12+bob, 2, 2);
+    if (party || work) {
+      ctx.fillStyle = '#cc4420';
+      ctx.fillRect(rx-1, y-9+bob, 3, 1);
+    }
+  } else {
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(rx-2, y-12+bob, 3, 1);
+    ctx.fillRect(rx+2, y-12+bob, 3, 1);
   }
 
-  // Walking or idle
-  const legOff = isWalking ? (frame%2===0 ? 1 : -1) : 0;
-  drawStandingChar(rx, y, col, ci, legOff, false);
-
-  // Accessories
-  if(ci===3) { // Kike — cap
-    px(rx+1, y-1, 6, 1, '#ff6030');
-    px(rx, y-1, 1, 1, '#ff6030');
+  // ACCESSORIES
+  if (colorSet === CHAR_COLORS[3]) { // cap
+    ctx.fillStyle = '#ff6b00';
+    ctx.fillRect(rx-5, y-18+bob, 10, 2);
+    ctx.fillRect(rx-6, y-17+bob, 2, 2);
   }
-  if(ci===4) { // Ana — sunglasses
-    px(rx+1, y+3, 2, 1, '#1a1a1a');
-    px(rx+4, y+3, 2, 1, '#1a1a1a');
-    px(rx+3, y+3, 1, 1, '#555');
-  }
-
-  // Bubble
-  if(c.bubble) {
-    const bx = rx + 8, by = y - 8;
-    px(bx, by, 12, 7, '#1a1a1a');
-    px(bx+1, by+1, 10, 5, '#2a2a2a');
-    drawPixelText(c.bubble.slice(0,3), bx+2, by+2, '#e8ff3c', 1);
-    px(bx+2, by+7, 2, 2, '#1a1a1a');
-    px(bx+3, by+9, 1, 1, '#1a1a1a');
+  if (colorSet === CHAR_COLORS[4]) { // shades
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(rx-3, y-13+bob, 3, 2);
+    ctx.fillRect(rx+1, y-13+bob, 3, 2);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(rx,   y-13+bob, 1, 2);
   }
 
-  // Selected highlight
-  if(ci === G.selected) {
-    ctx.fillStyle = 'rgba(232,255,60,0.18)';
-    ctx.fillRect(rx-1, y-1, 8, 15);
+  // SELECTED GLOW
+  if (selected) {
+    ctx.fillStyle = 'rgba(255,45,120,0.12)';
+    ctx.beginPath();
+    ctx.ellipse(rx, y+2+bob, 10, 4, 0, 0, Math.PI*2);
+    ctx.fill();
+    // Selection ring
+    ctx.strokeStyle = '#ff2d78';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(rx, y+8+bob, 8, 3.5, 0, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // BUBBLE
+  if (bubbleText) {
+    const bx = rx + 10, by = y - 20 + bob;
+    ctx.fillStyle = 'rgba(17,17,30,0.95)';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, 28, 13, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#ff2d78'; ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 6px monospace';
+    ctx.fillText(bubbleText.slice(0,6), bx+3, by+9);
+    // Tail
+    ctx.fillStyle = 'rgba(17,17,30,0.95)';
+    ctx.beginPath();
+    ctx.moveTo(bx, by+13);
+    ctx.lineTo(bx-4, by+17);
+    ctx.lineTo(bx+4, by+13);
+    ctx.closePath(); ctx.fill();
   }
 
   ctx.restore();
 }
 
-function drawStandingChar(x, y, col, ci, legOff, asleep) {
-  // Legs
-  px(x+1, y+10, 2, 4, col.pants);
-  px(x+4, y+10, 2, 4+legOff, col.pants);
-  // Shoes
-  px(x+1, y+13, 3, 1, col.shoe);
-  px(x+4, y+13+legOff, 3, 1, col.shoe);
-  // Body
-  px(x+1, y+5, 6, 6, col.shirt);
-  // Arms
-  if(!asleep) {
-    px(x, y+5, 1, 5, col.skin);
-    px(x+7, y+5, 1, 5, col.skin);
-  } else {
-    px(x+1, y+8, 6, 2, col.skin);
-  }
-  // Head
-  px(x+1, y, 6, 5, col.skin);
-  // Hair
-  px(x+1, y, 6, 2, col.hair);
-  px(x, y+1, 1, 3, col.hair);
-  px(x+7, y+1, 1, 3, col.hair);
-  // Eyes
-  if(!asleep) {
-    px(x+2, y+3, 1, 1, '#1a1a1a');
-    px(x+5, y+3, 1, 1, '#1a1a1a');
-  } else {
-    px(x+2, y+3, 2, 1, '#1a1a1a');
-    px(x+5, y+3, 2, 1, '#1a1a1a');
-  }
-  // Mouth
-  if(!asleep) { px(x+3, y+4, 2, 1, '#a05030'); }
-}
-
-function drawPartyChar(x, y, col, ci, frame) {
-  // Arms up — different every frame
-  const aOff = frame%2===0 ? -2 : -1;
-  px(x+1, y+10, 2, 4, col.pants);
-  px(x+4, y+10, 2, 4, col.pants);
-  px(x+1, y+13, 3, 1, col.shoe);
-  px(x+4, y+13, 3, 1, col.shoe);
-  px(x+1, y+5, 6, 5, col.shirt);
-  // Arms raised
-  px(x-1, y+3+aOff, 2, 4, col.skin);
-  px(x+7, y+3+aOff, 2, 4, col.skin);
-  // Head
-  px(x+1, y, 6, 5, col.skin);
-  px(x+1, y, 6, 2, col.hair);
-  px(x+2, y+3, 1, 1, '#1a1a1a');
-  px(x+5, y+3, 1, 1, '#1a1a1a');
-  px(x+3, y+4, 2, 1, '#e05030'); // big smile
-  // Confetti
-  const confetti = ['#ff3c3c','#e8ff3c','#3cffb4','#c03cff'];
-  for(let i=0; i<4; i++) {
-    const cx2 = x + Math.sin(frame*0.8+i*2)*6;
-    const cy2 = y - 4 - ((frame*2+i*3)%8);
-    px(Math.floor(cx2), Math.floor(cy2), 1, 1, confetti[i]);
-  }
-}
-
-// ══════════════════════════════════════════════════════
-//  TRASH OVERLAY (floor level)
-// ══════════════════════════════════════════════════════
-function drawTrashOverlay() {
-  if(!G) return;
-  const W = canvas.width, H = canvas.height;
-  const floor = Math.floor(H * 0.62);
-  const trashCount = Math.floor(G.trash / 8);
-
-  // Deterministic positions based on index
-  const positions = [
-    [12,2], [28,3], [44,1], [60,4], [70,2], [15,5], [35,1], [50,3], [65,5], [8,4],
-    [22,2], [38,5], [55,1], [72,3], [18,4],
-  ];
-  const trashSprites = [
-    c => { px(c[0],c[1],4,3,PAL.trashBag); px(c[0]+1,c[1]-1,2,1,'#1a3a1a'); },
-    c => { px(c[0],c[1],3,4,'#3a5a3a'); px(c[0]+1,c[1]-1,1,1,'#2a4a2a'); },
-    c => { px(c[0],c[1]+1,4,2,'#8a3020'); px(c[0]+1,c[1],2,1,'#6a2010'); }, // can
-    c => { px(c[0],c[1],5,2,'#4a3a2a'); px(c[0]+1,c[1]-1,3,1,'#3a2a1a'); }, // box
-    c => { px(c[0],c[1],2,4,'#5a3a7a'); px(c[0]+1,c[1]-1,1,1,'#3a1a5a'); }, // bottle
-  ];
-
-  for(let i=0; i<Math.min(trashCount, positions.length); i++) {
-    const [ox, oy] = positions[i];
-    const tx = Math.floor(ox * W / 80);
-    const ty = floor + 3 + oy;
-    const sprite = trashSprites[i % trashSprites.length];
-    sprite([tx, ty]);
-  }
-}
-
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  GAME STATE
-// ══════════════════════════════════════════════════════
-const CHAR_DEFS = [
-  { name:'Yo',     emoji:'🧑‍🎤' },
-  { name:'Felipe', emoji:'🧔' },
-  { name:'Bea',    emoji:'👩‍🦱' },
-  { name:'Kike',   emoji:'🧢' },
-  { name:'Ana',    emoji:'🕶️' },
+// ═══════════════════════════════════════════════════════
+const FRIEND_DEFS = [
+  { id:'rebe',  name:'Rebe',    emoji:'👩‍🦱', role:'La artista',     traits:['+creatividad','−paga alquiler'], good:'art_boost', bad:'no_rent' },
+  { id:'paco',  name:'Paco',    emoji:'🧔',   role:'El músico',      traits:['+fiesta','+seguidores'],         good:'music_boost', bad:'ruido' },
+  { id:'sonia', name:'Sonia',   emoji:'👩‍💼', role:'La lista',       traits:['+organización','−muy seria'],    good:'org_boost', bad:'drama' },
+  { id:'manu',  name:'Manu',    emoji:'🧢',   role:'El vago',        traits:['−energía','−hace nada'],         good:'nada', bad:'nothing' },
+  { id:'leo',   name:'Leo',     emoji:'🕶️',  role:'El dealer amigo',traits:['+materiales','−te roba'],        good:'drug_boost', bad:'steal' },
+  { id:'clara', name:'Clara',   emoji:'👸',   role:'La influencer',  traits:['+seguidores','−drama redes'],    good:'follow_boost', bad:'drama' },
+  { id:'chema', name:'Chema',   emoji:'🧑‍🔧', role:'El manitas',    traits:['+repara','−caos a veces'],       good:'repair', bad:'chaos' },
+  { id:'berta', name:'Berta',   emoji:'🎨',   role:'La tatuadora',   traits:['+clientes tatoo','−ruido'],      good:'tattoo_clients', bad:'ruido' },
+  { id:'kiko',  name:'Kiko',    emoji:'🎮',   role:'El gamer',       traits:['+stream','−electricidad'],       good:'stream_boost', bad:'electric' },
+  { id:'tere',  name:'Tere',    emoji:'👩‍🍳', role:'La cocinera',   traits:['+comida','−gasta gas'],          good:'food_boost', bad:'gas' },
+  { id:'nacho', name:'Nacho',   emoji:'🛹',   role:'El skater',      traits:['+rep. calle','−rompe cosas'],    good:'rep_boost', bad:'break' },
+  { id:'patri', name:'Patri',   emoji:'💃',   role:'La bailaora',    traits:['+fiesta x2','−vecinos'],         good:'party_boost', bad:'vecinos' },
+  { id:'rui',   name:'Rui',     emoji:'🎵',   role:'El productor',   traits:['+beats','−no duerme'],           good:'music_prod', bad:'no_sleep' },
+  { id:'vane',  name:'Vanesa',  emoji:'📸',   role:'La fotógrafa',   traits:['+contenido','−te fotografia mal'],good:'photo_boost', bad:'bad_photo' },
+  { id:'ivan',  name:'Iván',    emoji:'💪',   role:'El gorrilla',    traits:['+seguridad','−come todo'],       good:'security', bad:'food_drain' },
+];
+
+const WORK_ACTIONS = [
+  { id:'cantar',    name:'Cantar / directo', ico:'🎤', req:'mic',         time:30, money:[20,80],  seg:[50,200],  energy:20, desc:'Necesitas micro. Seguidores garantizados.' },
+  { id:'tatuar',    name:'Tatuar cliente',   ico:'💉', req:'tattoostool', time:45, money:[60,150], seg:[10,40],   energy:30, desc:'Clientes del barrio. Buen dinero si no la cagas.' },
+  { id:'fotos',     name:'Sesión de fotos',  ico:'📷', req:'camera',      time:20, money:[30,90],  seg:[30,100],  energy:15, desc:'Fotos para Instagram. Necesitas cámara.' },
+  { id:'stream',    name:'Streamear',        ico:'🎮', req:'playstation',  time:60, money:[10,50],  seg:[80,300],  energy:10, desc:'Muchas horas pero muchos seguidores.' },
+  { id:'nada',      name:'No hacer nada',    ico:'🛌', req:null,           time:10, money:[0,0],    seg:[0,0],     energy:-20, desc:'Válido. A veces lo que más necesitas.' },
+  { id:'limpiar',   name:'Limpiar la nave',  ico:'🧹', req:null,           time:15, money:[0,0],    seg:[0,0],     energy:15, desc:'Reduce la basura. Previene enfermedades y multas.' },
+  { id:'chatear',   name:'Chatear en redes', ico:'📱', req:null,           time:10, money:[0,10],   seg:[5,30],    energy:5,  desc:'Sin esfuerzo. Poco a poco.' },
+  { id:'rebuscar',  name:'Rebuscar cupones', ico:'🧾', req:null,           time:20, money:[5,25],   seg:[0,0],     energy:8,  desc:'Descuentos, subastas online, lo que sea.' },
+];
+
+const EVENTS = [
+  { id:'casero', chance:.10, ico:'👴', tit:'LLEGA EL PADRE DE FELIPE',
+    dsc:'Viene a cobrar 400€ de alquiler. No le gusta el estado de la nave.',
+    choices:[
+      { lbl:'Pagar 400€', cls:'p', fn:g=>{ if(g.money>=400){g.money-=400;notify('Casero','Alquiler pagado. Hasta el mes que viene.','g');}else{triggerGameOver('No tenías los 400€ del alquiler. Os han echado de la nave. 👴')}}},
+      { lbl:'Negociar',   cls:'c', fn:g=>{ g.money-=200; g.rep=Math.max(0,g.rep-15); notify('Casero','200€ de adelanto. El resto la semana que viene o fuera.'); }},
+    ]},
+  { id:'multa', chance:.09, ico:'🚔', tit:'MULTA DEL AYUNTAMIENTO',
+    dsc:'Quejas por ruido. Capa (el alcalde) firma una multa de 200€.',
+    choices:[
+      { lbl:'Pagar 200€', cls:'p', fn:g=>{ g.money-=200; notify('Sistema','Multa pagada. Por ahora.','y'); }},
+      { lbl:'Ignorar',    cls:'s', fn:g=>{ g.chaos+=20; notify('Sistema','La multa se acumula. Más caos.','r'); }},
+    ]},
+  { id:'ratas', chance:.08, ico:'🐀', tit:'LOS RATAS EN LA PUERTA',
+    dsc:'La crew de la calle pide entrar. Si tienen buena relación con vosotros pueden echar una mano.',
+    choices:[
+      { lbl:'Dejarles pasar', cls:'g', fn:g=>{ if(g.rep>=40){g.trash=Math.max(0,g.trash-30);notify('Los Ratas','Limpiamos un poco. Os debemos una 🐀','g');}else{notify('Los Ratas','Mal ambiente. Pasamos.','r');} }},
+      { lbl:'Echarles',       cls:'s', fn:g=>{ g.rep=Math.max(0,g.rep-10); }},
+    ]},
+  { id:'viral', chance:.06, ico:'🔥', tit:'¡PUBLICACIÓN VIRAL!',
+    dsc:'Algo que publicaste se ha viralizado en redes. Mejorada entera lo ha visto.',
+    choices:[
+      { lbl:'Aprovechar la ola', cls:'c', fn:g=>{ g.seg+=500; g.rep+=15; notify('Redes','¡+500 seguidores de golpe! 🔥','g'); }},
+    ]},
+  { id:'averia', chance:.09, ico:'🔧', tit:'AVERÍA EN LA NAVE',
+    dsc:'El enchufe principal ha petado. Sin luz hasta que alguien lo arregle.',
+    choices:[
+      { lbl:'Electricista (150€)', cls:'p', fn:g=>{ g.money-=150; notify('Sistema','Electricidad restaurada.','g'); }},
+      { lbl:'Chema lo arregla',    cls:'c', fn:g=>{ if(g.friends.some(f=>f.id==='chema')){notify('Chema','Lo tengo arreglado. De nada 🔧','g');}else{g.chaos+=15;notify('Sistema','Sin Chema aquí no hay quien lo arregle.','r');} }},
+    ]},
+  { id:'collab', chance:.07, ico:'🤝', tit:'PROPUESTA DE COLLAB',
+    dsc:'Una marca local quiere hacer un evento en la nave. Pagan 300€ y traen visibilidad.',
+    choices:[
+      { lbl:'Aceptar',  cls:'g', fn:g=>{ g.money+=300; g.seg+=200; g.trash+=25; notify('Collab','300€ y buena prensa. Pero la nave quedó hecha un desastre.','y'); }},
+      { lbl:'Rechazar', cls:'s', fn:g=>{ notify('Sistema','Lo rechazaste. Quizás era demasiado.'); }},
+    ]},
+  { id:'inspeccion', chance:.06, ico:'👷', tit:'INSPECCIÓN MUNICIPAL',
+    dsc:'Un inspector aparece por la nave. Si hay mucha basura o caos, multa segura.',
+    choices:[
+      { lbl:'Dejarle pasar', cls:'p', fn:g=>{ if(g.trash<40&&g.chaos<30){notify('Inspector','Todo en orden. Buen trabajo.','g');}else{g.money-=250;notify('Inspector','Condiciones inadecuadas. 250€ de multa.','r');} }},
+      { lbl:'No abrir',      cls:'d', fn:g=>{ g.rep=Math.max(0,g.rep-20); notify('Sistema','El inspector se fue. Pero no olvidará.','r'); }},
+    ]},
 ];
 
 let G = null;
-let animFrame = 0;
-let tickTimer = null;
-let lastTime = 0;
+let animId = null;
+let lastT = 0;
+let secAcc = 0;
+const DAY_SECS = 90;
 
 function initGame() {
-  resizeCanvas();
-  const W = canvas.width, H = canvas.height;
-  const floor = Math.floor(H * 0.62);
-
   G = {
-    day: 1, time: 0, money: 400, trash: 10, chaos: 0, reputation: 50,
-    selected: 0, running: true, gameover: false,
-    chars: CHAR_DEFS.map((d, i) => ({
-      ...d,
-      hunger:  65 + Math.random()*25,
-      sleep:   60 + Math.random()*30,
-      boredom: 20 + Math.random()*30,
-      happy:   60 + Math.random()*25,
-      drug:    0,
-      collapsed: false,
+    day: 1, time: 0,
+    money: 400, seg: 0, rep: 50,
+    hp: 100, energy: 100,
+    hunger: 80, sleep: 80,
+    trash: 5, chaos: 0,
+    xp: 0, level: 1,
+    // Skills
+    skills: { cantar:0, tatuar:0, fotos:0, stream:0 },
+    // Placed furniture
+    placed: [],
+    // Friends in the local
+    friends: [],
+    // Player char
+    player: {
+      gx: 4, gy: 4,
+      tx: 4, ty: 4,
       state: 'idle',
-      // Pixel position in scene
-      px: 20 + i * Math.floor((W-40)/5),
-      py: floor - 14,
-      tx: 20 + i * Math.floor((W-40)/5), // target x
-      vx: 0,
-      dir: 1,
-      visible: true,
-      bubble: null,
-      bubbleTimer: 0,
-    })),
+      facing: 'right',
+      bubble: null, bubbleT: 0,
+    },
+    running: true, gameover: false,
   };
 
-  document.getElementById('overlay').classList.remove('on');
-  document.querySelector('#overlay .ev-box').style.borderColor = 'var(--accent)';
-  document.querySelector('.ev-title').style.color = 'var(--accent)';
-  startLoop();
+  // Close all panels
+  ['shop','fpanel','stpanel','evlay'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('amenu').classList.remove('on');
+
+  renderShopTabs();
+  renderFriendsPanel();
+  updateHUD();
+
+  if (animId) cancelAnimationFrame(animId);
+  lastT = performance.now();
+  animId = requestAnimationFrame(loop);
+
+  notify('Sistema', '🏚️ Bienvenido a la Nave 7, Polígono de Mejorada. Toca la nave para moverte. Pulsa "Currar" para ganar pasta.', 'b');
 }
 
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 //  MAIN LOOP
-// ══════════════════════════════════════════════════════
-let rafId = null;
-let secondAcc = 0;
-const DAY_SECONDS = 60;
-
-function startLoop() {
-  if(rafId) cancelAnimationFrame(rafId);
-  lastTime = performance.now();
-  rafId = requestAnimationFrame(loop);
-}
-
+// ═══════════════════════════════════════════════════════
 function loop(now) {
-  const dt = Math.min((now - lastTime) / 1000, 0.1);
-  lastTime = now;
-  animFrame = Math.floor(now / 200) % ANIM_FRAMES;
+  const dt = Math.min((now - lastT)/1000, 0.12);
+  lastT = now;
 
-  if(G.running && !G.gameover) {
-    update(dt);
-  }
-
+  if (G.running && !G.gameover) update(dt);
   render();
-  rafId = requestAnimationFrame(loop);
+  animId = requestAnimationFrame(loop);
 }
 
 function update(dt) {
-  secondAcc += dt;
+  secAcc += dt;
+  G.time += dt / DAY_SECS;
+  document.getElementById('dayfill').style.width = (Math.min(G.time,1)*100)+'%';
+  document.getElementById('hday').textContent = G.day;
 
-  // Progress time
-  G.time += dt / DAY_SECONDS;
-  document.getElementById('timebar').style.width = (G.time * 100) + '%';
+  // Move player toward target
+  const p = G.player;
+  const dx = p.tx - p.gx, dy = p.ty - p.gy;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist > 0.08) {
+    const spd = 2.5;
+    p.gx += (dx/dist) * spd * dt;
+    p.gy += (dy/dist) * spd * dt;
+    p.state = 'walking';
+    p.facing = dx < 0 ? 'left' : 'right';
+  } else {
+    p.gx = p.tx; p.gy = p.ty;
+    if (p.state === 'walking') p.state = 'idle';
+  }
 
-  // Char AI movement
-  G.chars.forEach((c, i) => {
-    if(c.collapsed) return;
-    // Random wander
-    if(Math.random() < 0.005 && c.state === 'idle') {
-      const W = canvas.width;
-      c.tx = 10 + Math.random() * (W - 20);
-    }
-    // Move toward target
-    const dx = c.tx - c.px;
-    if(Math.abs(dx) > 2) {
-      c.vx = Math.sign(dx) * 15;
-      c.dir = Math.sign(dx);
-      c.state = 'walking';
-    } else {
-      c.vx = 0;
-      if(c.state === 'walking') c.state = 'idle';
-    }
-    c.px += c.vx * dt;
-    c.px = Math.max(4, Math.min(canvas.width - 12, c.px));
+  // Bubble timer
+  if (p.bubbleT > 0) { p.bubbleT -= dt; if (p.bubbleT <= 0) p.bubble = null; }
 
-    // Bubble timer
-    if(c.bubbleTimer > 0) { c.bubbleTimer -= dt; if(c.bubbleTimer <= 0) c.bubble = null; }
-  });
+  // Stat decay per second
+  if (secAcc >= 1) {
+    secAcc -= 1;
+    G.hunger  = Math.max(0, G.hunger  - 0.8);
+    G.sleep   = Math.max(0, G.sleep   - 0.6);
+    G.energy  = Math.max(0, G.energy  - 0.4);
+    G.trash   = Math.min(100, G.trash + 0.4);
+    G.chaos   = Math.max(0, G.chaos   - 0.2);
 
-  // Stat decay (every real second)
-  if(secondAcc >= 1) {
-    secondAcc -= 1;
-    G.chars.forEach(c => {
-      if(c.collapsed) return;
-      if(c.state !== 'sleeping') {
-        c.hunger  = Math.max(0, c.hunger  - 1.2);
-        c.sleep   = Math.max(0, c.sleep   - 0.8);
-        c.boredom = Math.max(0, c.boredom - 0.5);
-        c.happy   = Math.max(0, c.happy   - 0.3);
-      } else {
-        c.sleep  = Math.min(100, c.sleep  + 3);
-        c.hunger = Math.max(0,   c.hunger - 0.4);
-        c.boredom= Math.max(0,   c.boredom- 0.3);
-      }
-      c.drug = Math.max(0, c.drug - 0.5);
-      if(c.hunger < 20) c.happy = Math.max(0, c.happy - 0.5);
-      if(c.sleep  < 20) c.happy = Math.max(0, c.happy - 0.5);
-      if(!c.collapsed && (c.hunger <= 0 || c.sleep <= 0)) {
-        c.collapsed = true; c.state = 'ko';
-        showNotif(c.name, `${c.name} ha colapsado 💀`, 'danger');
-      }
-    });
-    G.trash = Math.min(100, G.trash + 0.3);
+    // Furniture bonuses
+    if (G.placed.some(p=>p.id==='plant'))     G.trash = Math.max(0, G.trash-0.3);
+    if (G.placed.some(p=>p.id==='trash_bin')) G.trash = Math.max(0, G.trash-0.5);
+    if (G.placed.some(p=>p.id==='fridge'))    G.hunger = Math.min(100, G.hunger+0.4);
+    if (G.placed.some(p=>p.id==='lamp'))      G.rep = Math.min(100, G.rep+0.01);
+
+    // HP affected by stats
+    if (G.hunger < 15) G.hp = Math.max(0, G.hp-1);
+    if (G.sleep  < 15) G.hp = Math.max(0, G.hp-0.5);
+    if (G.trash  > 80) G.hp = Math.max(0, G.hp-0.5);
+
+    updateHUD();
   }
 
   // Day end
-  if(G.time >= 1) {
-    G.time = 0;
-    endDay();
-  }
+  if (G.time >= 1) { G.time = 0; endDay(); }
 
-  // Day/night visual
-  const t = G.time;
-  const isNight = t > 0.75 || t < 0.15;
-  document.getElementById('daynight').style.background =
-    isNight ? 'rgba(0,0,30,0.35)' : 'rgba(255,200,100,0.04)';
-
-  renderHUD();
-  renderStatPanel();
-  renderCharTabs();
-}
-
-function render() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawRoom();
-  drawTrashOverlay();
-  G.chars.forEach((c, i) => drawCharacter(c, i, animFrame));
+  // HP zero = game over
+  if (G.hp <= 0) triggerGameOver('Tu salud llegó a cero. La vida en la nave te pudo. 💀');
 }
 
 function endDay() {
   G.day++;
-  G.money -= 25; // daily expenses
-  G.trash = Math.min(100, G.trash + 5);
+  G.money -= 15; // daily costs (luz, agua)
+  G.trash  = Math.min(100, G.trash + 4);
 
-  if(G.day > 30) { triggerWin(); return; }
-  if(G.day === 30 && G.money < 800) {
-    triggerGameOver(`Sin los €800 del alquiler. El padre de Felipe os da 24h. 👴`); return;
+  // Friend effects
+  G.friends.forEach(f => {
+    const def = FRIEND_DEFS.find(d=>d.id===f.id);
+    if (!def) return;
+    if (Math.random() < 0.15) { // bad event chance
+      if (def.bad === 'steal')    { G.money = Math.max(0, G.money-30); notify(def.name,'Te ha birlado 30€ de la caja. Classic Leo. 😒','r'); }
+      if (def.bad === 'ruido')    { G.chaos += 10; notify(def.name,'Ha armado un ruido de locos anoche.','r'); }
+      if (def.bad === 'no_rent')  { notify(def.name,'Rebe dice que este mes no puede pagar. Obvio.','r'); }
+      if (def.bad === 'food_drain'){ G.hunger = Math.max(0, G.hunger-15); notify(def.name,'Iván se ha comido todo lo de la nevera.','r'); }
+    } else {
+      if (def.good === 'follow_boost') { G.seg += 30; }
+      if (def.good === 'food_boost')   { G.hunger = Math.min(100, G.hunger+20); }
+      if (def.good === 'music_boost')  { G.seg += 20; }
+      if (def.good === 'repair')       { G.chaos = Math.max(0, G.chaos-10); }
+    }
+  });
+
+  // Alquiler mensual día 30
+  if (G.day % 30 === 0) {
+    triggerEvent({
+      ico:'👴', tit:'FIN DE MES — ALQUILER',
+      dsc:`Han pasado 30 días. El casero quiere 400€. Tienes ${G.money}€ en caja.`,
+      evbox_cls:'',
+      choices:[
+        { lbl:'Pagar 400€', cls:'p', fn:g=>{ if(g.money>=400){g.money-=400;notify('Casero','Pagado. Seguid así.','g');}else triggerGameOver('Sin dinero para el alquiler. Desahucio. 👴'); }},
+      ]
+    });
+    return;
   }
-  if(G.day === 30) {
-    G.money -= 800;
-    showNotif('Casero', `Alquiler cobrado. Quedan €${G.money} 👴`, 'good');
+
+  // Level up check
+  const xpNeeded = G.level * 200;
+  if (G.xp >= xpNeeded) { G.level++; G.xp -= xpNeeded; notify('Sistema',`🆙 NIVEL ${G.level}! Nuevas oportunidades desbloqueadas.`,'g'); }
+
+  // Random event
+  for (const ev of EVENTS) {
+    if (Math.random() < ev.chance) { triggerEvent(ev); return; }
   }
 
-  const collapsed = G.chars.filter(c=>c.collapsed).length;
-  if(collapsed >= 3) { triggerGameOver('Tres personas en el suelo. Nadie cuida el local. 💀'); return; }
-
-  document.getElementById('hday').textContent = G.day;
-  maybeTriggerEvent();
-  showNotif('', `DÍA ${G.day} — Basura: ${Math.round(G.trash)}% 🗑️`);
+  notify('', `☀️ Día ${G.day} — Tienes ${G.money}€ y ${Math.round(G.seg)} seguidores`);
+  updateHUD();
 }
 
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  ctx.clearRect(0, 0, CW, CH);
+
+  // BG gradient
+  const grad = ctx.createLinearGradient(0,0,0,CH);
+  grad.addColorStop(0,'#0d0d1a');
+  grad.addColorStop(1,'#0a0a12');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,CW,CH);
+
+  drawRoom();
+
+  // Sort render: furniture + player by gy+gx (painter's algo)
+  const renderables = [];
+
+  G.placed.forEach(item => {
+    const def = SHOP_ITEMS.find(d=>d.id===item.id);
+    if (def) renderables.push({ sortKey: item.gy + item.gx + def.h + def.w, type:'furniture', item, def });
+  });
+
+  renderables.push({ sortKey: G.player.gy + G.player.gx, type:'player' });
+
+  G.friends.forEach((f,i) => {
+    renderables.push({ sortKey: f.gy + f.gx + 0.5, type:'friend', f, i });
+  });
+
+  renderables.sort((a,b) => a.sortKey - b.sortKey);
+
+  renderables.forEach(r => {
+    if (r.type === 'furniture') {
+      drawFurnitureItem(r.item);
+    } else if (r.type === 'player') {
+      const p = G.player;
+      drawCharSprite(p.gx, p.gy, CHAR_COLORS[0], p.state, p.facing, true, p.bubble);
+    } else if (r.type === 'friend') {
+      const f = r.f;
+      drawCharSprite(f.gx, f.gy, NPC_COLORS[r.i % NPC_COLORS.length], f.state||'idle', f.facing||'right', false, f.bubble);
+    }
+  });
+
+  // Day/night tint
+  const t = G.time;
+  const nightAlpha = t > 0.75 ? (t-0.75)*1.5*0.35 : t < 0.1 ? (0.1-t)*3.5*0.35 : 0;
+  if (nightAlpha > 0) {
+    ctx.fillStyle = `rgba(0,0,20,${nightAlpha})`;
+    ctx.fillRect(0,0,CW,CH);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOUCH / CLICK → move player / open menu
+// ═══════════════════════════════════════════════════════
+cv.addEventListener('click', e => {
+  const rect = cv.getBoundingClientRect();
+  const mx = (e.clientX - rect.left), my = (e.clientY - rect.top);
+  const { gx, gy } = screenToGrid(mx, my);
+
+  if (gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return;
+
+  // Check if tapped on furniture
+  const hit = G.placed.find(it => {
+    const def = SHOP_ITEMS.find(d=>d.id===it.id);
+    return gx >= it.gx && gx < it.gx+(def?.w||1) && gy >= it.gy && gy < it.gy+(def?.h||1);
+  });
+
+  if (hit) {
+    openFurnitureMenu(hit, mx, my);
+    return;
+  }
+
+  // Check if tapped on friend
+  const friendHit = G.friends.find(f => Math.abs(f.gx - gx) < 1 && Math.abs(f.gy - gy) < 1);
+  if (friendHit) {
+    openFriendMenu(friendHit, mx, my);
+    return;
+  }
+
+  // Move player
+  G.player.tx = Math.max(0.5, Math.min(GRID-1.5, gx + 0.5));
+  G.player.ty = Math.max(0.5, Math.min(GRID-1.5, gy + 0.5));
+  closeMenu();
+});
+
+// ═══════════════════════════════════════════════════════
+//  ACTION MENU
+// ═══════════════════════════════════════════════════════
+function openFurnitureMenu(item, mx, my) {
+  const def = SHOP_ITEMS.find(d=>d.id===item.id);
+  if (!def) return;
+  const menu = document.getElementById('amenu');
+  document.getElementById('amenu-title').textContent = def.ico + ' ' + def.name.toUpperCase();
+  const btns = document.getElementById('amenu-btns');
+  btns.innerHTML = '';
+
+  // Use action based on item
+  const actions = getFurnitureActions(item, def);
+  actions.forEach(a => {
+    const b = document.createElement('div');
+    b.className = 'am-btn ' + (a.cls||'');
+    b.textContent = a.lbl;
+    b.onclick = () => { a.fn(); closeMenu(); };
+    btns.appendChild(b);
+  });
+
+  positionMenu(menu, mx, my);
+  menu.classList.add('on');
+}
+
+function getFurnitureActions(item, def) {
+  const actions = [];
+  if (def.id === 'fridge') {
+    actions.push({ lbl:'🍕 Comer (gratis)', cls:'grn', fn:()=>{ G.hunger=Math.min(100,G.hunger+45); G.player.bubble='NOM'; G.player.bubbleT=2; notify('Tú','Om nom nom 🍕','g'); }});
+  }
+  if (def.id === 'bed' || def.id === 'mattress') {
+    actions.push({ lbl:'😴 Dormir (recuperar)', cls:'blu', fn:()=>{ G.sleep=Math.min(100,G.sleep+50); G.energy=Math.min(100,G.energy+30); G.player.state='sleeping'; G.player.bubble='ZZZ'; G.player.bubbleT=3; notify('Tú','Siesta de 20 minutos... o de 8 horas.','b'); setTimeout(()=>{ G.player.state='idle'; G.player.bubble=null; }, 3000); }});
+  }
+  if (def.id === 'sofa' || def.id === 'beanbag') {
+    actions.push({ lbl:'😌 Descansar', cls:'', fn:()=>{ G.energy=Math.min(100,G.energy+20); G.player.bubble='😌'; G.player.bubbleT=2; notify('Tú','Un ratito en el sofá. Bien merecido.','g'); }});
+  }
+  if (def.id === 'mic') {
+    actions.push({ lbl:'🎤 Cantar / Directo', cls:'red', fn:()=>doWork('cantar') });
+  }
+  if (def.id === 'tattoostool') {
+    actions.push({ lbl:'💉 Tatuar cliente', cls:'red', fn:()=>doWork('tatuar') });
+  }
+  if (def.id === 'camera') {
+    actions.push({ lbl:'📷 Sesión de fotos', cls:'red', fn:()=>doWork('fotos') });
+  }
+  if (def.id === 'playstation') {
+    actions.push({ lbl:'🎮 Streamear', cls:'blu', fn:()=>doWork('stream') });
+  }
+  if (def.id === 'bar') {
+    actions.push({ lbl:'🍺 Abrir barra', cls:'yel', fn:()=>{ G.money+=Math.floor(Math.random()*40+20); G.rep=Math.min(100,G.rep+5); notify('Barra','Noche de barra: +€ y +rep 🍺','g'); }});
+  }
+  if (def.id === 'speaker') {
+    actions.push({ lbl:'🎉 Poner música', cls:'red', fn:()=>{ G.friends.forEach(f=>{ f.state='partying'; f.bubble='🎉'; setTimeout(()=>{ f.state='idle'; f.bubble=null; },4000); }); notify('Local','¡La nave peta! 🔊','g'); }});
+  }
+  actions.push({ lbl:'🗑️ Quitar mueble', cls:'', fn:()=>{ G.placed=G.placed.filter(p=>p!==item); notify('Sistema','Mueble retirado.'); }});
+  return actions;
+}
+
+function openFriendMenu(friend, mx, my) {
+  const def = FRIEND_DEFS.find(d=>d.id===friend.id);
+  const menu = document.getElementById('amenu');
+  document.getElementById('amenu-title').textContent = (def?.emoji||'👤')+' '+(def?.name||'').toUpperCase();
+  const btns = document.getElementById('amenu-btns');
+  btns.innerHTML = '';
+
+  const b1 = document.createElement('div');
+  b1.className = 'am-btn blu';
+  b1.textContent = '💬 Hablar';
+  b1.onclick = () => { notify(def.name, randomFriendLine(def), 'b'); closeMenu(); };
+  btns.appendChild(b1);
+
+  const b2 = document.createElement('div');
+  b2.className = 'am-btn red';
+  b2.textContent = '🚪 Echar del local';
+  b2.onclick = () => { G.friends=G.friends.filter(f=>f!==friend); notify('Sistema',`${def.name} se ha ido del local.`); renderFriendsPanel(); closeMenu(); };
+  btns.appendChild(b2);
+
+  positionMenu(menu, mx, my);
+  menu.classList.add('on');
+}
+
+function randomFriendLine(def) {
+  const lines = {
+    rebe: ['Tío, estoy con un proyecto, ya te cuento.','¿Cuándo hacemos la expo?'],
+    paco: ['Tengo una maqueta nueva, escúchala.','¿Esta noche hay fiesta o qué?'],
+    sonia: ['Lleváis tres días sin limpiar el baño.','El presupuesto está descontrolado.'],
+    manu: ['Bro...','Mhm.','¿Hay algo en la nevera?'],
+    leo:  ['¿Qué necesitas?','Tío, relájate.'],
+    clara:['¿Me haces una foto aquí? La luz mola.','Tengo 12k nuevos seguidores esta semana.'],
+    chema:['Ese enchufe del fondo da miedo.','Si me das herramientas te arreglo lo que quieras.'],
+    berta:['Tengo clientes mañana, ¿puedo usar la nave?','El tatuaje te quedó bien, ¿eh?'],
+    kiko: ['Stream de 6 horas hoy, no me molestes.','¿Alguien tiene cable de red?'],
+    tere: ['He cocinado para todos, está en la nevera.','Necesitamos más gas.'],
+    nacho:['El suelo del polígono es perfecto para patinar.','He roto sin querer algo, era tuyo?'],
+    patri:['¡A bailar! Venga, que sé que quieres.','¿Cuándo montamos la próxima fiesta?'],
+    rui:  ['Escucha este beat, dime qué te parece.','Llevo 38 horas despierto y sigo productivo.'],
+    vane: ['Te voy a hacer una sesión de fotos, va a petar en redes.','Necesito más luz natural aquí.'],
+    ivan: ['Todo controlado. Nadie entra sin que yo lo sepa.','¿Queda algo de comer?'],
+  };
+  const arr = lines[def.id] || ['...'];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function positionMenu(menu, mx, my) {
+  menu.style.left = Math.min(mx, CW-145)+'px';
+  menu.style.top  = Math.min(my-10, CH-200)+'px';
+}
+
+function closeMenu() {
+  document.getElementById('amenu').classList.remove('on');
+}
+
+// ═══════════════════════════════════════════════════════
+//  WORK SYSTEM
+// ═══════════════════════════════════════════════════════
+function openWork() {
+  const evl = document.getElementById('evlay');
+  document.getElementById('ev-ico').textContent = '💼';
+  document.getElementById('ev-tit').textContent = 'CURRAR';
+  document.getElementById('ev-tit').className = 'ev-tit cy';
+  document.getElementById('ev-dsc').textContent = 'Elige qué hacer hoy. Cada acción tiene consecuencias.';
+  document.getElementById('evbox').className = 'evbox cy';
+
+  const btns = document.getElementById('ev-btns');
+  btns.innerHTML = '';
+
+  WORK_ACTIONS.forEach(w => {
+    // Check requirement
+    const hasReq = !w.req || G.placed.some(p=>p.id===w.req);
+    if (!hasReq) return; // hide if not unlocked
+
+    const b = document.createElement('button');
+    b.className = 'ev-btn ' + (w.req ? 'c' : 's');
+    b.innerHTML = `${w.ico} ${w.name}<br><span style="font-size:7px;opacity:.7">${w.desc}</span>`;
+    b.style.textAlign='left'; b.style.lineHeight='1.4';
+    b.onclick = () => {
+      doWork(w.id);
+      evl.classList.remove('on');
+    };
+    btns.appendChild(b);
+  });
+
+  // Close button
+  const bc = document.createElement('button');
+  bc.className = 'ev-btn s';
+  bc.textContent = '✕ Cerrar';
+  bc.onclick = () => evl.classList.remove('on');
+  btns.appendChild(bc);
+
+  evl.classList.add('on');
+}
+
+function doWork(id) {
+  if (G.energy < 10) { notify('Tú','Estás demasiado cansado para trabajar.','r'); return; }
+  const w = WORK_ACTIONS.find(x=>x.id===id);
+  if (!w) return;
+
+  if (id === 'nada') {
+    G.energy = Math.min(100, G.energy + 20);
+    G.sleep  = Math.min(100, G.sleep  + 10);
+    G.player.state = 'sleeping'; G.player.bubble = 'ZZZ'; G.player.bubbleT = 3;
+    notify('Tú','No has hecho nada. Válido. 🛌','b');
+    setTimeout(()=>{ G.player.state='idle'; G.player.bubble=null; }, 3000);
+    return;
+  }
+  if (id === 'limpiar') {
+    G.trash = Math.max(0, G.trash-30);
+    G.energy = Math.max(0, G.energy-15);
+    G.rep = Math.min(100, G.rep+5);
+    G.player.bubble='🧹'; G.player.bubbleT=2;
+    notify('Tú','La nave está bastante más decente. 🧹','g');
+    G.xp += 10;
+    return;
+  }
+  if (id === 'chatear') {
+    const earned = rnd(w.money);
+    const segG   = rnd(w.seg);
+    G.money += earned; G.seg += segG;
+    G.energy = Math.max(0, G.energy-w.energy);
+    G.player.bubble='📱'; G.player.bubbleT=2;
+    notify('Tú',`Chateando: +${segG} seguidores, +${earned}€ 📱`,'b');
+    G.xp += 5;
+    return;
+  }
+  if (id === 'rebuscar') {
+    const earned = rnd(w.money);
+    G.money += earned;
+    G.energy = Math.max(0, G.energy-w.energy);
+    notify('Tú',`Rebuscando cupones: +${earned}€ 🧾`,'y');
+    G.xp += 5;
+    return;
+  }
+
+  // Skill-based actions
+  const skill = G.skills[id] || 0;
+  const skillBonus = 1 + skill * 0.15;
+  const earned = Math.floor(rnd(w.money) * skillBonus);
+  const segG   = Math.floor(rnd(w.seg)   * skillBonus);
+
+  G.money  += earned;
+  G.seg    += segG;
+  G.energy  = Math.max(0, G.energy - w.energy);
+  G.hunger  = Math.max(0, G.hunger - 10);
+  G.skills[id] = Math.min(10, (G.skills[id]||0) + 1);
+  G.xp     += 30;
+
+  G.player.state = 'working'; G.player.bubble = w.ico; G.player.bubbleT = 3;
+  setTimeout(()=>{ if(G.player.state==='working'){G.player.state='idle'; G.player.bubble=null;} }, 3000);
+
+  // Fail chance decreases with skill
+  const failChance = Math.max(0.05, 0.35 - skill*0.03);
+  if (Math.random() < failChance) {
+    notify('Tú',`${w.ico} ${w.name}: algo salió mal. +${earned}€, +${segG} segs. Skill: ${G.skills[id]}/10`,'r');
+  } else {
+    notify('Tú',`${w.ico} ${w.name}: bien hecho! +${earned}€, +${segG} segs 🔥`,'g');
+  }
+  updateHUD();
+}
+
+function rnd([min,max]) { return Math.floor(Math.random()*(max-min+1))+min; }
+
+// ═══════════════════════════════════════════════════════
+//  SHOP
+// ═══════════════════════════════════════════════════════
+const CATS = ['Básicos','Trabajo','Ambiente'];
+let shopCat = 'Básicos';
+
+function renderShopTabs() {
+  const tabs = document.getElementById('shop-tabs');
+  tabs.innerHTML = '';
+  CATS.forEach(cat => {
+    const t = document.createElement('div');
+    t.className = 'stab' + (shopCat===cat?' on':'');
+    t.textContent = cat;
+    t.onclick = () => { shopCat=cat; renderShopTabs(); renderShopList(); };
+    tabs.appendChild(t);
+  });
+  renderShopList();
+}
+
+function renderShopList() {
+  const list = document.getElementById('shop-list');
+  list.innerHTML = '';
+  document.getElementById('sm').textContent = G.money;
+
+  SHOP_ITEMS.filter(it=>it.cat===shopCat).forEach(it => {
+    const owned = G.placed.some(p=>p.id===it.id);
+    const can   = G.money >= it.price;
+    const card  = document.createElement('div');
+    card.className = 'scard' + (owned?' owned':'') + (!owned&&can?' can':'');
+    card.innerHTML = `
+      <div class="scard-ico">${it.ico}</div>
+      <div class="scard-name">${it.name}</div>
+      <div class="scard-fx">${it.fx}</div>
+      <div class="scard-desc">${it.desc}</div>
+      <div class="scard-price">${owned?'✓ COMPRADO':'€'+it.price}</div>
+    `;
+    if (!owned) {
+      card.onclick = () => buyItem(it);
+    }
+    list.appendChild(card);
+  });
+}
+
+function buyItem(it) {
+  if (G.money < it.price) { notify('Sistema','No tienes suficiente dinero 💸','r'); return; }
+  if (G.placed.some(p=>p.id===it.id)) { notify('Sistema','Ya tienes este objeto.'); return; }
+
+  G.money -= it.price;
+
+  // Find free placement spot
+  let px2 = 2, py2 = 2;
+  outer: for (let y=1; y<GRID-it.h; y++) {
+    for (let x=1; x<GRID-it.w; x++) {
+      const blocked = G.placed.some(p=>{
+        const def=SHOP_ITEMS.find(d=>d.id===p.id);
+        return x<p.gx+(def?.w||1)&&x+it.w>p.gx&&y<p.gy+(def?.h||1)&&y+it.h>p.gy;
+      });
+      if (!blocked) { px2=x; py2=y; break outer; }
+    }
+  }
+
+  G.placed.push({ id:it.id, gx:px2, gy:py2 });
+  notify('Tienda',`${it.ico} ${it.name} colocado en la nave! ${it.fx}`,'g');
+  renderShopList();
+  updateHUD();
+}
+
+function openShop()  { document.getElementById('shop').classList.add('on'); renderShopTabs(); }
+function closeShop() { document.getElementById('shop').classList.remove('on'); }
+
+// ═══════════════════════════════════════════════════════
+//  FRIENDS PANEL
+// ═══════════════════════════════════════════════════════
+function renderFriendsPanel() {
+  const list = document.getElementById('fp-list');
+  list.innerHTML = '';
+  document.getElementById('fp-count').textContent = G.friends.length;
+
+  FRIEND_DEFS.forEach(def => {
+    const inLocal = G.friends.some(f=>f.id===def.id);
+    const card = document.createElement('div');
+    card.className = 'fcard' + (inLocal?' invited':'');
+    card.innerHTML = `
+      <div class="fcard-ico">${def.emoji}</div>
+      <div class="fcard-info">
+        <div class="fcard-name">${def.name}</div>
+        <div class="fcard-role">${def.role}</div>
+        <div class="fcard-traits">${def.traits.map(t=>`<span class="ftrait ${t.startsWith('+')?' g':'r'}">${t}</span>`).join('')}</div>
+      </div>
+      <button class="fcard-btn ${inLocal?'kick':'inv'}" onclick="${inLocal?`kickFriend('${def.id}')`:`inviteFriend('${def.id}')`}">${inLocal?'Echar':'Invitar'}</button>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function inviteFriend(id) {
+  if (G.friends.length >= 15) { notify('Sistema','Ya hay 15 personas en el local. Límite máximo.','r'); return; }
+  if (G.friends.some(f=>f.id===id)) return;
+  const def = FRIEND_DEFS.find(d=>d.id===id);
+  G.friends.push({
+    id, gx:1+Math.random()*6, gy:1+Math.random()*6,
+    state:'idle', facing:'right', bubble:null
+  });
+  notify(def.name, `${def.emoji} ${def.name} ha llegado al local.`,'b');
+  renderFriendsPanel();
+}
+
+function kickFriend(id) {
+  const def = FRIEND_DEFS.find(d=>d.id===id);
+  G.friends = G.friends.filter(f=>f.id!==id);
+  notify('Sistema',`${def.name} se ha ido del local.`);
+  renderFriendsPanel();
+}
+
+function openFriends()  { document.getElementById('fpanel').classList.add('on'); renderFriendsPanel(); }
+function closeFriends() { document.getElementById('fpanel').classList.remove('on'); }
+
+// ═══════════════════════════════════════════════════════
+//  STATS PANEL
+// ═══════════════════════════════════════════════════════
+function openStats() {
+  const panel = document.getElementById('stpanel');
+  document.getElementById('stp-lvl').textContent = G.level;
+  const body = document.getElementById('stp-body');
+
+  const xpNeed = G.level * 200;
+  const xpPct  = Math.round((G.xp/xpNeed)*100);
+
+  const stats = [
+    { lbl:'❤️ Salud',      val:G.hp,     col:'#ff2d78' },
+    { lbl:'⚡ Energía',    val:G.energy,  col:'#ffd600' },
+    { lbl:'🍔 Hambre',     val:G.hunger,  col:'#ff6b00' },
+    { lbl:'😴 Sueño',      val:G.sleep,   col:'#00f5ff' },
+    { lbl:'⭐ Reputación', val:G.rep,     col:'#aaff00' },
+    { lbl:'🗑️ Basura',    val:G.trash,   col:G.trash>60?'#ff2d78':'#888' },
+    { lbl:'🌀 Caos',       val:G.chaos,   col:G.chaos>50?'#ff2d78':'#888' },
+  ];
+  const skills2 = [
+    { lbl:'🎤 Cantar',  val:(G.skills.cantar||0)*10 },
+    { lbl:'💉 Tatuar',  val:(G.skills.tatuar||0)*10 },
+    { lbl:'📷 Fotos',   val:(G.skills.fotos||0)*10  },
+    { lbl:'🎮 Stream',  val:(G.skills.stream||0)*10 },
+  ];
+
+  body.innerHTML = `
+    <div class="stat-section">
+      <div class="stat-section-title">Experiencia</div>
+      <div class="xp-row"><span>XP</span><span>${G.xp}/${xpNeed}</span></div>
+      <div class="xp-track"><div class="xp-fill" style="width:${xpPct}%"></div></div>
+      <div class="xp-row" style="margin-top:4px"><span>💶 Dinero</span><span style="color:#aaff00">${G.money}€</span></div>
+      <div class="xp-row"><span>⭐ Seguidores</span><span style="color:#ffd600">${G.seg}</span></div>
+    </div>
+    <div class="stat-section">
+      <div class="stat-section-title">Estado personal</div>
+      ${stats.map(s=>`
+        <div class="stat-row">
+          <span class="stat-lbl">${s.lbl}</span>
+          <div class="stat-track"><div class="stat-fill" style="width:${Math.round(s.val)}%;background:${s.col}"></div></div>
+          <span class="stat-val" style="color:${s.col}">${Math.round(s.val)}</span>
+        </div>`).join('')}
+    </div>
+    <div class="stat-section">
+      <div class="stat-section-title">Habilidades</div>
+      ${skills2.map(s=>`
+        <div class="stat-row">
+          <span class="stat-lbl">${s.lbl}</span>
+          <div class="stat-track"><div class="stat-fill" style="width:${s.val}%;background:var(--cy)"></div></div>
+          <span class="stat-val" style="color:var(--cy)">${s.val/10}/10</span>
+        </div>`).join('')}
+    </div>
+    <div class="stat-section">
+      <div class="stat-section-title">La Nave</div>
+      <div class="xp-row"><span>🛋️ Objetos</span><span>${G.placed.length}</span></div>
+      <div class="xp-row"><span>👥 Amigos</span><span>${G.friends.length}/15</span></div>
+    </div>
+  `;
+
+  panel.classList.add('on');
+}
+function closeStats() { document.getElementById('stpanel').classList.remove('on'); }
+
+// ═══════════════════════════════════════════════════════
 //  EVENTS
-// ══════════════════════════════════════════════════════
-const EVENTS = [
-  { id:'casero', chance:0.12, icon:'👴', title:'LLEGA EL CASERO',
-    desc:'El padre de Felipe se presenta. Quiere ver el local en condiciones o paga de adelanto.',
-    choices:[
-      { label:'Dar €200', cls:'p', fn:g=>{ g.money-=200; showNotif('Casero','Hasta pronto. No os lo mereces.','good'); } },
-      { label:'Cerrar la puerta', cls:'d', fn:g=>{ g.reputation-=20; showNotif('Casero','¡Llamaré a mi abogado!','danger'); } },
-    ]},
-  { id:'multa', chance:0.09, icon:'🚔', title:'MULTA DE CAPA',
-    desc:'El alcalde manda una multa por ruidos y residuos. €150 o el caos sube.',
-    choices:[
-      { label:'Pagar €150', cls:'p', fn:g=>{ g.money-=150; } },
-      { label:'Recurrir', cls:'s', fn:g=>{ g.chaos+=20; g.money-=300; showNotif('Capa','Recurso denegado. Se dobla. 🤌','danger'); } },
-    ]},
-  { id:'ratas', chance:0.08, icon:'🐀', title:'LOS RATAS PASAN POR AQUI',
-    desc:'La crew ofrece ayuda con la limpieza si les tratas bien. ¿Les dejas entrar?',
-    choices:[
-      { label:'Pasar, chaval', cls:'p', fn:g=>{ if(g.reputation>=35){ g.trash=Math.max(0,g.trash-30); showNotif('Ratas','Dejamos esto reluciente 🧹','good'); } else showNotif('Ratas','Mal rollo. Pasamos.','danger'); } },
-      { label:'Mandarles a paseo', cls:'s', fn:g=>{ g.reputation-=10; } },
-    ]},
-  { id:'averia', chance:0.09, icon:'🚰', title:'AVERÍA EN EL BAÑO',
-    desc:'La cisterna ha explotado. Hay agua por todas partes.',
-    choices:[
-      { label:'Fontanero (€120)', cls:'p', fn:g=>{ g.money-=120; showNotif('Fontanero','Arreglado. Por esta vez.','good'); } },
-      { label:'Arreglar solos', cls:'d', fn:g=>{ g.trash+=20; g.chaos+=10; showNotif('Kike','Ha quedado peor lmao 💀'); } },
-    ]},
-  { id:'visita', chance:0.07, icon:'🎁', title:'VISITA SORPRESA',
-    desc:'Amigos de amigos aparecen con bebida. Fiesta improvisada guaranteed.',
-    choices:[
-      { label:'¡Adelante!', cls:'p', fn:g=>{ g.chars.forEach(c=>{c.happy=Math.min(100,c.happy+25);c.boredom=Math.max(0,c.boredom-25);}); g.trash+=20; showNotif('Ana','MODO FIESTA ACTIVADO 🎉'); } },
-      { label:'No estamos', cls:'s', fn:g=>{ g.reputation-=5; } },
-    ]},
-];
-
-function maybeTriggerEvent() {
-  for(const ev of EVENTS) {
-    if(Math.random() < ev.chance) { triggerEvent(ev); return; }
-  }
-}
-
+// ═══════════════════════════════════════════════════════
 function triggerEvent(ev) {
   G.running = false;
-  document.getElementById('ev-icon').textContent = ev.icon;
-  document.getElementById('ev-title').textContent = ev.title;
-  document.getElementById('ev-desc').textContent = ev.desc;
+  document.getElementById('ev-ico').textContent = ev.ico;
+  document.getElementById('ev-tit').textContent = ev.tit;
+  document.getElementById('ev-tit').className = 'ev-tit' + (ev.tit_cls ? ' '+ev.tit_cls : '');
+  document.getElementById('ev-dsc').textContent = ev.dsc;
+  document.getElementById('evbox').className = 'evbox' + (ev.evbox_cls ? ' '+ev.evbox_cls : '');
+
   const btns = document.getElementById('ev-btns');
   btns.innerHTML = '';
   ev.choices.forEach(ch => {
     const b = document.createElement('button');
     b.className = 'ev-btn ' + ch.cls;
-    b.textContent = ch.label;
+    b.textContent = ch.lbl;
     b.onclick = () => {
       ch.fn(G);
-      document.getElementById('overlay').classList.remove('on');
+      document.getElementById('evlay').classList.remove('on');
       G.running = true;
+      updateHUD();
     };
     btns.appendChild(b);
   });
-  document.getElementById('overlay').classList.add('on');
+  document.getElementById('evlay').classList.add('on');
 }
 
-// ══════════════════════════════════════════════════════
-//  ACTIONS
-// ══════════════════════════════════════════════════════
-function act(type) {
-  const c = G.chars[G.selected];
-  if(c.collapsed && type !== 'sleep') {
-    showNotif(c.name, `${c.name} está KO, primero duerme 💀`); return;
-  }
-  switch(type) {
-    case 'eat':
-      if(G.money < 12) { showNotif('','Sin pasta pa comer 😭','danger'); return; }
-      G.money -= 12; c.hunger = Math.min(100, c.hunger+45); c.happy = Math.min(100, c.happy+8);
-      setBubble(G.selected, 'NOM'); showNotif(c.name, `${c.name} se pega un banquete 🍕`, 'good');
-      break;
-    case 'sleep':
-      if(c.state === 'sleeping') {
-        c.state = 'idle'; showNotif(c.name, `${c.name} se despierta`);
-      } else {
-        c.state = 'sleeping'; c.collapsed = false;
-        // Move to bed area
-        const W = canvas.width;
-        c.tx = Math.floor(W * 0.65);
-        setBubble(G.selected, 'ZZZ'); showNotif(c.name, `${c.name} se va a dormir 😴`, 'good');
-      }
-      break;
-    case 'clean':
-      if(c.sleep < 20) { showNotif(c.name, 'Demasiado cansado para limpiar'); return; }
-      const cleaned = 20 + Math.random()*15;
-      G.trash = Math.max(0, G.trash - cleaned);
-      c.sleep = Math.max(0, c.sleep - 12); G.reputation = Math.min(100, G.reputation+4);
-      setBubble(G.selected, 'BRR'); showNotif(c.name, `${c.name} limpia 🧹 (-${Math.round(cleaned)}%)`, 'good');
-      break;
-    case 'party':
-      if(G.money < 25) { showNotif('','Sin pasta pa fiesta 🥲','danger'); return; }
-      G.money -= 25;
-      G.chars.forEach((ch,i) => { if(!ch.collapsed) { ch.state = ch.state==='partying'?'idle':'partying'; ch.tx = 30 + i*(canvas.width-60)/5; } });
-      G.trash = Math.min(100, G.trash+18); G.chaos = Math.min(100, G.chaos+8);
-      showNotif('', '¡FIESTA EN EL LOCAL! 🎉');
-      break;
-    case 'work':
-      if(c.sleep < 20) { showNotif(c.name, 'Necesita dormir antes de currar'); return; }
-      const earn = 55 + Math.floor(Math.random()*70);
-      G.money += earn; c.sleep = Math.max(0, c.sleep-22); c.hunger = Math.max(0, c.hunger-18);
-      setBubble(G.selected, '€€€'); showNotif(c.name, `${c.name} curra: +€${earn} 💼`, 'good');
-      break;
-    case 'seco':
-      if(G.money < 25) { showNotif('El Seco','Sin pasta tío 🌿','danger'); return; }
-      G.money -= 25; c.happy = Math.min(100, c.happy+28); c.drug = Math.min(100, c.drug+35);
-      setBubble(G.selected, '!!!'); showNotif('El Seco', `Material de primera 🌿`, 'good');
-      if(c.drug > 75) showNotif(c.name, `${c.name} está MUY alterado 😵`, 'danger');
-      break;
-    case 'ratas':
-      if(G.reputation < 30) { showNotif('Los Ratas','Os habéis ganado la enemistad 🐀','danger'); return; }
-      G.reputation -= 5;
-      const r = Math.random();
-      if(r < 0.5) { G.trash = Math.max(0, G.trash-18); showNotif('Los Ratas','Limpiamos un poco 🐀🧹','good'); }
-      else if(r < 0.8) { const a2 = Math.floor(Math.random()*40)+15; G.money+=a2; showNotif('Los Ratas',`Os pasan €${a2} 💸`,'good'); }
-      else showNotif('Los Ratas','Esta vez nada. Os deben una 🤝');
-      break;
-    case 'skip':
-      G.time = 0.99;
-      break;
-  }
-}
-
-function setBubble(i, text, duration=2.5) {
-  G.chars[i].bubble = text;
-  G.chars[i].bubbleTimer = duration;
-}
-
-// ══════════════════════════════════════════════════════
-//  RENDER UI
-// ══════════════════════════════════════════════════════
-function renderHUD() {
-  const m = document.getElementById('hv-money');
-  const t = document.getElementById('hv-trash');
-  const r = document.getElementById('hv-rep');
-  m.textContent = `€${G.money}`;
-  t.textContent = `${Math.round(G.trash)}%`;
-  r.textContent = `${Math.round(G.reputation)}`;
-  document.getElementById('hp-money').className = 'hud-pill' + (G.money<100?' danger':G.money<300?' warn':' good');
-  document.getElementById('hp-trash').className = 'hud-pill' + (G.trash>70?' danger':G.trash>40?' warn':'');
-  document.getElementById('hp-rep').className   = 'hud-pill' + (G.reputation<30?' danger':G.reputation>70?' good':'');
-}
-
-const STAT_DEFS = [
-  { k:'hunger', lbl:'🍔 Hambre', col:'#ff9f3c', low:20 },
-  { k:'sleep',  lbl:'😴 Sueño',  col:'#3c9fff', low:15 },
-  { k:'boredom',lbl:'🎮 Abur.',  col:'#c03cff', low:20 },
-  { k:'happy',  lbl:'😊 Feliz',  col:'#3cffb4', low:20 },
-  { k:'drug',   lbl:'🌿 Alter.', col:'#e8ff3c', high:75 },
-];
-
-function renderStatPanel() {
-  const c = G.chars[G.selected];
-  document.getElementById('stat-emoji').textContent = c.emoji;
-  document.getElementById('stat-name').textContent = c.name.toUpperCase();
-  const states = { idle:'En el local', walking:'Caminando...', sleeping:'Durmiendo 😴', partying:'De fiesta 🎉', working:'Currando 💼', ko:'COLAPSADO 💀' };
-  document.getElementById('stat-state').textContent = states[c.state] || 'Normal';
-
-  const bars = document.getElementById('stat-bars');
-  bars.innerHTML = '';
-  STAT_DEFS.forEach(def => {
-    const v = Math.max(0, Math.min(100, c[def.k]));
-    const danger = (def.low && v < def.low) || (def.high && v > def.high);
-    const col = danger ? '#ff3c3c' : v < 35 ? '#ffab3c' : def.col;
-    const row = document.createElement('div');
-    row.className = 'sbar';
-    row.innerHTML = `<span class="sbar-lbl">${def.lbl}</span><div class="sbar-track"><div class="sbar-fill" style="width:${v}%;background:${col}"></div></div><span class="sbar-num" style="color:${col}">${Math.round(v)}</span>`;
-    bars.appendChild(row);
-  });
-}
-
-function renderCharTabs() {
-  const tabs = document.getElementById('char-tabs');
-  tabs.innerHTML = '';
-  G.chars.forEach((c, i) => {
-    const hp = Math.round((c.hunger + c.sleep + c.happy) / 3);
-    const el = document.createElement('div');
-    el.className = 'char-tab' + (i===G.selected?' active':'') + (c.collapsed?' ko':'');
-    el.innerHTML = `<span class="tab-emoji">${c.emoji}</span><span class="tab-name">${c.name}</span><div class="tab-bar"><div class="tab-fill" style="width:${hp}%;background:${hp<30?'#ff3c3c':hp<60?'#ffab3c':'#3cffb4'}"></div></div>`;
-    el.onclick = () => { G.selected = i; renderStatPanel(); renderCharTabs(); };
-    tabs.appendChild(el);
-  });
-}
-
-// ══════════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ══════════════════════════════════════════════════════
-function showNotif(sender, msg, type='') {
-  const area = document.getElementById('notif-area');
-  const el = document.createElement('div');
-  el.className = 'notif ' + type;
-  el.innerHTML = (sender ? `<div class="notif-sender">${sender}</div>` : '') + msg;
-  area.appendChild(el);
-  setTimeout(()=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(), 400); }, 2800);
-}
-
-// ══════════════════════════════════════════════════════
-//  GAME OVER / WIN
-// ══════════════════════════════════════════════════════
 function triggerGameOver(reason) {
   G.gameover = true; G.running = false;
-  document.getElementById('ev-icon').textContent = '💀';
-  document.getElementById('ev-title').textContent = 'GAME OVER';
-  document.getElementById('ev-title').style.color = 'var(--danger)';
-  document.getElementById('ev-desc').textContent = reason;
-  const btns = document.getElementById('ev-btns');
-  btns.innerHTML = '<button class="ev-btn p" onclick="initGame()">REINTENTAR</button>';
-  document.querySelector('#overlay .ev-box').style.borderColor = 'var(--danger)';
-  document.getElementById('overlay').classList.add('on');
-}
-function triggerWin() {
-  G.gameover = true; G.running = false;
-  document.getElementById('ev-icon').textContent = '🏆';
-  document.getElementById('ev-title').textContent = '¡UN MES!';
-  document.getElementById('ev-desc').textContent = `Sobrevivisteis. €${G.money} en el fondo, ${Math.round(G.trash)}% de basura. Leyendas absolutas.`;
-  const btns = document.getElementById('ev-btns');
-  btns.innerHTML = '<button class="ev-btn p" onclick="initGame()">OTRO MES</button>';
-  document.getElementById('overlay').classList.add('on');
+  triggerEvent({
+    ico:'💀', tit:'GAME OVER', dsc:reason,
+    choices:[{ lbl:'VOLVER A EMPEZAR', cls:'p', fn:()=>{ initGame(); }}]
+  });
 }
 
-// ══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  HUD
+// ═══════════════════════════════════════════════════════
+function updateHUD() {
+  if (!G) return;
+  document.getElementById('hp-money').textContent = G.money;
+  document.getElementById('hp-seg').textContent   = G.seg >= 1000 ? (G.seg/1000).toFixed(1)+'k' : G.seg;
+  document.getElementById('hp-trash').textContent = Math.round(G.trash)+'%';
+  document.getElementById('hp-hp').textContent    = Math.round(G.hp);
+
+  const mp = document.getElementById('hp-money').parentElement;
+  mp.className = 'pill' + (G.money<50?' pk':G.money<200?' ye':' gn');
+}
+
+// ═══════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+function notify(sender, msg, type='') {
+  const area = document.getElementById('nbox');
+  const el   = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.innerHTML = (sender?`<div class="nsend">${sender}</div>`:'')+msg;
+  area.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 3200);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MISC ACTIONS
+// ═══════════════════════════════════════════════════════
+function act(id) {
+  if (id === 'skip') { G.time = 0.99; }
+}
+
+// ═══════════════════════════════════════════════════════
 //  BOOT
-// ══════════════════════════════════════════════════════
-window.addEventListener('resize', () => { resizeCanvas(); });
+// ═══════════════════════════════════════════════════════
+window.addEventListener('resize', ()=>{ resize(); });
+resize();
 initGame();
 </script>
 </body>
