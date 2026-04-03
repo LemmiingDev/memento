@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>El Local</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #1a1a1a;
+    --surface2: #252525;
+    --border: #333;
+    --accent: #e8ff3c;
+    --accent2: #ff3c3c;
+    --accent3: #3cffb4;
+    --text: #f0f0f0;
+    --muted: #888;
+    --danger: #ff3c3c;
+    --warning: #ffab3c;
+    --good: #3cffb4;
+    --h-font: 'Bebas Neue', cursive;
+    --b-font: 'Space Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+  html, body {
+    width: 100%; height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--b-font);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #app {
+    display: flex; flex-direction: column;
+    height: 100dvh; max-width: 430px;
+    margin: 0 auto; position: relative;
+  }
+
+  /* ===== HEADER ===== */
+  #header {
+    padding: 10px 14px 6px;
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  #header h1 {
+    font-family: var(--h-font);
+    font-size: 28px; letter-spacing: 2px;
+    color: var(--accent); line-height: 1;
+  }
+  #day-info { text-align: right; }
+  #day-info .day-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+  #day-info .day-val { font-size: 18px; font-weight: 700; color: var(--text); }
+  #time-bar-wrap {
+    height: 4px; background: var(--surface2);
+    border-radius: 2px; margin-top: 2px; width: 80px;
+  }
+  #time-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 1s linear; }
+
+  /* ===== STATUS STRIP ===== */
+  #status-strip {
+    display: flex; gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .strip-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .strip-label { font-size: 8px; color: var(--muted); text-transform: uppercase; }
+  .strip-val { font-size: 13px; font-weight: 700; }
+  .strip-val.danger { color: var(--danger); animation: blink 1s infinite; }
+  .strip-val.warning { color: var(--warning); }
+  .strip-val.good { color: var(--good); }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ===== MAIN SCENE ===== */
+  #scene {
+    flex: 1; position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 80%, #1c1a10 0%, #0d0d0d 70%);
+  }
+
+  /* Floor */
+  #scene::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
+    background: linear-gradient(to top, #1a1508 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Trash visual */
+  #trash-layer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-end; flex-wrap: wrap;
+    padding: 0 4px;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .trash-item {
+    font-size: 18px; margin: 1px;
+    filter: saturate(0.6) brightness(0.7);
+    animation: trashWobble 3s ease-in-out infinite;
+  }
+  @keyframes trashWobble { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+
+  /* Characters area */
+  #characters-area {
+    position: absolute; bottom: 28%; left: 0; right: 0;
+    display: flex; justify-content: space-around; align-items: flex-end;
+    padding: 0 8px;
+  }
+
+  .char-sprite {
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; position: relative;
+    transition: transform 0.2s;
+  }
+  .char-sprite:active { transform: scale(0.92); }
+  .char-sprite.selected .char-body { outline: 3px solid var(--accent); border-radius: 8px; }
+  .char-sprite.collapsed .char-body { filter: grayscale(1) brightness(0.5); }
+  .char-sprite.party .char-body { animation: partyBounce 0.4s ease-in-out infinite alternate; }
+  @keyframes partyBounce { from{transform:translateY(0)} to{transform:translateY(-6px)} }
+
+  .char-body {
+    font-size: 36px; line-height: 1;
+    border-radius: 6px; padding: 2px;
+    transition: filter 0.3s;
+  }
+  .char-name {
+    font-size: 8px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .char-status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    position: absolute; top: 0; right: 0;
+  }
+  .char-mood-bubble {
+    position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2px 5px;
+    font-size: 11px; white-space: nowrap;
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .char-sprite:hover .char-mood-bubble,
+  .char-sprite.selected .char-mood-bubble { opacity: 1; }
+
+  /* ===== NPC NOTIFICATIONS ===== */
+  #notif-area {
+    position: absolute; top: 8px; left: 14px; right: 14px;
+    pointer-events: none; z-index: 10;
+  }
+  .notif {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 7px 10px; margin-bottom: 5px;
+    border-radius: 0 6px 6px 0;
+    font-size: 11px; line-height: 1.4;
+    animation: notifSlide 0.3s ease-out;
+    pointer-events: auto;
+  }
+  .notif.danger { border-color: var(--danger); }
+  .notif.good { border-color: var(--good); }
+  .notif-sender { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  @keyframes notifSlide { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+  /* ===== SELECTED CHAR PANEL ===== */
+  #char-panel {
+    background: var(--surface);
+    border-top: 2px solid var(--border);
+    padding: 8px 14px 6px;
+    flex-shrink: 0;
+    max-height: 140px;
+  }
+  #char-panel-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
+  }
+  #char-panel-emoji { font-size: 26px; }
+  #char-panel-name { font-family: var(--h-font); font-size: 22px; color: var(--accent); letter-spacing: 2px; }
+  #char-panel-state { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+
+  #stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+  }
+  .stat-row {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .stat-label { font-size: 8px; color: var(--muted); width: 52px; text-transform: uppercase; flex-shrink: 0; }
+  .stat-bar-wrap { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .stat-bar { height: 100%; border-radius: 3px; transition: width 0.4s ease, background-color 0.4s; }
+  .stat-val { font-size: 9px; width: 24px; text-align: right; }
+
+  /* ===== ACTION BUTTONS ===== */
+  #actions {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 6px; padding: 8px 10px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .action-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 4px 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn:active { transform: scale(0.93); background: #333; }
+  .action-btn.disabled { opacity: 0.3; pointer-events: none; }
+  .action-btn .btn-icon { font-size: 22px; }
+  .action-btn .btn-label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+  .action-btn.highlight { border-color: var(--accent); }
+  .action-btn.danger-btn { border-color: var(--danger); }
+
+  /* ===== CHAR SELECTOR TABS ===== */
+  #char-tabs {
+    display: flex; gap: 4px;
+    padding: 6px 10px;
+    background: var(--bg);
+    overflow-x: auto; flex-shrink: 0;
+    scrollbar-width: none;
+  }
+  #char-tabs::-webkit-scrollbar { display: none; }
+  .char-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    padding: 4px 8px; border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    min-width: 52px; background: var(--surface);
+  }
+  .char-tab:active { background: var(--surface2); }
+  .char-tab.active { border-color: var(--accent); background: #1e1e00; }
+  .char-tab.collapsed-tab { border-color: var(--danger); background: #1e0000; }
+  .char-tab .tab-emoji { font-size: 20px; }
+  .char-tab .tab-name { font-size: 7px; color: var(--muted); text-transform: uppercase; }
+  .char-tab .tab-hp-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .char-tab .tab-hp-fill { height: 100%; background: var(--good); border-radius: 2px; transition: width 0.4s; }
+
+  /* ===== EVENT OVERLAY ===== */
+  #event-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20; padding: 24px;
+    display: none;
+  }
+  #event-overlay.active { display: flex; }
+  .event-box {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px 18px; width: 100%;
+    text-align: center;
+  }
+  .event-icon { font-size: 52px; margin-bottom: 8px; }
+  .event-title { font-family: var(--h-font); font-size: 30px; color: var(--accent); letter-spacing: 2px; margin-bottom: 6px; }
+  .event-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .event-btns { display: flex; gap: 8px; }
+  .event-btn {
+    flex: 1; padding: 12px 8px;
+    border-radius: 8px; border: none;
+    font-family: var(--b-font); font-size: 11px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .event-btn:active { opacity: 0.7; }
+  .event-btn.primary { background: var(--accent); color: #000; }
+  .event-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .event-btn.danger { background: var(--danger); color: #fff; }
+
+  /* ===== GAME OVER ===== */
+  #gameover {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.95);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 30; padding: 24px;
+    display: none;
+  }
+  #gameover.active { display: flex; }
+  #gameover h2 { font-family: var(--h-font); font-size: 52px; color: var(--danger); letter-spacing: 4px; text-align: center; }
+  #gameover p { font-size: 13px; color: var(--muted); text-align: center; margin: 12px 0 20px; line-height: 1.6; }
+  #restart-btn {
+    padding: 14px 32px; background: var(--accent); color: #000;
+    border: none; border-radius: 8px;
+    font-family: var(--b-font); font-size: 13px; font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Chaos mode */
+  body.chaos-mode #scene { animation: chaosFlash 0.3s infinite alternate; }
+  @keyframes chaosFlash { from{filter:hue-rotate(0deg)} to{filter:hue-rotate(30deg) brightness(1.1)} }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div>
+      <h1>EL LOCAL</h1>
+      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Simulador de supervivencia</div>
+    </div>
+    <div id="day-info">
+      <div class="day-label">Día</div>
+      <div class="day-val" id="day-display">1 / 30</div>
+      <div id="time-bar-wrap"><div id="time-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- GLOBAL STATUS STRIP -->
+  <div id="status-strip">
+    <div class="strip-item">
+      <span class="strip-label">💶 Fondo</span>
+      <span class="strip-val" id="strip-money">€0</span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">🗑️ Basura</span>
+      <span class="strip-val" id="strip-trash">0%</span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">😤 Caos</span>
+      <span class="strip-val" id="strip-chaos">0%</span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">⭐ Rep.</span>
+      <span class="strip-val" id="strip-rep">50</span>
+    </div>
+  </div>
+
+  <!-- MAIN SCENE -->
+  <div id="scene">
+    <div id="notif-area"></div>
+    <div id="trash-layer"></div>
+    <div id="characters-area"></div>
+
+    <!-- EVENT OVERLAY -->
+    <div id="event-overlay">
+      <div class="event-box">
+        <div class="event-icon" id="ev-icon">⚠️</div>
+        <div class="event-title" id="ev-title">EVENTO</div>
+        <div class="event-desc" id="ev-desc">Descripción del evento</div>
+        <div class="event-btns" id="ev-btns"></div>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="gameover">
+      <h2>GAME<br>OVER</h2>
+      <p id="gameover-reason">Los desahuciaron. Ni pa' pipas.</p>
+      <button id="restart-btn" onclick="initGame()">VOLVER A INTENTARLO</button>
+    </div>
+  </div>
+
+  <!-- SELECTED CHAR PANEL -->
+  <div id="char-panel">
+    <div id="char-panel-header">
+      <span id="char-panel-emoji">🧍</span>
+      <div>
+        <div id="char-panel-name">NOMBRE</div>
+        <div id="char-panel-state">Estado normal</div>
+      </div>
+    </div>
+    <div id="stats-grid"></div>
+  </div>
+
+  <!-- CHAR SELECTOR TABS -->
+  <div id="char-tabs"></div>
+
+  <!-- ACTION BUTTONS -->
+  <div id="actions">
+    <div class="action-btn" onclick="doAction('eat')">
+      <span class="btn-icon">🍕</span><span class="btn-label">Comer</span>
+    </div>
+    <div class="action-btn" onclick="doAction('sleep')">
+      <span class="btn-icon">😴</span><span class="btn-label">Dormir</span>
+    </div>
+    <div class="action-btn" onclick="doAction('clean')">
+      <span class="btn-icon">🧹</span><span class="btn-label">Limpiar</span>
+    </div>
+    <div class="action-btn" onclick="doAction('party')">
+      <span class="btn-icon">🎉</span><span class="btn-label">Fiesta</span>
+    </div>
+    <div class="action-btn" onclick="doAction('work')">
+      <span class="btn-icon">💼</span><span class="btn-label">Currar</span>
+    </div>
+    <div class="action-btn" onclick="doAction('seco')">
+      <span class="btn-icon">🌿</span><span class="btn-label">El Seco</span>
+    </div>
+    <div class="action-btn" onclick="doAction('ratas')">
+      <span class="btn-icon">🐀</span><span class="btn-label">Ratas</span>
+    </div>
+    <div class="action-btn" onclick="doAction('nextday')">
+      <span class="btn-icon">⏭️</span><span class="btn-label">Avanzar</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  EL LOCAL — Game Engine
+// ================================================================
+
+// ── CONFIG ─────────────────────────────────────────────────────
+const CFG = {
+  days: 30,
+  rent: 800,        // coste total mensual
+  startMoney: 400,
+  trashPerDay: 8,   // % basura que sube por día sin limpiar
+  rentDay: 30,      // día en que llega el casero
+  dayDuration: 60,  // segundos por día (modo real-time)
+  statDecayPerDay: {
+    hunger: 20,
+    sleep: 15,
+    boredom: 10,
+  }
+};
+
+// ── CHARACTER DEFINITIONS ───────────────────────────────────────
+const CHAR_DEFS = [
+  { id:'yo',     name:'Tú',      emoji:'🧑‍🎤', color:'#e8ff3c', bio:'El manager accidental del grupo.' },
+  { id:'felipe', name:'Felipe',  emoji:'🧔',   color:'#ff3c3c', bio:'Hijo del casero. Drama permanente.' },
+  { id:'bea',    name:'Bea',     emoji:'👩‍🦱', color:'#3cffb4', bio:'La única con trabajo fijo... a ratos.' },
+  { id:'kike',   name:'Kike',    emoji:'🧢',   color:'#ff9f3c', bio:'Conoce al Seco de toda la vida.' },
+  { id:'ana',    name:'Ana',     emoji:'🕶️',  color:'#c03cff', bio:'Artista. Desaparece días enteros.' },
+];
+
+const STAT_DEFS = [
+  { key:'hunger',   label:'🍔 Hambre',  max:100, dangerBelow:20, color:'#ff9f3c' },
+  { key:'sleep',    label:'😴 Sueño',   max:100, dangerBelow:15, color:'#3c9fff' },
+  { key:'boredom',  label:'🎮 Abur.',   max:100, dangerBelow:20, color:'#c03cff' },
+  { key:'happy',    label:'😊 Feliz',   max:100, dangerBelow:20, color:'#3cffb4' },
+  { key:'drug',     label:'🌿 Alter.',  max:100, dangerAbove:80, color:'#e8ff3c' },
+];
+
+// ── EVENTS ─────────────────────────────────────────────────────
+const DAILY_EVENTS = [
+  {
+    id:'casero', chance:0.12, icon:'👴', title:'LLEGA EL CASERO',
+    desc:'El padre de Felipe se presenta sin avisar. Exige ver el local en condiciones.',
+    choices:[
+      { label:'Pagar €200', action: (g)=>{ g.money-=200; showNotif('Felipe',"Papá dice que la semana que viene vuelve... 😬"); } },
+      { label:'Ignorarle', action: (g)=>{ g.reputation-=20; showNotif('Casero',"Tendréis noticias de mi abogado. 😡", 'danger'); } },
+    ]
+  },
+  {
+    id:'multa', chance:0.10, icon:'🚔', title:'MULTA DE CAPA',
+    desc:'El alcalde (Capa) ha enviado una multa por ruidos y residuos en la vía pública.',
+    choices:[
+      { label:'Pagar €150', action: (g)=>{ g.money-=150; } },
+      { label:'Recurrir', action: (g)=>{ g.chaos+=15; showNotif('Capa',"Recurso denegado. La multa se dobla 🤌", 'danger'); g.money-=300; } },
+    ]
+  },
+  {
+    id:'ratashelp', chance:0.08, icon:'🐀', title:'LOS RATAS SE OFRECEN',
+    desc:'La crew pasa por el local. Si les tratas bien limpian a cambio de una birra.',
+    choices:[
+      { label:'Dejarles pasar', action: (g)=>{ if(g.reputation>=40){ g.trash=Math.max(0,g.trash-35); showNotif('Ratas',"Dejamos esto reluciente 🧹✨", 'good'); } else { showNotif('Ratas',"Mal ambiente aquí, tío. Pasamos.", 'danger'); } } },
+      { label:'Mandarles a paseo', action: (g)=>{ g.reputation-=10; } },
+    ]
+  },
+  {
+    id:'averia', chance:0.09, icon:'🚰', title:'AVERÍA EN EL BAÑO',
+    desc:'La cisterna ha explotado. El suelo está lleno de agua. Llover sobre mojado.',
+    choices:[
+      { label:'Llamar fontanero (€120)', action: (g)=>{ g.money-=120; showNotif('Kike',"Tío, ni fontanero ni leches, yo lo arreglo 🔧", 'good'); } },
+      { label:'Arreglarlo solos', action: (g)=>{ g.trash+=20; g.chaos+=10; showNotif('Felipe',"Ha quedado peor que antes wtf 💀"); } },
+    ]
+  },
+  {
+    id:'visita', chance:0.07, icon:'🎁', title:'VISITA INESPERADA',
+    desc:'Unos amigos de amigos traen comida y bebida. Fiesta improvisada.',
+    choices:[
+      { label:'¡Bienvenidos!', action: (g)=>{ g.chars.forEach(c=>{c.happy=Math.min(100,c.happy+30); c.boredom=Math.max(0,c.boredom-30);}); g.trash+=25; showNotif('Ana',"ESTO ES LO QUE NECESITÁBAMOS 🎉"); } },
+      { label:'No estamos p\'visitas', action: (g)=>{ g.reputation-=5; } },
+    ]
+  },
+  {
+    id:'curro', chance:0.11, icon:'💰', title:'OPORTUNIDAD DE CURRO',
+    desc:'Han ofrecido un trabajo temporal de carga y descarga. €200 pero cansa la vida.',
+    choices:[
+      { label:'Mandar a alguien', action: (g)=>{ const c=g.chars[g.selected]; c.sleep=Math.max(0,c.sleep-30); c.hunger=Math.max(0,c.hunger-20); g.money+=200; showNotif(c.name,'Vuelvo destrozado pero con pasta 💸', 'good'); } },
+      { label:'Pasar', action: (g)=>{ showNotif('Bea',"Tío, la pasta no crece en los árboles..."); } },
+    ]
+  },
+];
+
+// ── STATE ───────────────────────────────────────────────────────
+let G = {};
+
+function createChar(def) {
+  return {
+    ...def,
+    hunger:  70 + Math.random()*20,
+    sleep:   60 + Math.random()*30,
+    boredom: 30 + Math.random()*30,
+    happy:   60 + Math.random()*25,
+    drug:    0,
+    collapsed: false,
+    state: 'normal', // normal, sleeping, partying, working
+  };
+}
+
+function initGame() {
+  G = {
+    day: 1,
+    timeInDay: 0,      // 0-100
+    money: CFG.startMoney,
+    trash: 10,
+    chaos: 0,
+    reputation: 50,
+    chars: CHAR_DEFS.map(createChar),
+    selected: 0,
+    running: true,
+    gameover: false,
+    rentPaid: false,
+  };
+  document.getElementById('gameover').classList.remove('active');
+  document.getElementById('event-overlay').classList.remove('active');
+  document.body.classList.remove('chaos-mode');
+  renderAll();
+  startTick();
+}
+
+// ── TICK LOOP ───────────────────────────────────────────────────
+let tickInterval = null;
+let dayTickCount = 0;
+
+function startTick() {
+  if(tickInterval) clearInterval(tickInterval);
+  dayTickCount = 0;
+  // tick every second, 60 ticks = 1 day
+  tickInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  if(!G.running || G.gameover) return;
+
+  G.timeInDay += (100 / CFG.dayDuration);
+  dayTickCount++;
+
+  // Update stats every 3 seconds (natural decay)
+  if(dayTickCount % 3 === 0) {
+    G.chars.forEach(c => {
+      if(c.collapsed) return;
+      if(c.state !== 'sleeping') {
+        c.hunger  = Math.max(0, c.hunger  - 1);
+        c.sleep   = Math.max(0, c.sleep   - 0.5);
+        c.boredom = Math.max(0, c.boredom - 0.5);
+      } else {
+        // sleeping: recover sleep, lose a bit of hunger
+        c.sleep   = Math.min(100, c.sleep   + 2);
+        c.hunger  = Math.max(0,   c.hunger  - 0.3);
+        c.boredom = Math.max(0,   c.boredom + 0.5); // bored from sleeping too much
+      }
+      if(c.state === 'partying') {
+        c.happy   = Math.min(100, c.happy   + 0.8);
+        c.boredom = Math.min(100, c.boredom + 1);
+        c.hunger  = Math.max(0,   c.hunger  - 1.5);
+        c.drug    = Math.min(100, c.drug    + 0.3);
+      }
+      // Drug decay
+      c.drug = Math.max(0, c.drug - 0.2);
+      // Happiness affected by stats
+      if(c.hunger < 20) c.happy = Math.max(0, c.happy - 0.5);
+      if(c.sleep  < 20) c.happy = Math.max(0, c.happy - 0.5);
+      if(c.drug   > 70) c.happy = Math.min(100, c.happy + 0.3);
+      // Check collapse
+      if((c.hunger <= 0 || c.sleep <= 0) && !c.collapsed) {
+        c.collapsed = true;
+        c.state = 'collapsed';
+        showNotif(c.name, `${c.name} ha colapsado 💀`, 'danger');
+        checkChaos();
+      }
+    });
+  }
+
+  // Trash grows passively
+  if(dayTickCount % 10 === 0) {
+    G.trash = Math.min(100, G.trash + 0.5);
+  }
+
+  // Chaos affected by trash
+  G.chaos = Math.min(100, G.chaos + (G.trash > 70 ? 0.05 : 0));
+  G.chaos = Math.max(0, G.chaos - 0.02);
+
+  // Chaos mode visual
+  if(G.chaos > 75) document.body.classList.add('chaos-mode');
+  else document.body.classList.remove('chaos-mode');
+
+  // Day ends
+  if(G.timeInDay >= 100) endDay();
+  else updateTimeBar();
+
+  renderStats();
+  renderStripValues();
+  renderCharSprites();
+  renderCharTabs();
+}
+
+function endDay() {
+  G.timeInDay = 0;
+  dayTickCount = 0;
+  G.day++;
+
+  // Daily costs
+  G.money -= 30; // gastos diarios (luz, comida base)
+  G.trash = Math.min(100, G.trash + CFG.trashPerDay);
+
+  // Rent day
+  if(G.day > CFG.rentDay) {
+    triggerGameOver('El casero os ha desahuciado. No había pasta pa\' la renta. 💸');
+    return;
+  }
+  if(G.day === CFG.rentDay && G.money < CFG.rent) {
+    triggerGameOver(`Faltaban €${CFG.rent - G.money} para el alquiler. El padre de Felipe os ha echado a patadas. 👴😤`);
+    return;
+  }
+  if(G.day === CFG.rentDay) {
+    G.money -= CFG.rent;
+    showNotif('Casero', `Alquiler cobrado. Quedan €${G.money}. Hasta el mes que viene 🤑`, 'good');
+  }
+
+  // Chaos check: multiple collapses
+  const collapsed = G.chars.filter(c=>c.collapsed).length;
+  if(collapsed >= 3) {
+    triggerGameOver('Tres de los cinco colapsaron. Nadie quedó para pagar el alquiler. 💀');
+    return;
+  }
+
+  // Random event
+  maybeTriggerEvent();
+
+  if(G.day > CFG.days) {
+    triggerWin();
+    return;
+  }
+
+  showNotif('Sistema', `Día ${G.day} — La basura: ${Math.round(G.trash)}% 🗑️`);
+}
+
+function maybeTriggerEvent() {
+  for(const ev of DAILY_EVENTS) {
+    if(Math.random() < ev.chance) {
+      triggerEvent(ev);
+      return;
+    }
+  }
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+function triggerEvent(ev) {
+  G.running = false;
+  const overlay = document.getElementById('event-overlay');
+  document.getElementById('ev-icon').textContent = ev.icon;
+  document.getElementById('ev-title').textContent = ev.title;
+  document.getElementById('ev-desc').textContent = ev.desc;
+  const btnsEl = document.getElementById('ev-btns');
+  btnsEl.innerHTML = '';
+  ev.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'event-btn ' + (choice.danger ? 'danger' : choice.secondary ? 'secondary' : 'primary');
+    btn.textContent = choice.label;
+    btn.onclick = () => {
+      choice.action(G);
+      overlay.classList.remove('active');
+      G.running = true;
+      renderAll();
+    };
+    btnsEl.appendChild(btn);
+  });
+  overlay.classList.add('active');
+}
+
+// ── ACTIONS ─────────────────────────────────────────────────────
+function doAction(type) {
+  const c = G.chars[G.selected];
+  if(c.collapsed && type !== 'sleep') {
+    showNotif(c.name, `${c.name} está colapsado/a, primero descansa 💀`);
+    return;
+  }
+
+  switch(type) {
+    case 'eat':
+      if(G.money < 15) { showNotif('Sistema', 'Sin pasta ni pa\' comer 😭', 'danger'); return; }
+      G.money -= 15;
+      c.hunger = Math.min(100, c.hunger + 45);
+      c.happy  = Math.min(100, c.happy  + 10);
+      showNotif(c.name, `${c.name} se zampa algo rico 🍕`, 'good');
+      break;
+
+    case 'sleep':
+      if(c.state === 'sleeping') {
+        c.state = 'normal';
+        showNotif(c.name, `${c.name} se despierta (sueño: ${Math.round(c.sleep)}%)`);
+      } else {
+        c.state = 'sleeping';
+        c.collapsed = false;
+        showNotif(c.name, `${c.name} se va a dormir 😴`, 'good');
+      }
+      break;
+
+    case 'clean':
+      if(c.sleep < 20) { showNotif(c.name, `${c.name} está demasiado cansado para limpiar`); return; }
+      const cleaned = 25 + Math.random()*15;
+      G.trash = Math.max(0, G.trash - cleaned);
+      c.sleep = Math.max(0, c.sleep - 15);
+      c.boredom = Math.max(0, c.boredom - 5);
+      G.reputation = Math.min(100, G.reputation + 5);
+      showNotif(c.name, `${c.name} limpia el local 🧹 (-${Math.round(cleaned)}% basura)`, 'good');
+      break;
+
+    case 'party':
+      if(G.money < 30) { showNotif('Sistema', 'Sin pasta pa\' fiesta 🥲', 'danger'); return; }
+      G.money -= 30;
+      G.chars.forEach(ch => {
+        if(!ch.collapsed) {
+          ch.state = ch.state === 'partying' ? 'normal' : 'partying';
+        }
+      });
+      G.trash = Math.min(100, G.trash + 20);
+      G.chaos = Math.min(100, G.chaos + 10);
+      showNotif('Sistema', '¡FIESTA EN EL LOCAL! 🎉 La basura sube...');
+      break;
+
+    case 'work':
+      if(c.sleep < 25) { showNotif(c.name, `${c.name} necesita dormir antes de currar`); return; }
+      c.state = 'working';
+      const earned = 60 + Math.floor(Math.random()*80);
+      G.money += earned;
+      c.sleep   = Math.max(0, c.sleep   - 25);
+      c.hunger  = Math.max(0, c.hunger  - 20);
+      c.boredom = Math.max(0, c.boredom - 10);
+      showNotif(c.name, `${c.name} curra y saca €${earned} 💼`, 'good');
+      setTimeout(()=>{ if(c.state==='working') c.state='normal'; }, 5000);
+      break;
+
+    case 'seco':
+      if(G.money < 25) { showNotif('El Seco', 'No tienes pasta tío, vuelve cuando cobres 🌿', 'danger'); return; }
+      G.money -= 25;
+      c.happy  = Math.min(100, c.happy  + 30);
+      c.drug   = Math.min(100, c.drug   + 35);
+      c.sleep  = Math.max(0,   c.sleep  - 10);
+      showNotif('El Seco', `Material de primera para ${c.name}. Que aproveche 🌿`, 'good');
+      if(c.drug > 80) {
+        showNotif(c.name, `${c.name} está muy alterado/a... 😵`, 'danger');
+      }
+      break;
+
+    case 'ratas':
+      if(G.reputation < 30) {
+        showNotif('Los Ratas', 'Iros a la mierda, habéis quemado el puente 🐀', 'danger');
+        return;
+      }
+      G.reputation = Math.max(0, G.reputation - 5);
+      const helpRoll = Math.random();
+      if(helpRoll < 0.5) {
+        G.trash = Math.max(0, G.trash - 20);
+        showNotif('Los Ratas', '¡Os ayudamos con la basura esta vez! 🐀🧹', 'good');
+      } else if(helpRoll < 0.8) {
+        const aviso = Math.floor(Math.random()*50) + 20;
+        G.money += aviso;
+        showNotif('Los Ratas', `Os pasan €${aviso} de un trabajo rápido 💸`, 'good');
+      } else {
+        showNotif('Los Ratas', 'Esta vez nada. Pero os deben una 🤝');
+      }
+      break;
+
+    case 'nextday':
+      if(!G.running) return;
+      // Manual day skip
+      G.timeInDay = 99;
+      break;
+  }
+  renderAll();
+}
+
+function checkChaos() {
+  const collapsed = G.chars.filter(c=>c.collapsed).length;
+  if(collapsed >= 3) G.chaos = Math.min(100, G.chaos + 20);
+}
+
+// ── GAME OVER / WIN ─────────────────────────────────────────────
+function triggerGameOver(reason) {
+  G.gameover = true;
+  G.running = false;
+  clearInterval(tickInterval);
+  document.getElementById('gameover-reason').textContent = reason;
+  document.getElementById('gameover').classList.add('active');
+}
+
+function triggerWin() {
+  G.gameover = true;
+  G.running = false;
+  clearInterval(tickInterval);
+  document.getElementById('gameover-reason').textContent =
+    `¡Sobrevivisteis el mes! €${G.money} en el fondo, ${Math.round(G.trash)}% de basura y con las justas. Leyendas. 🏆`;
+  document.getElementById('gameover').classList.add('active');
+  document.querySelector('#gameover h2').textContent = '¡UN MES!';
+  document.querySelector('#gameover h2').style.color = 'var(--accent)';
+}
+
+// ── NOTIFICATIONS ───────────────────────────────────────────────
+function showNotif(sender, msg, type='') {
+  const area = document.getElementById('notif-area');
+  const el = document.createElement('div');
+  el.className = 'notif ' + type;
+  el.innerHTML = `<div class="notif-sender">${sender}</div>${msg}`;
+  area.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity 0.5s'; el.style.opacity='0'; setTimeout(()=>el.remove(),500); }, 3000);
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function renderAll() {
+  renderCharSprites();
+  renderCharTabs();
+  renderStats();
+  renderStripValues();
+  renderTrash();
+  updateTimeBar();
+}
+
+function updateTimeBar() {
+  document.getElementById('time-bar').style.width = G.timeInDay + '%';
+  document.getElementById('day-display').textContent = `${G.day} / ${CFG.days}`;
+}
+
+function renderStripValues() {
+  const moneyEl = document.getElementById('strip-money');
+  moneyEl.textContent = `€${G.money}`;
+  moneyEl.className = 'strip-val ' + (G.money < 100 ? 'danger' : G.money < 300 ? 'warning' : 'good');
+
+  const trashEl = document.getElementById('strip-trash');
+  trashEl.textContent = Math.round(G.trash) + '%';
+  trashEl.className = 'strip-val ' + (G.trash > 75 ? 'danger' : G.trash > 50 ? 'warning' : '');
+
+  const chaosEl = document.getElementById('strip-chaos');
+  chaosEl.textContent = Math.round(G.chaos) + '%';
+  chaosEl.className = 'strip-val ' + (G.chaos > 70 ? 'danger' : G.chaos > 40 ? 'warning' : '');
+
+  const repEl = document.getElementById('strip-rep');
+  repEl.textContent = Math.round(G.reputation);
+  repEl.className = 'strip-val ' + (G.reputation < 25 ? 'danger' : G.reputation > 70 ? 'good' : '');
+}
+
+function getStatColor(key, val) {
+  const def = STAT_DEFS.find(s=>s.key===key);
+  if(!def) return '#888';
+  if(def.dangerBelow && val < def.dangerBelow) return '#ff3c3c';
+  if(def.dangerAbove && val > def.dangerAbove) return '#ff3c3c';
+  if(val < 35) return '#ffab3c';
+  return def.color;
+}
+
+function renderStats() {
+  const c = G.chars[G.selected];
+  document.getElementById('char-panel-emoji').textContent = c.emoji;
+  document.getElementById('char-panel-name').textContent = c.name.toUpperCase();
+
+  const states = { normal:'En el local', sleeping:'Durmiendo 😴', partying:'De fiesta 🎉', working:'Currando 💼', collapsed:'COLAPSADO 💀' };
+  document.getElementById('char-panel-state').textContent = states[c.state] || 'Normal';
+
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = '';
+  STAT_DEFS.forEach(def => {
+    const val = Math.max(0, Math.min(100, c[def.key]));
+    const color = getStatColor(def.key, val);
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    row.innerHTML = `
+      <span class="stat-label">${def.label}</span>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" style="width:${val}%;background:${color}"></div>
+      </div>
+      <span class="stat-val" style="color:${color}">${Math.round(val)}</span>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+function renderCharSprites() {
+  const area = document.getElementById('characters-area');
+  area.innerHTML = '';
+  G.chars.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'char-sprite' + (i===G.selected?' selected':'') + (c.collapsed?' collapsed':'') + (c.state==='partying'?' party':'');
+    el.onclick = () => { G.selected = i; renderAll(); };
+
+    const mood = getCharMood(c);
+    el.innerHTML = `
+      <div class="char-mood-bubble">${mood}</div>
+      <div class="char-body">${c.emoji}</div>
+      <div class="char-name">${c.name}</div>
+      <div class="char-status-dot" style="background:${getStatusDot(c)}"></div>
+    `;
+    area.appendChild(el);
+  });
+}
+
+function getCharMood(c) {
+  if(c.collapsed) return '💀 KO';
+  if(c.drug > 70) return '😵 ALTERADO';
+  if(c.happy > 70) return '😊 Bien';
+  if(c.hunger < 20) return '🍔 Hambre!';
+  if(c.sleep < 20) return '😴 Cansado';
+  if(c.boredom < 25) return '😒 Aburrido';
+  return '😐 Ok';
+}
+
+function getStatusDot(c) {
+  if(c.collapsed) return '#ff3c3c';
+  if(c.drug > 70) return '#e8ff3c';
+  if(c.happy > 70) return '#3cffb4';
+  if(c.hunger < 25 || c.sleep < 25) return '#ffab3c';
+  return '#3c9fff';
+}
+
+function renderCharTabs() {
+  const tabs = document.getElementById('char-tabs');
+  tabs.innerHTML = '';
+  G.chars.forEach((c, i) => {
+    const hp = Math.round((c.hunger + c.sleep + c.happy) / 3);
+    const el = document.createElement('div');
+    el.className = 'char-tab' + (i===G.selected?' active':'') + (c.collapsed?' collapsed-tab':'');
+    el.onclick = () => { G.selected = i; renderAll(); };
+    el.innerHTML = `
+      <span class="tab-emoji">${c.emoji}</span>
+      <span class="tab-name">${c.name}</span>
+      <div class="tab-hp-bar">
+        <div class="tab-hp-fill" style="width:${hp}%;background:${hp<30?'#ff3c3c':hp<60?'#ffab3c':'#3cffb4'}"></div>
+      </div>
+    `;
+    tabs.appendChild(el);
+  });
+}
+
+function renderTrash() {
+  const layer = document.getElementById('trash-layer');
+  const trashEmojis = ['🗑️','🍺','🍕','🧻','👟','📦','🥤','🍾','💊','🧦'];
+  const count = Math.floor(G.trash / 10);
+  layer.innerHTML = '';
+  for(let i=0; i<count; i++) {
+    const t = document.createElement('span');
+    t.className = 'trash-item';
+    t.textContent = trashEmojis[i % trashEmojis.length];
+    t.style.animationDelay = (i*0.3)+'s';
+    layer.appendChild(t);
+  }
+}
+
+// ── BOOT ────────────────────────────────────────────────────────
+initGame();
+</script>
+</body>
+</html>
