@@ -9,26 +9,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #080808;
-  --bg1:       #0e0e0e;
-  --bg2:       #141414;
-  --bg3:       #1c1c1c;
-  --line:      #222;
-  --line2:     #2e2e2e;
-  --text:      #d8d4cc;
-  --text2:     #7a7670;
-  --text3:     #3e3c38;
-  --accent:    #c0392b;
-  --accent2:   #8b1a10;
-  --accent3:   rgba(192,57,43,0.08);
-  --gold:      #a8916a;
-  --gold2:     rgba(168,145,106,0.12);
-  --green:     #2d5a2d;
-  --green2:    #3d7a3d;
-  --radius:    4px;
-  --mono:      'DM Mono', monospace;
-  --serif:     'Cormorant Garamond', Georgia, serif;
-  --sans:      'Instrument Sans', sans-serif;
+  --bg:      #080808;
+  --bg1:     #0e0e0e;
+  --bg2:     #141414;
+  --line:    #1e1e1e;
+  --line2:   #2a2a2a;
+  --text:    #d8d4cc;
+  --text2:   #7a7670;
+  --text3:   #3e3c38;
+  --accent:  #c0392b;
+  --accent2: #8b1a10;
+  --gold:    #a8916a;
+  --green:   #2d5a2d;
+  --green2:  #3d7a3d;
+  --radius:  4px;
+  --mono:    'DM Mono', monospace;
+  --serif:   'Cormorant Garamond', Georgia, serif;
+  --sans:    'Instrument Sans', sans-serif;
 }
 
 html { scroll-behavior: smooth; }
@@ -40,259 +37,332 @@ body {
   font-weight: 300;
   min-height: 100vh;
   overflow-x: hidden;
-  cursor: default;
 }
 
-/* ─── NOISE OVERLAY ─── */
-body::before {
+/* noise */
+body::after {
   content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.4;
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
 }
 
-/* ─── SCREENS ─── */
+/* ── SCREENS ── */
 .screen { display: none; min-height: 100vh; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* ─── ONBOARDING ─── */
+/* ══════════════════════════════════════════════
+   ONBOARDING
+══════════════════════════════════════════════ */
 #screen-onboarding {
-  background: var(--bg);
+  align-items: center;
   justify-content: flex-end;
+  background: var(--bg);
 }
 
-.onb-header {
+/* thin top bar - just memento wordmark, no entity name */
+.onb-topbar {
   position: fixed;
   top: 0; left: 0; right: 0;
-  padding: 2rem 2.5rem;
+  padding: 1.6rem 2.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 10;
+  z-index: 20;
+  background: linear-gradient(to bottom, var(--bg) 60%, transparent);
 }
 
-.logo {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-.onb-step-indicator {
+.wordmark {
   font-family: var(--mono);
   font-size: 0.65rem;
+  letter-spacing: 0.4em;
   color: var(--text3);
-  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.chat-window {
-  flex: 1;
+.onb-progress {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 6rem 0 0;
-  max-width: 680px;
-  margin: 0 auto;
+  gap: 5px;
+  align-items: center;
+}
+
+.onb-dot {
+  width: 18px; height: 1px;
+  background: var(--line2);
+  transition: background 0.4s;
+}
+
+.onb-dot.done { background: var(--accent2); }
+.onb-dot.active { background: var(--accent); }
+
+/* chat area */
+.chat-area {
   width: 100%;
-}
-
-.chat-messages {
-  padding: 2rem 2rem 0;
+  max-width: 660px;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-  overflow-y: auto;
-  max-height: calc(100vh - 220px);
+  flex: 1;
+  padding-top: 5rem;
 }
 
-.chat-messages::-webkit-scrollbar { width: 2px; }
-.chat-messages::-webkit-scrollbar-track { background: transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--line2); }
+.chat-feed {
+  flex: 1;
+  padding: 1.5rem 2rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
+  scroll-behavior: smooth;
+}
 
+.chat-feed::-webkit-scrollbar { width: 2px; }
+.chat-feed::-webkit-scrollbar-thumb { background: var(--line2); }
+
+/* message animation */
 .msg {
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
-.msg.visible { opacity: 1; transform: translateY(0); }
+.msg.in { opacity: 1; transform: translateY(0); }
 
-.msg-entity {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-}
-
-.msg-entity-label {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--accent);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding-left: 2px;
-  opacity: 0.7;
-}
-
-.msg-bubble-entity {
+/* entity bubble — no label, just the bubble */
+.bubble-in {
   background: var(--bg1);
-  border: 0.5px solid var(--line);
+  border: 0.5px solid var(--line2);
   border-left: 2px solid var(--accent2);
-  padding: 0.9rem 1.2rem;
+  padding: 1rem 1.3rem;
   border-radius: 0 var(--radius) var(--radius) var(--radius);
   font-family: var(--serif);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 1.1rem;
+  line-height: 1.75;
   color: var(--text);
-  max-width: 85%;
+  max-width: 82%;
+  width: fit-content;
 }
 
-.msg-bubble-entity em { color: var(--gold); font-style: italic; }
-.msg-bubble-entity strong { color: var(--accent); font-weight: 400; }
+.bubble-in em   { color: var(--gold); font-style: italic; }
+.bubble-in b    { color: var(--accent); font-weight: 400; }
+.bubble-in .num { font-family: var(--mono); font-size: 0.9rem; color: var(--text2); }
 
-.msg-user {
+/* stat line inside entity bubble */
+.stat-line {
   display: flex;
-  justify-content: flex-end;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 0.5px solid var(--line2);
 }
 
-.msg-bubble-user {
-  background: var(--bg2);
-  border: 0.5px solid var(--line2);
-  padding: 0.75rem 1.1rem;
-  border-radius: var(--radius) 0 var(--radius) var(--radius);
+.stat-n {
   font-family: var(--mono);
-  font-size: 0.85rem;
-  color: var(--text2);
-  max-width: 60%;
-}
-
-.msg-reveal {
-  background: rgba(192,57,43,0.06);
-  border: 0.5px solid var(--accent2);
-  border-radius: var(--radius);
-  padding: 1.4rem 1.6rem;
-  text-align: center;
-  margin: 0.5rem 0;
-}
-
-.msg-reveal .reveal-days {
-  font-family: var(--mono);
-  font-size: 3rem;
+  font-size: 1.4rem;
   font-weight: 300;
   color: var(--accent);
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
-.msg-reveal .reveal-label {
-  font-family: var(--serif);
-  font-size: 0.85rem;
-  color: var(--text2);
-  margin-top: 0.4rem;
-  font-style: italic;
-}
-
-.msg-reveal .reveal-date {
+.stat-l {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: var(--text3);
-  margin-top: 0.8rem;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 
-.typing-indicator {
-  display: none;
-  align-items: center;
-  gap: 4px;
+/* user bubble */
+.bubble-out-wrap { display: flex; justify-content: flex-end; }
+
+.bubble-out {
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
   padding: 0.7rem 1rem;
+  border-radius: var(--radius) 0 var(--radius) var(--radius);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--text2);
+  max-width: 55%;
+}
+
+/* typing */
+.typing-wrap { opacity: 0; transition: opacity 0.3s; }
+.typing-wrap.in { opacity: 1; }
+
+.typing-bubble {
+  display: flex;
+  gap: 5px;
+  align-items: center;
   background: var(--bg1);
-  border: 0.5px solid var(--line);
+  border: 0.5px solid var(--line2);
   border-left: 2px solid var(--accent2);
+  padding: 0.75rem 1rem;
   border-radius: 0 var(--radius) var(--radius) var(--radius);
   width: fit-content;
 }
 
-.typing-indicator.visible { display: flex; }
-
-.typing-dot {
+.t-dot {
   width: 4px; height: 4px;
   background: var(--accent2);
   border-radius: 50%;
-  animation: typingPulse 1.4s ease-in-out infinite;
+  animation: tdot 1.3s ease-in-out infinite;
 }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.t-dot:nth-child(2) { animation-delay: 0.18s; }
+.t-dot:nth-child(3) { animation-delay: 0.36s; }
 
-@keyframes typingPulse {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+@keyframes tdot {
+  0%,80%,100% { opacity: 0.2; transform: scale(0.75); }
   40% { opacity: 1; transform: scale(1); }
 }
 
-.chat-input-area {
-  padding: 1.5rem 2rem 2.5rem;
-  border-top: 0.5px solid var(--line);
-  background: linear-gradient(to top, var(--bg) 60%, transparent);
-  max-width: 680px;
-  margin: 0 auto;
+/* reveal card */
+.reveal-card {
+  background: rgba(192,57,43,0.05);
+  border: 0.5px solid var(--accent2);
+  border-radius: var(--radius);
+  padding: 2rem;
   width: 100%;
+  animation: revealIn 0.8s ease forwards;
+}
+
+@keyframes revealIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.reveal-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 1.2rem;
+}
+
+.reveal-days {
+  font-family: var(--mono);
+  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  font-weight: 300;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.reveal-days-label {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text2);
+  font-style: italic;
+  margin-top: 0.4rem;
+}
+
+.reveal-divider {
+  height: 0.5px;
+  background: var(--line2);
+  margin: 1.4rem 0;
+}
+
+.reveal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.reveal-stat { }
+
+.reveal-stat-n {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 300;
+}
+
+.reveal-stat-l {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.reveal-footer {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--line2);
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  color: var(--text3);
+  font-style: italic;
+  text-align: center;
+}
+
+/* input area */
+.input-area {
+  width: 100%;
+  padding: 1.2rem 2rem 2rem;
+  background: linear-gradient(to top, var(--bg) 50%, transparent);
 }
 
 .input-row {
   display: flex;
-  gap: 0.6rem;
-  align-items: stretch;
+  gap: 0.5rem;
 }
 
-.chat-input {
+.ci {
   flex: 1;
   background: var(--bg1);
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 0.85rem 1.1rem;
+  padding: 0.85rem 1rem;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 300;
   outline: none;
   transition: border-color 0.2s;
 }
 
-.chat-input:focus { border-color: var(--accent2); }
-.chat-input::placeholder { color: var(--text3); }
+.ci:focus { border-color: var(--accent2); }
+.ci::placeholder { color: var(--text3); }
 
-.chat-submit {
+input[type="date"].ci::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+  cursor: pointer;
+}
+
+.cs {
   background: var(--accent2);
   border: none;
   border-radius: var(--radius);
-  padding: 0 1.2rem;
+  padding: 0 1.1rem;
   color: #e8c8c4;
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: background 0.15s, transform 0.1s;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.chat-submit:hover { background: var(--accent); }
-.chat-submit:active { transform: scale(0.97); }
+.cs:hover { background: var(--accent); }
+.cs:active { transform: scale(0.97); }
 
-/* ─── ONBOARDING CHOICE BUTTONS ─── */
-.choice-buttons {
+.choices {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-bottom: 0.7rem;
 }
 
-.choice-btn {
-  background: var(--bg2);
+.choice {
+  background: var(--bg1);
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1rem;
   color: var(--text2);
   font-family: var(--mono);
   font-size: 0.75rem;
@@ -300,543 +370,512 @@ body::before {
   transition: all 0.15s;
 }
 
-.choice-btn:hover { border-color: var(--accent2); color: var(--text); }
+.choice:hover { border-color: var(--accent2); color: var(--text); }
 
-/* ─── APP SHELL ─── */
+/* ══════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════ */
 #screen-app {
   flex-direction: row;
   min-height: 100vh;
+  animation: appIn 0.6s ease forwards;
 }
 
-/* ─── SIDEBAR ─── */
+@keyframes appIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* SIDEBAR */
 .sidebar {
-  width: 220px;
+  width: 210px;
   background: var(--bg1);
   border-right: 0.5px solid var(--line);
   display: flex;
   flex-direction: column;
-  padding: 2rem 0;
+  padding: 0;
   position: fixed;
   top: 0; left: 0; bottom: 0;
   z-index: 100;
 }
 
-.sidebar-logo {
-  padding: 0 1.6rem 2rem;
+.sb-logo {
+  padding: 1.8rem 1.5rem 1.4rem;
   border-bottom: 0.5px solid var(--line);
-  margin-bottom: 1.5rem;
 }
 
-.sidebar-logo-text {
+.sb-logo-mark {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   letter-spacing: 0.35em;
   color: var(--text3);
   text-transform: uppercase;
 }
 
-.sidebar-logo-name {
+.sb-logo-name {
   font-family: var(--serif);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   color: var(--text);
   font-weight: 300;
-  margin-top: 0.2rem;
-  letter-spacing: 0.05em;
+  margin-top: 0.15rem;
 }
 
-.sidebar-user {
-  padding: 0 1.6rem;
-  margin-bottom: 2rem;
+.sb-user {
+  padding: 1.2rem 1.5rem 1.4rem;
+  border-bottom: 0.5px solid var(--line);
 }
 
-.sidebar-user-name {
-  font-family: var(--sans);
-  font-size: 0.8rem;
+.sb-user-name {
+  font-size: 0.82rem;
   color: var(--text2);
   font-weight: 300;
 }
 
-.sidebar-user-days {
+.sb-user-days {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--accent);
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
+  letter-spacing: 0.02em;
 }
 
-.sidebar-nav {
+.sb-nav {
   flex: 1;
-  padding: 0 0.8rem;
+  padding: 1rem 0.7rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
-.nav-item {
+.ni {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.8rem;
+  gap: 0.7rem;
+  padding: 0.6rem 0.8rem;
   border-radius: var(--radius);
   color: var(--text3);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: all 0.15s;
   border: 0.5px solid transparent;
-  font-weight: 300;
 }
 
-.nav-item:hover { color: var(--text2); background: var(--bg2); }
-.nav-item.active { color: var(--text); background: var(--bg2); border-color: var(--line); }
+.ni:hover { color: var(--text2); background: var(--bg2); }
+.ni.active { color: var(--text); background: var(--bg2); border-color: var(--line2); }
+.ni svg { flex-shrink: 0; opacity: 0.4; transition: opacity 0.15s; }
+.ni.active svg, .ni:hover svg { opacity: 0.9; }
 
-.nav-item svg { flex-shrink: 0; opacity: 0.5; }
-.nav-item.active svg { opacity: 1; }
-
-.sidebar-bottom {
-  padding: 1.5rem 1.6rem 0;
+.sb-foot {
+  padding: 1.2rem 1.5rem;
   border-top: 0.5px solid var(--line);
 }
 
-.sidebar-streak {
+.sb-streak {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text3);
+  letter-spacing: 0.04em;
 }
 
-.sidebar-streak span { color: var(--gold); }
+.sb-streak span { color: var(--gold); }
 
-/* ─── MAIN CONTENT ─── */
-.main-content {
-  margin-left: 220px;
+/* MAIN */
+.main {
+  margin-left: 210px;
   flex: 1;
   min-height: 100vh;
 }
 
-.page { display: none; padding: 3rem 3.5rem; max-width: 960px; }
-.page.active { display: block; }
+.page { display: none; padding: 2.8rem 3rem; max-width: 940px; }
+.page.active { display: block; animation: pgIn 0.35s ease; }
 
-/* ─── PAGE: HOME ─── */
-.home-header {
+@keyframes pgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PAGE HOME ── */
+.home-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .home-greeting {
   font-family: var(--serif);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text2);
   font-style: italic;
-  margin-bottom: 0.3rem;
 }
 
-.home-title {
+.home-name {
   font-family: var(--serif);
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 300;
   color: var(--text);
   line-height: 1.2;
+  margin-top: 0.2rem;
+}
+
+.home-date-block {
+  text-align: right;
 }
 
 .home-date {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text3);
-  letter-spacing: 0.12em;
-  text-align: right;
-  margin-top: 0.5rem;
+  letter-spacing: 0.1em;
 }
 
 /* COUNTDOWN HERO */
-.countdown-hero {
+.hero {
   background: var(--bg1);
-  border: 0.5px solid var(--line);
+  border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 3rem;
-  margin-bottom: 1.5rem;
+  padding: 2.5rem;
+  margin-bottom: 1.2rem;
   position: relative;
   overflow: hidden;
 }
 
-.countdown-hero::before {
+.hero::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--accent2), transparent);
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent2) 40%, transparent);
 }
 
-.countdown-label {
+.hero-label {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   letter-spacing: 0.2em;
   color: var(--text3);
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
 }
 
-.countdown-grid {
+.cd-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 0;
+  grid-template-columns: repeat(4, 1fr);
 }
 
-.countdown-unit {
-  padding: 1rem 0;
+.cd-unit {
+  padding: 0.8rem 0;
   border-right: 0.5px solid var(--line);
   text-align: center;
 }
-.countdown-unit:last-child { border-right: none; }
+.cd-unit:last-child { border-right: none; }
 
-.countdown-number {
+.cd-n {
   font-family: var(--mono);
-  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
   font-weight: 300;
   color: var(--text);
   line-height: 1;
   letter-spacing: -0.02em;
+  transition: color 0.5s;
 }
 
-.countdown-number.primary { color: var(--accent); }
+.cd-n.red { color: var(--accent); }
 
-.countdown-unit-label {
+.cd-l {
   font-family: var(--mono);
-  font-size: 0.55rem;
+  font-size: 0.52rem;
   color: var(--text3);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
 }
 
-.countdown-footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
+.hero-foot {
+  margin-top: 1.8rem;
+  padding-top: 1.4rem;
   border-top: 0.5px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.death-date {
+.death-label {
   font-family: var(--serif);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text2);
   font-style: italic;
 }
 
-.death-date strong {
-  color: var(--text);
-  font-style: normal;
-  font-weight: 400;
+.death-label strong { color: var(--text); font-style: normal; font-weight: 400; }
+
+.life-bar-wrap { display: flex; align-items: center; gap: 0.8rem; }
+
+.lbar {
+  width: 100px; height: 2px;
+  background: var(--line2); border-radius: 1px; overflow: hidden;
 }
 
-.life-progress {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.progress-bar {
-  width: 120px;
-  height: 2px;
-  background: var(--line2);
-  border-radius: 1px;
-  overflow: hidden;
-}
-
-.progress-fill {
+.lbar-fill {
   height: 100%;
   background: var(--accent);
   border-radius: 1px;
-  transition: width 1s ease;
+  transition: width 1.2s ease;
 }
 
-.progress-pct {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text3);
-}
-
-/* STAT CARDS */
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.4rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--line);
-}
-
-.stat-card-label {
+.lbar-pct {
   font-family: var(--mono);
   font-size: 0.6rem;
   color: var(--text3);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 0.7rem;
 }
 
-.stat-card-value {
+/* STAT ROW */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.scard {
+  background: var(--bg1);
+  border: 0.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.3rem;
+}
+
+.scard-l {
   font-family: var(--mono);
-  font-size: 1.6rem;
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.scard-v {
+  font-family: var(--mono);
+  font-size: 1.5rem;
   font-weight: 300;
   color: var(--text);
   line-height: 1;
 }
+.scard-v.red { color: var(--accent); }
+.scard-v.gold { color: var(--gold); }
 
-.stat-card-value.accent { color: var(--accent); }
-.stat-card-value.gold { color: var(--gold); }
-
-.stat-card-sub {
+.scard-s {
   font-family: var(--serif);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text3);
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   font-style: italic;
 }
 
-/* DAILY QUOTE */
-.daily-quote-block {
+/* QUOTE BLOCK */
+.quote-block {
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 2rem 2.5rem;
+  padding: 1.8rem 2.2rem;
   position: relative;
 }
 
-.daily-quote-block::before {
-  content: '"';
+.quote-block::before {
+  content: '\201C';
   position: absolute;
-  top: 0.5rem; left: 1.5rem;
+  top: 0.3rem; left: 1.3rem;
   font-family: var(--serif);
   font-size: 5rem;
-  color: var(--line);
+  color: var(--line2);
   line-height: 1;
   pointer-events: none;
 }
 
-.daily-quote-text {
+.quote-text {
   font-family: var(--serif);
-  font-size: 1.2rem;
-  line-height: 1.75;
+  font-size: 1.1rem;
+  line-height: 1.8;
   color: var(--text2);
   font-style: italic;
-  font-weight: 300;
-  padding-left: 1.5rem;
+  padding-left: 1.2rem;
 }
 
-.daily-quote-attr {
+.quote-attr {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   color: var(--text3);
   letter-spacing: 0.12em;
-  margin-top: 1.2rem;
-  padding-left: 1.5rem;
+  margin-top: 1rem;
+  padding-left: 1.2rem;
 }
 
-/* ─── PAGE: BUCKET LIST ─── */
-.page-header {
-  margin-bottom: 2.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 0.5px solid var(--line);
+/* ── PAGE BUCKET ── */
+.page-head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 0.5px solid var(--line);
 }
 
 .page-title {
   font-family: var(--serif);
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   font-weight: 300;
   color: var(--text);
 }
 
-.page-subtitle {
+.page-sub {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text3);
   margin-top: 0.3rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
-.btn-primary {
+.btn-ghost {
   background: transparent;
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 0.6rem 1.2rem;
+  padding: 0.55rem 1.1rem;
   color: var(--text2);
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   cursor: pointer;
   transition: all 0.15s;
-  letter-spacing: 0.05em;
 }
+.btn-ghost:hover { border-color: var(--accent2); color: var(--text); }
 
-.btn-primary:hover { border-color: var(--accent2); color: var(--text); }
-
-/* ADD ITEM FORM */
-.add-item-form {
+.add-form {
+  display: none;
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 1.2rem;
-  margin-bottom: 1.5rem;
-  display: none;
-  gap: 0.8rem;
+  padding: 1.1rem;
+  margin-bottom: 1.2rem;
+  gap: 0.7rem;
   align-items: flex-end;
 }
+.add-form.open { display: flex; }
 
-.add-item-form.visible { display: flex; }
+.fg { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
 
-.form-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
-.form-label { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+.fl {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
 
-.form-input, .form-select {
+.fi, .fs {
   background: var(--bg);
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
   padding: 0.6rem 0.8rem;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 300;
   outline: none;
   transition: border-color 0.15s;
 }
-
-.form-input:focus, .form-select:focus { border-color: var(--accent2); }
-.form-select { cursor: pointer; }
+.fi:focus, .fs:focus { border-color: var(--accent2); }
+.fs { cursor: pointer; }
 option { background: var(--bg1); }
 
-.form-submit {
+.btn-add {
   background: var(--accent2);
   border: none;
   border-radius: var(--radius);
-  padding: 0.6rem 1.2rem;
+  padding: 0.6rem 1.1rem;
   color: #e8c8c4;
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
 }
+.btn-add:hover { background: var(--accent); }
 
-.form-submit:hover { background: var(--accent); }
-
-/* FILTER TABS */
-.filter-tabs {
+.filter-row {
   display: flex;
-  gap: 0.3rem;
-  margin-bottom: 1.5rem;
+  gap: 0;
+  margin-bottom: 1.2rem;
   border-bottom: 0.5px solid var(--line);
-  padding-bottom: 0;
 }
 
-.filter-tab {
+.ft {
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text3);
-  padding: 0.5rem 0.8rem;
+  padding: 0.45rem 0.8rem;
   cursor: pointer;
   border-bottom: 1.5px solid transparent;
   margin-bottom: -0.5px;
-  letter-spacing: 0.08em;
-  transition: all 0.15s;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
+  transition: all 0.15s;
 }
+.ft:hover { color: var(--text2); }
+.ft.active { color: var(--text); border-bottom-color: var(--accent); }
 
-.filter-tab:hover { color: var(--text2); }
-.filter-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.blist { display: flex; flex-direction: column; gap: 0.4rem; }
 
-/* BUCKET ITEMS */
-.bucket-list-container { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.bucket-item {
+.bitem {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
+  gap: 0.9rem;
+  padding: 0.9rem 1.1rem;
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  transition: border-color 0.2s, background 0.2s;
   cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
 }
+.bitem:hover { border-color: var(--line2); background: var(--bg2); }
+.bitem.done { opacity: 0.55; }
 
-.bucket-item:hover { border-color: var(--line2); background: var(--bg2); }
-.bucket-item.done { opacity: 0.6; }
-.bucket-item.done:hover { opacity: 0.8; }
-
-.bucket-check {
-  width: 18px; height: 18px;
+.bcheck {
+  width: 17px; height: 17px;
   border-radius: 50%;
   border: 1px solid var(--line2);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: all 0.2s;
 }
+.bcheck.on { background: var(--green); border-color: var(--green2); }
 
-.bucket-check.checked {
-  background: var(--green);
-  border-color: var(--green2);
-}
-
-.check-svg { display: none; }
-.bucket-check.checked .check-svg { display: block; }
-
-.bucket-info { min-width: 0; }
-
-.bucket-name {
-  font-family: var(--sans);
-  font-size: 0.85rem;
+.bname {
+  font-size: 0.83rem;
   color: var(--text);
   font-weight: 300;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.bitem.done .bname { text-decoration: line-through; color: var(--text3); }
 
-.bucket-item.done .bucket-name { text-decoration: line-through; color: var(--text3); }
-
-.bucket-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  margin-top: 0.3rem;
+.bmeta {
+  display: flex; gap: 0.7rem; align-items: center; margin-top: 0.25rem;
 }
 
-.bucket-cat {
+.bcat {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   color: var(--text3);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
-.bucket-date {
+.bdate {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   color: var(--green2);
 }
 
-.bucket-delete {
-  width: 24px; height: 24px;
+.bdel {
+  width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
   opacity: 0;
   color: var(--text3);
@@ -844,383 +883,396 @@ option { background: var(--bg1); }
   transition: opacity 0.15s, color 0.15s;
   flex-shrink: 0;
 }
+.bitem:hover .bdel { opacity: 1; }
+.bdel:hover { color: var(--accent); }
 
-.bucket-item:hover .bucket-delete { opacity: 1; }
-.bucket-delete:hover { color: var(--accent); }
+.empty {
+  padding: 2.5rem;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  color: var(--text3);
+  font-style: italic;
+  border: 0.5px dashed var(--line2);
+  border-radius: var(--radius);
+}
 
-/* ─── PAGE: DAILY ─── */
+/* ── PAGE DAILY ── */
 .daily-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
 }
 
 .card {
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 1.6rem;
+  padding: 1.5rem;
 }
 
 .card-label {
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   color: var(--text3);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
-.streak-display {
+.streak-n {
   font-family: var(--mono);
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 300;
   color: var(--gold);
   line-height: 1;
 }
 
-.streak-sub {
+.streak-s {
   font-family: var(--serif);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text3);
   font-style: italic;
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
 }
 
-.week-dots {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+.wdots {
+  display: flex; gap: 0.4rem; margin-top: 1rem;
 }
 
-.week-dot {
-  width: 28px; height: 28px;
+.wd {
+  width: 26px; height: 26px;
   border-radius: var(--radius);
   border: 0.5px solid var(--line);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   color: var(--text3);
 }
+.wd.on { background: rgba(45,90,45,0.25); border-color: var(--green); color: var(--green2); }
+.wd.today { border-color: var(--accent2); color: var(--accent); }
 
-.week-dot.done { background: rgba(45,90,45,0.3); border-color: var(--green); color: var(--green2); }
-.week-dot.today { border-color: var(--accent2); color: var(--accent); }
-
-.reflection-full {
+.refl-card {
   grid-column: 1 / -1;
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 1.6rem;
+  padding: 1.5rem;
 }
 
-.reflection-question {
+.refl-q {
   font-family: var(--serif);
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.75;
   color: var(--text2);
   font-style: italic;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.1rem;
 }
 
-.reflection-textarea {
+.rta {
   width: 100%;
   background: var(--bg);
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 1rem;
   color: var(--text);
   font-family: var(--serif);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 300;
   line-height: 1.7;
   resize: none;
   outline: none;
   transition: border-color 0.2s;
-  min-height: 120px;
+  min-height: 110px;
+}
+.rta:focus { border-color: var(--accent2); }
+.rta::placeholder { color: var(--text3); font-style: italic; }
+
+.refl-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.7rem;
 }
 
-.reflection-textarea:focus { border-color: var(--accent2); }
-.reflection-textarea::placeholder { color: var(--text3); font-style: italic; }
-
-.reflection-save {
-  margin-top: 0.8rem;
+.btn-save {
   background: transparent;
   border: 0.5px solid var(--line2);
   border-radius: var(--radius);
-  padding: 0.55rem 1.2rem;
+  padding: 0.5rem 1rem;
   color: var(--text3);
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   cursor: pointer;
   transition: all 0.15s;
-  letter-spacing: 0.06em;
+}
+.btn-save:hover { border-color: var(--accent2); color: var(--text2); }
+
+.saved-msg {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--green2);
+  display: none;
 }
 
-.reflection-save:hover { border-color: var(--accent2); color: var(--text2); }
-
-/* ─── PAGE: PROFILE ─── */
-.profile-grid {
+/* ── PAGE PROFILE ── */
+.prof-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
-.profile-stat {
+.prof-stat {
+  background: var(--bg1);
+  border: 0.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.3rem;
+}
+
+.ps-n {
+  font-family: var(--mono);
+  font-size: 1.9rem;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+}
+
+.ps-l {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 0.45rem;
+}
+
+.prof-wide {
+  grid-column: 1 / -1;
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
   padding: 1.4rem;
 }
 
-.profile-stat-n {
-  font-family: var(--mono);
-  font-size: 2rem;
-  font-weight: 300;
-  color: var(--text);
-  line-height: 1;
+.prow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--line);
 }
+.prow:last-child { border-bottom: none; }
 
-.profile-stat-l {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--text3);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 0.5rem;
-}
+.pr-label { font-family: var(--serif); font-size: 0.88rem; color: var(--text2); }
+.pr-value { font-family: var(--mono); font-size: 0.75rem; color: var(--text3); }
+.pr-value.hi { color: var(--gold); }
 
-.profile-wide {
+.refl-archive {
   grid-column: 1 / -1;
   background: var(--bg1);
   border: 0.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 1.6rem;
+  padding: 1.4rem;
 }
 
-.happiness-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.ra-entry {
   padding: 0.9rem 0;
   border-bottom: 0.5px solid var(--line);
 }
-.happiness-row:last-child { border-bottom: none; }
+.ra-entry:last-child { border-bottom: none; }
 
-.hap-label { font-family: var(--serif); font-size: 0.9rem; color: var(--text2); }
-.hap-value { font-family: var(--mono); font-size: 0.8rem; color: var(--text3); }
-.hap-value.highlight { color: var(--gold); }
-
-/* ─── ANIMATIONS ─── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.page.active { animation: fadeInUp 0.4s ease forwards; }
-
-/* ─── RESPONSIVE ─── */
-@media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-  .sidebar.open { transform: translateX(0); }
-  .main-content { margin-left: 0; }
-  .page { padding: 1.5rem; }
-  .countdown-grid { grid-template-columns: 1fr 1fr; }
-  .stat-row { grid-template-columns: 1fr; }
-  .daily-grid { grid-template-columns: 1fr; }
-  .profile-grid { grid-template-columns: 1fr; }
-  .add-item-form { flex-direction: column; }
-}
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
-
-/* ─── EMPTY STATE ─── */
-.empty-state {
-  padding: 3rem;
-  text-align: center;
+.ra-date {
+  font-family: var(--mono);
+  font-size: 0.58rem;
   color: var(--text3);
-  font-family: var(--serif);
-  font-size: 0.9rem;
-  font-style: italic;
-  border: 0.5px dashed var(--line);
-  border-radius: var(--radius);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.4rem;
 }
+
+.ra-text {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  color: var(--text2);
+  font-style: italic;
+  line-height: 1.65;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
 
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════ ONBOARDING ═══════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+     ONBOARDING
+══════════════════════════════════════════ -->
 <div id="screen-onboarding" class="screen active">
 
-  <div class="onb-header">
-    <div class="logo">Memento</div>
-    <div class="onb-step-indicator" id="step-indicator">01 / 05</div>
+  <div class="onb-topbar">
+    <div class="wordmark">Memento</div>
+    <div class="onb-progress" id="onb-progress">
+      <div class="onb-dot active"></div>
+      <div class="onb-dot"></div>
+      <div class="onb-dot"></div>
+      <div class="onb-dot"></div>
+      <div class="onb-dot"></div>
+    </div>
   </div>
 
-  <div class="chat-window">
-    <div class="chat-messages" id="chat-messages">
-      <!-- messages rendered by JS -->
-    </div>
-
-    <div class="chat-input-area">
-      <div id="choice-container" class="choice-buttons" style="margin-bottom:0.8rem; display:none;"></div>
+  <div class="chat-area">
+    <div class="chat-feed" id="chat-feed"></div>
+    <div class="input-area">
+      <div class="choices" id="choices" style="display:none;"></div>
       <div class="input-row" id="input-row">
-        <input class="chat-input" id="chat-input" type="text" placeholder="escribe aquí..." autocomplete="off" />
-        <button class="chat-submit" id="chat-submit">enviar</button>
+        <input class="ci" id="chat-in" type="text" placeholder="escribe aquí..." autocomplete="off"/>
+        <button class="cs" id="chat-send">enviar</button>
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- ═══════════════════════════════════════ APP ═══════════════════════════════════════ -->
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════════ -->
 <div id="screen-app" class="screen">
 
-  <!-- SIDEBAR -->
   <nav class="sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-text">aplicación</div>
-      <div class="sidebar-logo-name">Memento</div>
+    <div class="sb-logo">
+      <div class="sb-logo-mark">aplicación</div>
+      <div class="sb-logo-name">Memento</div>
     </div>
-
-    <div class="sidebar-user">
-      <div class="sidebar-user-name" id="sb-name">—</div>
-      <div class="sidebar-user-days" id="sb-days">— días restantes</div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-name">—</div>
+      <div class="sb-user-days" id="sb-days">— días restantes</div>
     </div>
-
-    <div class="sidebar-nav">
-      <div class="nav-item active" data-page="home" onclick="showPage('home', this)">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="7" y1="3" x2="7" y2="7" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
-          <line x1="7" y1="7" x2="9.5" y2="9" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
+    <div class="sb-nav">
+      <div class="ni active" data-page="home" onclick="goPage('home',this)">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="6.5" y1="3" x2="6.5" y2="6.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="6.5" y1="6.5" x2="9" y2="8.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
         </svg>
         Contador
       </div>
-      <div class="nav-item" data-page="bucket" onclick="showPage('bucket', this)">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <rect x="1.5" y="2" width="11" height="10" rx="1" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="4" y1="5.5" x2="10" y2="5.5" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="4" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" data-page="bucket" onclick="goPage('bucket',this)">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <rect x="1.5" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="4" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="4" y1="7.5" x2="9" y2="7.5" stroke="currentColor" stroke-width="0.8"/>
         </svg>
         Lista de vida
       </div>
-      <div class="nav-item" data-page="daily" onclick="showPage('daily', this)">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <rect x="2" y="2" width="10" height="10" rx="1" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="5" y1="1" x2="5" y2="3" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="9" y1="1" x2="9" y2="3" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="2" y1="5.5" x2="12" y2="5.5" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" data-page="daily" onclick="goPage('daily',this)">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <rect x="2" y="2" width="9" height="9" rx="1" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="4.5" y1="1" x2="4.5" y2="3" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="8.5" y1="1" x2="8.5" y2="3" stroke="currentColor" stroke-width="0.8"/>
+          <line x1="2" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="0.8"/>
         </svg>
         Hoy
       </div>
-      <div class="nav-item" data-page="profile" onclick="showPage('profile', this)">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="0.8"/>
-          <path d="M2 12c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" data-page="profile" onclick="goPage('profile',this)">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="6.5" cy="4.5" r="2.2" stroke="currentColor" stroke-width="0.8"/>
+          <path d="M1.5 11c0-2.485 2.239-4.5 5-4.5s5 2.015 5 4.5" stroke="currentColor" stroke-width="0.8"/>
         </svg>
         Perfil
       </div>
     </div>
-
-    <div class="sidebar-bottom">
-      <div class="sidebar-streak">racha — <span id="sb-streak">0</span> días</div>
+    <div class="sb-foot">
+      <div class="sb-streak">racha — <span id="sb-streak">0</span> días</div>
     </div>
   </nav>
 
-  <!-- MAIN -->
-  <div class="main-content">
+  <div class="main">
 
-    <!-- PAGE: HOME -->
+    <!-- HOME -->
     <div class="page active" id="page-home">
-      <div class="home-header">
+      <div class="home-head">
         <div>
-          <div class="home-greeting" id="home-greeting">buenos días,</div>
-          <div class="home-title" id="home-name-title">—</div>
+          <div class="home-greeting" id="h-greeting">—</div>
+          <div class="home-name" id="h-name">—</div>
         </div>
-        <div class="home-date" id="home-date">—</div>
+        <div class="home-date-block">
+          <div class="home-date" id="h-date">—</div>
+        </div>
       </div>
 
-      <div class="countdown-hero">
-        <div class="countdown-label">tiempo restante estimado</div>
-        <div class="countdown-grid">
-          <div class="countdown-unit">
-            <div class="countdown-number primary" id="cd-years">—</div>
-            <div class="countdown-unit-label">años</div>
+      <div class="hero">
+        <div class="hero-label">tiempo restante estimado</div>
+        <div class="cd-grid">
+          <div class="cd-unit">
+            <div class="cd-n red" id="cd-y">—</div>
+            <div class="cd-l">años</div>
           </div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="cd-days">—</div>
-            <div class="countdown-unit-label">días</div>
+          <div class="cd-unit">
+            <div class="cd-n" id="cd-d">—</div>
+            <div class="cd-l">días</div>
           </div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="cd-hours">—</div>
-            <div class="countdown-unit-label">horas</div>
+          <div class="cd-unit">
+            <div class="cd-n" id="cd-h">—</div>
+            <div class="cd-l">horas</div>
           </div>
-          <div class="countdown-unit">
-            <div class="countdown-number" id="cd-seconds">—</div>
-            <div class="countdown-unit-label">segundos</div>
+          <div class="cd-unit">
+            <div class="cd-n" id="cd-s">—</div>
+            <div class="cd-l">segundos</div>
           </div>
         </div>
-        <div class="countdown-footer">
-          <div class="death-date">
-            Fecha estimada de muerte: <strong id="cd-deathdate">—</strong>
-          </div>
-          <div class="life-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-            </div>
-            <div class="progress-pct" id="progress-pct">0% vivido</div>
+        <div class="hero-foot">
+          <div class="death-label">Fecha estimada: <strong id="h-ddate">—</strong></div>
+          <div class="life-bar-wrap">
+            <div class="lbar"><div class="lbar-fill" id="lbar-fill" style="width:0%"></div></div>
+            <div class="lbar-pct" id="lbar-pct">0% vivido</div>
           </div>
         </div>
       </div>
 
       <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-card-label">días vividos</div>
-          <div class="stat-card-value" id="stat-lived">—</div>
-          <div class="stat-card-sub">desde tu nacimiento</div>
+        <div class="scard">
+          <div class="scard-l">días vividos</div>
+          <div class="scard-v" id="s-lived">—</div>
+          <div class="scard-s">desde que naciste</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-label">lista de vida</div>
-          <div class="stat-card-value accent" id="stat-bucket">0 / 0</div>
-          <div class="stat-card-sub">cosas completadas</div>
+        <div class="scard">
+          <div class="scard-l">lista de vida</div>
+          <div class="scard-v red" id="s-bucket">0 / 0</div>
+          <div class="scard-s">cosas completadas</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-label">racha actual</div>
-          <div class="stat-card-value gold" id="stat-streak">0</div>
-          <div class="stat-card-sub">días consecutivos</div>
+        <div class="scard">
+          <div class="scard-l">racha</div>
+          <div class="scard-v gold" id="s-streak">0</div>
+          <div class="scard-s">días consecutivos</div>
         </div>
       </div>
 
-      <div class="daily-quote-block" id="home-quote-block">
-        <div class="daily-quote-text" id="home-quote">—</div>
-        <div class="daily-quote-attr" id="home-quote-attr">— memento</div>
+      <div class="quote-block">
+        <div class="quote-text" id="h-quote">—</div>
+        <div class="quote-attr" id="h-quote-attr">—</div>
       </div>
     </div>
 
-    <!-- PAGE: BUCKET LIST -->
+    <!-- BUCKET -->
     <div class="page" id="page-bucket">
-      <div class="page-header">
+      <div class="page-head">
         <div>
           <div class="page-title">Lista de vida</div>
-          <div class="page-subtitle" id="bucket-count-label">0 cosas completadas de 0</div>
+          <div class="page-sub" id="bl-count">0 completadas de 0</div>
         </div>
-        <button class="btn-primary" onclick="toggleAddForm()">+ Añadir</button>
+        <button class="btn-ghost" onclick="toggleForm()">+ Añadir</button>
       </div>
 
-      <div class="add-item-form" id="add-item-form">
-        <div class="form-group" style="flex:2;">
-          <label class="form-label">qué quieres vivir</label>
-          <input class="form-input" id="new-item-text" type="text" placeholder="ver el amanecer en el desierto..." />
+      <div class="add-form" id="add-form">
+        <div class="fg" style="flex:2;">
+          <label class="fl">qué quieres vivir</label>
+          <input class="fi" id="ni-text" type="text" placeholder="ver el amanecer en el desierto..."/>
         </div>
-        <div class="form-group">
-          <label class="form-label">categoría</label>
-          <select class="form-select" id="new-item-cat">
+        <div class="fg">
+          <label class="fl">categoría</label>
+          <select class="fs" id="ni-cat">
             <option value="aventura">aventura</option>
             <option value="relaciones">relaciones</option>
             <option value="creativo">creativo</option>
@@ -1229,692 +1281,730 @@ option { background: var(--bg1); }
             <option value="espiritual">espiritual</option>
           </select>
         </div>
-        <button class="form-submit" onclick="addBucketItem()">Añadir</button>
+        <button class="btn-add" onclick="addItem()">Añadir</button>
       </div>
 
-      <div class="filter-tabs">
-        <div class="filter-tab active" onclick="filterBucket('all', this)">Todas</div>
-        <div class="filter-tab" onclick="filterBucket('pending', this)">Pendientes</div>
-        <div class="filter-tab" onclick="filterBucket('done', this)">Completadas</div>
-        <div class="filter-tab" onclick="filterBucket('aventura', this)">Aventura</div>
-        <div class="filter-tab" onclick="filterBucket('relaciones', this)">Relaciones</div>
-        <div class="filter-tab" onclick="filterBucket('creativo', this)">Creativo</div>
-        <div class="filter-tab" onclick="filterBucket('personal', this)">Personal</div>
+      <div class="filter-row">
+        <div class="ft active" onclick="filterBy('all',this)">Todas</div>
+        <div class="ft" onclick="filterBy('pending',this)">Pendientes</div>
+        <div class="ft" onclick="filterBy('done',this)">Completadas</div>
+        <div class="ft" onclick="filterBy('aventura',this)">Aventura</div>
+        <div class="ft" onclick="filterBy('relaciones',this)">Relaciones</div>
+        <div class="ft" onclick="filterBy('creativo',this)">Creativo</div>
+        <div class="ft" onclick="filterBy('personal',this)">Personal</div>
       </div>
 
-      <div class="bucket-list-container" id="bucket-list-container">
-        <div class="empty-state">Tu lista de vida está vacía. Añade algo que quieras vivir antes de morir.</div>
+      <div class="blist" id="blist">
+        <div class="empty">Tu lista de vida está vacía. ¿Qué quieres haber hecho antes de morir?</div>
       </div>
     </div>
 
-    <!-- PAGE: DAILY -->
+    <!-- DAILY -->
     <div class="page" id="page-daily">
-      <div class="page-header">
+      <div class="page-head">
         <div>
           <div class="page-title">Hoy</div>
-          <div class="page-subtitle" id="daily-day-num">día — de tu vida</div>
+          <div class="page-sub" id="daily-daynum">día — de tu vida</div>
         </div>
       </div>
 
       <div class="daily-grid">
         <div class="card">
           <div class="card-label">racha activa</div>
-          <div class="streak-display" id="daily-streak">0</div>
-          <div class="streak-sub">días consecutivos</div>
-          <div class="week-dots" id="week-dots"></div>
+          <div class="streak-n" id="d-streak">0</div>
+          <div class="streak-s">días consecutivos</div>
+          <div class="wdots" id="wdots"></div>
         </div>
-
         <div class="card">
           <div class="card-label">frase del día</div>
-          <div class="daily-quote-text" id="daily-quote" style="font-size:0.85rem; line-height:1.65; padding-left:0;"></div>
+          <div class="quote-text" id="d-quote" style="font-size:0.88rem;padding-left:0;line-height:1.7;"></div>
         </div>
-
-        <div class="reflection-full">
-          <div class="card-label">pregunta de reflexión</div>
-          <div class="reflection-question" id="reflection-question">—</div>
-          <textarea class="reflection-textarea" id="reflection-text" placeholder="Escribe tu reflexión de hoy..."></textarea>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem;">
-            <button class="reflection-save" onclick="saveReflection()">Guardar reflexión</button>
-            <span id="reflection-saved-msg" style="font-family:var(--mono);font-size:0.6rem;color:var(--green2);display:none;">Guardado ✓</span>
+        <div class="refl-card">
+          <div class="card-label">reflexión</div>
+          <div class="refl-q" id="d-question">—</div>
+          <textarea class="rta" id="d-refl-text" placeholder="Escribe tu reflexión de hoy..."></textarea>
+          <div class="refl-row">
+            <button class="btn-save" onclick="saveRefl()">Guardar</button>
+            <span class="saved-msg" id="saved-msg">Guardado ✓</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- PAGE: PROFILE -->
+    <!-- PROFILE -->
     <div class="page" id="page-profile">
-      <div class="page-header">
+      <div class="page-head">
         <div>
           <div class="page-title">Perfil</div>
-          <div class="page-subtitle">tu historia con memento</div>
+          <div class="page-sub">tu historia</div>
         </div>
-        <button class="btn-primary" onclick="resetApp()" style="color:#c03030; border-color:#3a1a1a;">Reiniciar</button>
+        <button class="btn-ghost" onclick="resetApp()" style="color:var(--accent);border-color:#3a1a1a;">Reiniciar</button>
       </div>
 
-      <div class="profile-grid">
-        <div class="profile-stat">
-          <div class="profile-stat-n" id="prof-age">—</div>
-          <div class="profile-stat-l">edad actual</div>
+      <div class="prof-grid">
+        <div class="prof-stat">
+          <div class="ps-n" id="p-age">—</div>
+          <div class="ps-l">edad actual</div>
         </div>
-        <div class="profile-stat">
-          <div class="profile-stat-n" id="prof-death-age">—</div>
-          <div class="profile-stat-l">edad de muerte estimada</div>
+        <div class="prof-stat">
+          <div class="ps-n" id="p-dage">—</div>
+          <div class="ps-l">edad de muerte estimada</div>
         </div>
-        <div class="profile-stat">
-          <div class="profile-stat-n" id="prof-days-lived">—</div>
-          <div class="profile-stat-l">días vividos</div>
+        <div class="prof-stat">
+          <div class="ps-n" id="p-lived">—</div>
+          <div class="ps-l">días vividos</div>
         </div>
-        <div class="profile-stat">
-          <div class="profile-stat-n" id="prof-days-left">—</div>
-          <div class="profile-stat-l">días restantes</div>
-        </div>
-
-        <div class="profile-wide">
-          <div class="card-label" style="margin-bottom:0;">datos del registro</div>
-          <div class="happiness-row">
-            <div class="hap-label">Nombre</div>
-            <div class="hap-value highlight" id="prof-name">—</div>
-          </div>
-          <div class="happiness-row">
-            <div class="hap-label">Felicidad declarada</div>
-            <div class="hap-value" id="prof-happiness">—</div>
-          </div>
-          <div class="happiness-row">
-            <div class="hap-label">Fecha de muerte estimada</div>
-            <div class="hap-value" id="prof-deathdate">—</div>
-          </div>
-          <div class="happiness-row">
-            <div class="hap-label">Registrado en Memento</div>
-            <div class="hap-value" id="prof-joined">—</div>
-          </div>
-          <div class="happiness-row">
-            <div class="hap-label">Items en lista de vida</div>
-            <div class="hap-value" id="prof-bucket">—</div>
-          </div>
+        <div class="prof-stat">
+          <div class="ps-n" id="p-left">—</div>
+          <div class="ps-l">días restantes</div>
         </div>
 
-        <div class="profile-wide" id="reflections-archive">
+        <div class="prof-wide">
+          <div class="prow">
+            <div class="pr-label">Nombre</div>
+            <div class="pr-value hi" id="p-name">—</div>
+          </div>
+          <div class="prow">
+            <div class="pr-label">Fecha de nacimiento</div>
+            <div class="pr-value" id="p-bday">—</div>
+          </div>
+          <div class="prow">
+            <div class="pr-label">Felicidad declarada</div>
+            <div class="pr-value" id="p-hap">—</div>
+          </div>
+          <div class="prow">
+            <div class="pr-label">Fecha de muerte estimada</div>
+            <div class="pr-value" id="p-ddate">—</div>
+          </div>
+          <div class="prow">
+            <div class="pr-label">Registrado</div>
+            <div class="pr-value" id="p-joined">—</div>
+          </div>
+        </div>
+
+        <div class="refl-archive prof-wide">
           <div class="card-label">reflexiones guardadas</div>
-          <div id="reflections-list"></div>
+          <div id="refl-archive-list"></div>
         </div>
       </div>
     </div>
 
-  </div><!-- /main-content -->
-</div><!-- /screen-app -->
+  </div>
+</div>
 
 <script>
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════
-let userData = JSON.parse(localStorage.getItem('memento_user') || 'null');
-let bucketList = JSON.parse(localStorage.getItem('memento_bucket') || '[]');
-let reflections = JSON.parse(localStorage.getItem('memento_reflections') || '[]');
-let streakData = JSON.parse(localStorage.getItem('memento_streak') || '{"count":0,"lastDate":null}');
-let currentFilter = 'all';
+// ══════════════════════════════════════════════════
+let user    = JSON.parse(localStorage.getItem('m_user')   || 'null');
+let bucket  = JSON.parse(localStorage.getItem('m_bucket') || '[]');
+let refls   = JSON.parse(localStorage.getItem('m_refls')  || '[]');
+let streak  = JSON.parse(localStorage.getItem('m_streak') || '{"count":0,"last":null}');
+let filter  = 'all';
+
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MONTHS_SH = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
 const QUOTES = [
-  ["El tiempo que no viviste ya no volverá. El de mañana aún es tuyo.", "memento"],
   ["No hay nada más democrático que la muerte. Nadie escapa.", "memento"],
-  ["Cada día que pasa es uno menos. Úsalo.", "memento"],
+  ["Cada día que pasa es uno menos. No uno más.", "memento"],
   ["La mayoría de la gente muere a los 25 años, pero la entierran a los 75.", "Benjamin Franklin"],
   ["Vive como si fueras a morir mañana. Aprende como si fueras a vivir para siempre.", "Gandhi"],
-  ["El mayor desperdicio es el tiempo que perdemos aplazando vivir.", "memento"],
-  ["No temas la muerte. Teme la vida sin vivirla.", "memento"],
-  ["Dentro de 10 años lamentarás más las cosas que no hiciste.", "Mark Twain"],
-  ["Hay más tiempo que vida. Pero no para ti.", "memento"],
-  ["Haz de tu vida un sueño y de tu sueño una realidad.", "Antoine de Saint-Exupéry"],
-  ["El tiempo es el único capital que tiene un ser humano.", "Thomas Edison"],
+  ["El mayor desperdicio es aplazar la vida esperando el momento perfecto.", "memento"],
+  ["No temas la muerte. Teme no haber vivido.", "memento"],
+  ["Dentro de 10 años lamentarás más lo que no hiciste que lo que sí.", "Mark Twain"],
+  ["Hay más tiempo que vida. Pero no para ti, hoy.", "memento"],
+  ["Haz de tu vida un sueño. Haz del sueño una realidad.", "Antoine de Saint-Exupéry"],
+  ["El tiempo es el único capital que tienes. Gástalo bien.", "Thomas Edison"],
   ["No cuentes los días. Haz que los días cuenten.", "Muhammad Ali"],
+  ["La vida es aquello que te pasa mientras estás ocupado haciendo otros planes.", "John Lennon"],
 ];
 
 const QUESTIONS = [
-  "Si hoy fuera tu último día, ¿estarías satisfecho con lo que has hecho esta semana?",
-  "¿Qué estás posponiendo que en el fondo sabes que deberías hacer ya?",
-  "¿A quién deberías llamar hoy que llevas tiempo sin hablar?",
-  "¿Estás donde quieres estar en la vida, o simplemente donde acabaste?",
-  "¿Cuál es la última cosa que hiciste que te enorgulleció de verdad?",
-  "Si tu yo de hace 5 años te viera hoy, ¿qué diría?",
-  "¿Qué harías diferente si supieras que te queda un año?",
+  "Si hoy fuera tu último día, ¿estarías en paz con lo que has hecho esta semana?",
+  "¿Qué llevas tiempo postergando que en el fondo sabes que debes hacer ya?",
+  "¿A quién deberías llamar hoy que llevas demasiado tiempo sin hablar?",
+  "¿Estás donde quieres estar, o simplemente donde acabaste?",
+  "¿Cuál fue la última cosa que hiciste que te enorgulleció de verdad?",
+  "Si tu yo de hace 5 años te viera hoy, ¿qué pensaría?",
+  "¿Qué harías diferente si supieras que te queda exactamente un año?",
   "¿Estás eligiendo tu vida, o simplemente siguiendo la corriente?",
   "¿Cuándo fue la última vez que hiciste algo por primera vez?",
-  "¿Qué necesitas soltar para poder avanzar?",
+  "¿Qué necesitas soltar para poder avanzar de verdad?",
 ];
 
-// ══════════════════════════════════════
-// ONBOARDING CHAT
-// ══════════════════════════════════════
-let onbStep = 0;
-let onbData = {};
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+const fmtShort  = d => `${d.getDate()} ${MONTHS_SH[d.getMonth()]} ${d.getFullYear()}`;
+const fmtLong   = d => `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}`;
+const pad2      = n => String(n).padStart(2,'0');
+const $ = id => document.getElementById(id);
 
-const STEPS = [
+function ageFromBirthDate(bd) {
+  const now = new Date(), b = new Date(bd);
+  let age = now.getFullYear() - b.getFullYear();
+  if (now.getMonth() < b.getMonth() || (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())) age--;
+  return age;
+}
+
+function daysLivedFromBirthDate(bd) {
+  return Math.floor((new Date() - new Date(bd)) / 86400000);
+}
+
+// ══════════════════════════════════════════════════
+// ONBOARDING — conversación
+// ══════════════════════════════════════════════════
+let step = 0;
+let onb  = {};  // name, birthday, happiness, deathAge
+
+// Each entry: { msg(d), key, type, placeholder/choices, validate, error, extra }
+// type: text | date | choice | final
+const FLOW = [
   {
-    entity: "Así que has venido.\n\nBien.\n\n¿Cuál es tu nombre?",
+    msg: () => `Hola.\n\nEsto no es una app de bienestar. No va a decirte que todo va a salir bien.\n\nSolo voy a ayudarte a recordar que el tiempo corre.\n\n¿Cuál es tu nombre?`,
     key: 'name',
-    validate: v => v.trim().length > 0,
-    error: "Necesito un nombre.",
     type: 'text',
     placeholder: 'tu nombre...',
-    indicator: '01 / 05'
+    validate: v => v.trim().length > 0,
+    error: 'Necesito un nombre para continuar.',
   },
   {
-    entity: (d) => `${d.name}.\n\nUn nombre que algún día dejarán de pronunciar.\n\n¿Cuántos años tienes?`,
-    key: 'age',
-    validate: v => !isNaN(v) && +v > 5 && +v < 120,
-    error: "Una edad real, por favor.",
-    type: 'number',
-    placeholder: 'tu edad...',
-    indicator: '02 / 05'
-  },
-  {
-    entity: "¿Has sido feliz hasta ahora?\n\nSé honesto. No te estoy juzgando.",
-    key: 'happiness',
-    validate: v => v,
-    type: 'choice',
-    choices: ['Muy feliz', 'Bastante feliz', 'A medias', 'Poco feliz', 'Infeliz'],
-    indicator: '03 / 05'
-  },
-  {
-    entity: (d) => `${d.happiness.toLowerCase()}.\n\nEntendido.\n\nEsto es lo más difícil: ¿a qué edad crees que morirás?\n\nNo te engañes. Piénsalo.`,
-    key: 'deathAge',
-    validate: v => !isNaN(v) && +v > onbData.age && +v <= 120,
-    error: "Debe ser mayor que tu edad actual.",
-    type: 'number',
-    placeholder: 'edad estimada de muerte...',
-    indicator: '04 / 05'
-  },
-  {
-    entity: (d) => {
-      const deathDate = computeDeathDate(+d.age, +d.deathAge);
-      const daysLeft = Math.floor((deathDate - new Date()) / 86400000);
-      onbData.deathDate = deathDate;
-      onbData.daysLeft = daysLeft;
-      return `REVEAL:${daysLeft}:${formatDate(deathDate)}`;
+    msg: d => `${d.name}.\n\nBien.\n\n¿Cuándo naciste? Dame tu fecha de nacimiento.`,
+    key: 'birthday',
+    type: 'date',
+    placeholder: '',
+    validate: v => {
+      if (!v) return false;
+      const b = new Date(v), now = new Date();
+      return b < now && ageFromBirthDate(v) < 120;
     },
+    error: 'Esa fecha no parece correcta.',
+    extra: d => {
+      // after validating birthday, show lived days
+      const age    = ageFromBirthDate(d.birthday);
+      const lived  = daysLivedFromBirthDate(d.birthday);
+      return `<div class="stat-line">
+        <div><div class="stat-n">${age}</div><div class="stat-l">años vividos</div></div>
+        <div style="width:0.5px;background:var(--line2);align-self:stretch;margin:0 0.4rem;"></div>
+        <div><div class="stat-n">${lived.toLocaleString('es-ES')}</div><div class="stat-l">días que ya pasaron</div></div>
+      </div>`;
+    }
+  },
+  {
+    msg: d => {
+      const age = ageFromBirthDate(d.birthday);
+      return `${age} años.\n\n${lived(d.birthday).toLocaleString('es-ES')} días que ya no vuelven.\n\n¿Has sido feliz en todo este tiempo? Sé honesto.`;
+    },
+    key: 'happiness',
+    type: 'choice',
+    choices: ['Muy feliz', 'Bastante feliz', 'Regular, la verdad', 'Poco feliz', 'No, no lo he sido'],
+  },
+  {
+    msg: d => {
+      const hap = d.happiness.toLowerCase();
+      const age = ageFromBirthDate(d.birthday);
+      const msgs = {
+        'muy feliz':         `Qué bien. ${age} años de felicidad es un privilegio enorme.\n\nAhora viene la pregunta que nadie quiere responder:\n\n¿A qué edad crees que morirás?`,
+        'bastante feliz':    `Bastante feliz. Eso es mucho más de lo que tienen muchos.\n\nPero hay una pregunta que necesito hacerte:\n\n¿A qué edad crees que morirás?`,
+        'regular, la verdad':`Regular. Entendido. Todavía hay tiempo de cambiar eso.\n\nPero antes, una pregunta incómoda:\n\n¿A qué edad crees que morirás?`,
+        'poco feliz':        `Poco feliz. Eso duele oírlo. Y más aún vivirlo.\n\nTodavía queda tiempo, ${d.name}. Pero hay que saber cuánto.\n\n¿A qué edad crees que morirás?`,
+        'no, no lo he sido': `Gracias por ser honesto. Hace falta mucho valor para reconocerlo.\n\nEso significa que aún queda algo por hacer. Pero hay que saber cuánto tiempo queda.\n\n¿A qué edad crees que morirás?`,
+      };
+      return msgs[hap] || `Entendido.\n\n¿A qué edad crees que morirás?`;
+    },
+    key: 'deathAge',
+    type: 'text',
+    placeholder: 'edad estimada...',
+    validate: v => !isNaN(v) && +v > ageFromBirthDate(onb.birthday) && +v <= 120,
+    error: 'Debe ser un número mayor que tu edad actual.',
+  },
+  {
+    msg: d => 'FINAL',
     key: null,
     type: 'final',
-    indicator: '05 / 05'
   }
 ];
 
-function computeDeathDate(currentAge, deathAge) {
-  const now = new Date();
-  const birthYear = now.getFullYear() - currentAge;
-  // Add random variance of ±3 years
-  const variance = Math.floor(Math.random() * 7) - 3;
-  const finalAge = deathAge + variance;
-  const deathYear = birthYear + finalAge;
-  const deathMonth = Math.floor(Math.random() * 12);
-  const deathDay = Math.floor(Math.random() * 28) + 1;
-  return new Date(deathYear, deathMonth, deathDay);
+function lived(bd) { return daysLivedFromBirthDate(bd); }
+
+// ── chat mechanics ──
+async function addBubble(html, type='in') {
+  const feed = $('chat-feed');
+  const el = document.createElement('div');
+  el.className = 'msg';
+
+  if (type === 'in') {
+    el.innerHTML = `<div class="bubble-in">${html}</div>`;
+  } else if (type === 'out') {
+    el.innerHTML = `<div class="bubble-out-wrap"><div class="bubble-out">${html}</div></div>`;
+  } else if (type === 'reveal') {
+    el.innerHTML = html;
+  }
+
+  feed.appendChild(el);
+  requestAnimationFrame(() => {
+    el.classList.add('in');
+    feed.scrollTop = feed.scrollHeight;
+  });
+  return el;
 }
 
-function formatDate(d) {
-  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+let typingEl = null;
+
+async function showTyping(delay=900) {
+  const feed = $('chat-feed');
+  typingEl = document.createElement('div');
+  typingEl.className = 'typing-wrap msg';
+  typingEl.innerHTML = `<div class="typing-bubble"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
+  feed.appendChild(typingEl);
+  requestAnimationFrame(() => {
+    typingEl.classList.add('in');
+    feed.scrollTop = feed.scrollHeight;
+  });
+  await wait(delay);
+  typingEl.remove();
+  typingEl = null;
 }
 
-function formatDateFull(d) {
-  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${d.getDate()} de ${months[d.getMonth()]} de ${d.getFullYear()}`;
-}
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
-function addMessage(type, content, delay=0) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const msgs = document.getElementById('chat-messages');
-
-      if (type === 'typing') {
-        const el = document.createElement('div');
-        el.className = 'typing-indicator visible';
-        el.id = 'typing';
-        el.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-        msgs.appendChild(el);
-        msgs.scrollTop = msgs.scrollHeight;
-        resolve(el);
-        return;
-      }
-
-      const el = document.createElement('div');
-      el.className = 'msg';
-
-      if (type === 'entity') {
-        if (content.startsWith('REVEAL:')) {
-          const parts = content.split(':');
-          const days = parseInt(parts[1]).toLocaleString('es-ES');
-          const date = parts[2];
-          el.innerHTML = `<div class="msg-reveal">
-            <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1rem;">días que te quedan</div>
-            <div class="reveal-days">${days}</div>
-            <div class="reveal-label">El reloj ya corre. No se detiene.</div>
-            <div class="reveal-date">fecha estimada — ${date}</div>
-          </div>`;
-        } else {
-          const formatted = content.replace(/\n/g, '<br>');
-          el.innerHTML = `<div class="msg-entity">
-            <div class="msg-entity-label">La Entidad</div>
-            <div class="msg-bubble-entity">${formatted}</div>
-          </div>`;
-        }
-      } else if (type === 'user') {
-        el.innerHTML = `<div class="msg-user"><div class="msg-bubble-user">${content}</div></div>`;
-      }
-
-      msgs.appendChild(el);
-      requestAnimationFrame(() => {
-        el.classList.add('visible');
-        msgs.scrollTop = msgs.scrollHeight;
-      });
-      resolve(el);
-    }, delay);
+function setProgress(n) {
+  const dots = document.querySelectorAll('.onb-dot');
+  dots.forEach((d,i) => {
+    d.classList.remove('done','active');
+    if (i < n)     d.classList.add('done');
+    else if (i===n) d.classList.add('active');
   });
 }
 
-async function showEntityMessage(text, typingDelay=800) {
-  const typing = await addMessage('typing', '', 300);
-  await new Promise(r => setTimeout(r, typingDelay));
-  typing.remove();
-  await addMessage('entity', text);
-}
+function setupInput(s) {
+  const choicesEl = $('choices');
+  const inputRow  = $('input-row');
+  const ci        = $('chat-in');
 
-function setupStep(step) {
-  document.getElementById('step-indicator').textContent = step.indicator || '';
-  const inputRow = document.getElementById('input-row');
-  const choiceContainer = document.getElementById('choice-container');
-  const chatInput = document.getElementById('chat-input');
-
-  choiceContainer.style.display = 'none';
-  choiceContainer.innerHTML = '';
+  choicesEl.style.display = 'none';
+  choicesEl.innerHTML = '';
   inputRow.style.display = 'flex';
 
-  if (step.type === 'choice') {
-    choiceContainer.style.display = 'flex';
+  if (!s || s.type === 'final') {
     inputRow.style.display = 'none';
-    step.choices.forEach(ch => {
+    return;
+  }
+
+  if (s.type === 'choice') {
+    choicesEl.style.display = 'flex';
+    inputRow.style.display = 'none';
+    s.choices.forEach(c => {
       const btn = document.createElement('button');
-      btn.className = 'choice-btn';
-      btn.textContent = ch;
-      btn.onclick = () => handleInput(ch);
-      choiceContainer.appendChild(btn);
+      btn.className = 'choice';
+      btn.textContent = c;
+      btn.onclick = () => handleInput(c);
+      choicesEl.appendChild(btn);
     });
-  } else if (step.type === 'final') {
-    inputRow.style.display = 'none';
+  } else if (s.type === 'date') {
+    ci.type = 'date';
+    ci.placeholder = '';
+    ci.value = '';
+    ci.focus();
   } else {
-    chatInput.type = step.type || 'text';
-    chatInput.placeholder = step.placeholder || '';
-    chatInput.value = '';
-    chatInput.focus();
+    ci.type = s.type === 'text' ? 'text' : 'number';
+    ci.placeholder = s.placeholder || '';
+    ci.value = '';
+    ci.focus();
   }
 }
 
 async function handleInput(value) {
-  const step = STEPS[onbStep];
-  if (!step) return;
+  const s = FLOW[step];
+  if (!s) return;
 
-  if (step.validate && !step.validate(value)) {
-    await showEntityMessage(step.error || 'Respuesta inválida.', 400);
+  if (s.validate && !s.validate(value)) {
+    await showTyping(400);
+    await addBubble(s.error.replace(/\n/g,'<br>'));
     return;
   }
 
-  if (step.key) onbData[step.key] = value;
-  await addMessage('user', value);
+  if (s.key) onb[s.key] = value;
 
-  onbStep++;
+  // show user bubble
+  let displayVal = value;
+  if (s.type === 'date') {
+    const d = new Date(value + 'T12:00:00');
+    displayVal = fmtShort(d);
+  }
+  await addBubble(displayVal, 'out');
 
-  if (onbStep >= STEPS.length) {
-    // Final step: show CTA
-    setTimeout(() => {
-      const inputRow = document.getElementById('input-row');
-      inputRow.innerHTML = `<button class="chat-submit" style="width:100%;padding:0.9rem;font-size:0.8rem;" onclick="startApp()">Entrar a Memento →</button>`;
-    }, 500);
+  // optional extra info after birthday
+  if (s.extra) {
+    await wait(300);
+    const extraHtml = s.extra(onb);
+    // append extra to last entity bubble
+    const lastBubble = $('chat-feed').querySelector('.bubble-in:last-of-type');
+    if (lastBubble) {
+      lastBubble.insertAdjacentHTML('beforeend', extraHtml);
+    } else {
+      await showTyping(400);
+      await addBubble(extraHtml);
+    }
+  }
+
+  step++;
+  setProgress(step);
+
+  if (step >= FLOW.length) return;
+
+  const next = FLOW[step];
+  if (next.type === 'final') {
+    setupInput(next);
+    await showTyping(1200);
+    await doReveal();
     return;
   }
 
-  const nextStep = STEPS[onbStep];
-  const entityText = typeof nextStep.entity === 'function' ? nextStep.entity(onbData) : nextStep.entity;
-
-  await showEntityMessage(entityText, 1000);
-  setupStep(nextStep);
+  const msgText = typeof next.msg === 'function' ? next.msg(onb) : next.msg;
+  const typingTime = msgText.length > 100 ? 1400 : 900;
+  await showTyping(typingTime);
+  await addBubble(msgText.replace(/\n/g,'<br>'));
+  setupInput(next);
 }
 
-document.getElementById('chat-submit').addEventListener('click', () => {
-  const val = document.getElementById('chat-input').value.trim();
-  if (val) handleInput(val);
-});
+// ── compute death date ──
+function computeDeathDate(birthday, deathAge) {
+  const birth = new Date(birthday + 'T12:00:00');
+  const variance = Math.floor(Math.random() * 7) - 3;
+  const finalAge = parseInt(deathAge) + variance;
+  const deathYear = birth.getFullYear() + finalAge;
+  const deathMonth = Math.floor(Math.random() * 12);
+  const maxDay = new Date(deathYear, deathMonth + 1, 0).getDate();
+  const deathDay = Math.floor(Math.random() * maxDay) + 1;
+  return new Date(deathYear, deathMonth, deathDay);
+}
 
-document.getElementById('chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const val = e.target.value.trim();
-    if (val) handleInput(val);
-  }
-});
+async function doReveal() {
+  const birth     = new Date(onb.birthday + 'T12:00:00');
+  const deathDate = computeDeathDate(onb.birthday, onb.deathAge);
+  const now       = new Date();
+  const daysLeft  = Math.floor((deathDate - now) / 86400000);
+  const daysLivedN= daysLivedFromBirthDate(onb.birthday);
+  const totalDays = Math.floor((deathDate - birth) / 86400000);
+  const pct       = Math.floor((daysLivedN / totalDays) * 100);
 
-// ══════════════════════════════════════
-// START APP
-// ══════════════════════════════════════
-function startApp() {
-  userData = {
-    name: onbData.name,
-    age: parseInt(onbData.age),
-    happiness: onbData.happiness,
-    deathAge: parseInt(onbData.deathAge),
-    deathDate: onbData.deathDate.toISOString(),
-    joinDate: new Date().toISOString(),
+  const revealHtml = `<div class="reveal-card">
+    <div class="reveal-eyebrow">lo que queda</div>
+    <div class="reveal-days">${daysLeft.toLocaleString('es-ES')}</div>
+    <div class="reveal-days-label">días que te quedan estimados</div>
+    <div class="reveal-divider"></div>
+    <div class="reveal-grid">
+      <div class="reveal-stat">
+        <div class="reveal-stat-n">${daysLivedN.toLocaleString('es-ES')}</div>
+        <div class="reveal-stat-l">días vividos</div>
+      </div>
+      <div class="reveal-stat">
+        <div class="reveal-stat-n">${pct}%</div>
+        <div class="reveal-stat-l">de tu vida consumida</div>
+      </div>
+      <div class="reveal-stat">
+        <div class="reveal-stat-n">${fmtShort(deathDate)}</div>
+        <div class="reveal-stat-l">fecha estimada</div>
+      </div>
+    </div>
+    <div class="reveal-footer">El reloj ya corre. Siempre lo ha hecho.</div>
+  </div>`;
+
+  await addBubble(revealHtml, 'reveal');
+
+  // save user and launch app after a beat
+  user = {
+    name:      onb.name,
+    birthday:  onb.birthday,
+    happiness: onb.happiness,
+    deathAge:  parseInt(onb.deathAge),
+    deathDate: deathDate.toISOString(),
+    joinDate:  now.toISOString(),
   };
-  localStorage.setItem('memento_user', JSON.stringify(userData));
-  initApp();
+  localStorage.setItem('m_user', JSON.stringify(user));
+
+  await wait(2800);
+  launchApp();
 }
 
-function initApp() {
-  document.getElementById('screen-onboarding').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
+// ── send button ──
+$('chat-send').addEventListener('click', () => {
+  const v = $('chat-in').value.trim();
+  if (v) { $('chat-in').value = ''; handleInput(v); }
+});
+$('chat-in').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const v = e.target.value.trim();
+    if (v) { e.target.value = ''; handleInput(v); }
+  }
+});
 
+// ── start onboarding ──
+async function startOnboarding() {
+  setProgress(0);
+  const first = FLOW[0];
+  await showTyping(1400);
+  await addBubble(first.msg().replace(/\n/g,'<br>'));
+  setupInput(first);
+}
+
+// ══════════════════════════════════════════════════
+// APP
+// ══════════════════════════════════════════════════
+function launchApp() {
   updateStreak();
+  $('screen-onboarding').classList.remove('active');
+  $('screen-app').classList.add('active');
   renderHome();
-  renderBucketList();
+  renderBucket();
   renderDaily();
   renderProfile();
-
-  setInterval(updateCountdown, 1000);
+  setInterval(tick, 1000);
 }
 
-// ══════════════════════════════════════
-// COUNTDOWN
-// ══════════════════════════════════════
-function updateCountdown() {
-  if (!userData) return;
-  const deathDate = new Date(userData.deathDate);
-  const now = new Date();
-  const diff = deathDate - now;
+// countdown tick
+function tick() {
+  if (!user) return;
+  const dd = new Date(user.deathDate), now = new Date();
+  const diff = dd - now;
   if (diff <= 0) return;
 
-  const totalDays = Math.floor(diff / 86400000);
-  const years = Math.floor(totalDays / 365);
-  const days = totalDays % 365;
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const seconds = Math.floor((diff % 1000) / 1) || Math.floor((diff % 60000) / 1000);
+  const totalSec  = Math.floor(diff / 1000);
+  const years     = Math.floor(totalSec / 31536000);
+  const rem       = totalSec % 31536000;
+  const days      = Math.floor(rem / 86400);
+  const hours     = Math.floor((rem % 86400) / 3600);
+  const secs      = totalSec % 60;
 
-  const birthDate = new Date(deathDate.getFullYear() - userData.deathAge, 0, 1);
-  const totalLife = deathDate - birthDate;
-  const lived = now - birthDate;
-  const pct = Math.min(100, Math.floor((lived / totalLife) * 100));
+  $('cd-y').textContent = years.toLocaleString('es-ES');
+  $('cd-d').textContent = days.toLocaleString('es-ES');
+  $('cd-h').textContent = pad2(hours);
+  $('cd-s').textContent = pad2(secs);
 
-  document.getElementById('cd-years').textContent = years.toLocaleString('es-ES');
-  document.getElementById('cd-days').textContent = days.toLocaleString('es-ES');
-  document.getElementById('cd-hours').textContent = hours.toString().padStart(2,'0');
-  document.getElementById('cd-seconds').textContent = Math.floor((diff / 1000) % 60).toString().padStart(2,'0');
-  document.getElementById('cd-deathdate').textContent = formatDateFull(deathDate);
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-pct').textContent = pct + '% vivido';
+  const birth = new Date(user.birthday + 'T12:00:00');
+  const totalLife = dd - birth;
+  const lived = now - birth;
+  const pct = Math.min(100, Math.floor((lived / totalLife)*100));
+  $('lbar-fill').style.width = pct + '%';
+  $('lbar-pct').textContent  = pct + '% vivido';
 
-  // sidebar
-  document.getElementById('sb-days').textContent = totalDays.toLocaleString('es-ES') + ' días restantes';
+  const totalDaysLeft = Math.floor(diff / 86400000);
+  $('sb-days').textContent = totalDaysLeft.toLocaleString('es-ES') + ' días restantes';
 }
 
-// ══════════════════════════════════════
-// RENDER HOME
-// ══════════════════════════════════════
 function renderHome() {
-  if (!userData) return;
-  const hour = new Date().getHours();
-  const greeting = hour < 13 ? 'buenos días,' : hour < 20 ? 'buenas tardes,' : 'buenas noches,';
-  document.getElementById('home-greeting').textContent = greeting;
-  document.getElementById('home-name-title').textContent = userData.name;
-  document.getElementById('sb-name').textContent = userData.name;
-
+  if (!user) return;
   const now = new Date();
-  const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('home-date').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const h   = now.getHours();
+  const gr  = h<13 ? 'buenos días,' : h<20 ? 'buenas tardes,' : 'buenas noches,';
 
-  const birthYear = new Date(userData.deathDate).getFullYear() - userData.deathAge;
-  const birth = new Date(birthYear, 0, 1);
-  const daysLived = Math.floor((now - birth) / 86400000);
-  document.getElementById('stat-lived').textContent = daysLived.toLocaleString('es-ES');
+  $('h-greeting').textContent = gr;
+  $('h-name').textContent     = user.name;
+  $('sb-name').textContent    = user.name;
+  $('h-date').textContent     = `${DAYS_ES[now.getDay()]} ${now.getDate()} ${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
+  $('h-ddate').textContent    = fmtLong(new Date(user.deathDate));
 
-  const done = bucketList.filter(i => i.done).length;
-  document.getElementById('stat-bucket').textContent = `${done} / ${bucketList.length}`;
-  document.getElementById('stat-streak').textContent = streakData.count;
-  document.getElementById('sb-streak').textContent = streakData.count;
+  const dLived = daysLivedFromBirthDate(user.birthday);
+  $('s-lived').textContent  = dLived.toLocaleString('es-ES');
+  $('s-streak').textContent = streak.count;
+  $('sb-streak').textContent= streak.count;
 
-  const todayQuote = QUOTES[new Date().getDate() % QUOTES.length];
-  document.getElementById('home-quote').textContent = `${todayQuote[0]}`;
-  document.getElementById('home-quote-attr').textContent = `— ${todayQuote[1]}`;
+  const done = bucket.filter(i=>i.done).length;
+  $('s-bucket').textContent = `${done} / ${bucket.length}`;
 
-  updateCountdown();
+  const q = QUOTES[now.getDate() % QUOTES.length];
+  $('h-quote').textContent     = q[0];
+  $('h-quote-attr').textContent= '— ' + q[1];
+
+  tick();
 }
 
-// ══════════════════════════════════════
-// BUCKET LIST
-// ══════════════════════════════════════
-function toggleAddForm() {
-  const f = document.getElementById('add-item-form');
-  f.classList.toggle('visible');
-  if (f.classList.contains('visible')) document.getElementById('new-item-text').focus();
+// STREAK
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (streak.last === today) return;
+  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  if (streak.last === yest.toDateString()) streak.count++;
+  else streak.count = 1;
+  streak.last = today;
+  localStorage.setItem('m_streak', JSON.stringify(streak));
 }
 
-function addBucketItem() {
-  const text = document.getElementById('new-item-text').value.trim();
-  const cat = document.getElementById('new-item-cat').value;
+// BUCKET
+function toggleForm() {
+  const f = $('add-form');
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) $('ni-text').focus();
+}
+
+function addItem() {
+  const text = $('ni-text').value.trim();
+  const cat  = $('ni-cat').value;
   if (!text) return;
-
-  bucketList.push({ id: Date.now(), text, cat, done: false, doneDate: null });
-  localStorage.setItem('memento_bucket', JSON.stringify(bucketList));
-  document.getElementById('new-item-text').value = '';
-  renderBucketList();
-  updateStatCards();
+  bucket.push({ id: Date.now(), text, cat, done: false, doneDate: null });
+  localStorage.setItem('m_bucket', JSON.stringify(bucket));
+  $('ni-text').value = '';
+  renderBucket();
+  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
-function toggleBucket(id) {
-  const item = bucketList.find(i => i.id === id);
-  if (!item) return;
-  item.done = !item.done;
-  item.doneDate = item.done ? new Date().toISOString() : null;
-  localStorage.setItem('memento_bucket', JSON.stringify(bucketList));
-  renderBucketList();
-  updateStatCards();
+function toggleItem(id) {
+  const it = bucket.find(i=>i.id===id);
+  if (!it) return;
+  it.done = !it.done;
+  it.doneDate = it.done ? new Date().toISOString() : null;
+  localStorage.setItem('m_bucket', JSON.stringify(bucket));
+  renderBucket();
+  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
-function deleteBucket(id) {
-  bucketList = bucketList.filter(i => i.id !== id);
-  localStorage.setItem('memento_bucket', JSON.stringify(bucketList));
-  renderBucketList();
-  updateStatCards();
+function delItem(id) {
+  bucket = bucket.filter(i=>i.id!==id);
+  localStorage.setItem('m_bucket', JSON.stringify(bucket));
+  renderBucket();
+  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
-function filterBucket(filter, el) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+function filterBy(f, el) {
+  filter = f;
+  document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  renderBucketList();
+  renderBucket();
 }
 
-function renderBucketList() {
-  const container = document.getElementById('bucket-list-container');
-  let items = bucketList;
+function renderBucket() {
+  let items = bucket;
+  if (filter==='pending')    items = items.filter(i=>!i.done);
+  else if (filter==='done')  items = items.filter(i=>i.done);
+  else if (filter!=='all')   items = items.filter(i=>i.cat===filter);
 
-  if (currentFilter === 'pending') items = items.filter(i => !i.done);
-  else if (currentFilter === 'done') items = items.filter(i => i.done);
-  else if (currentFilter !== 'all') items = items.filter(i => i.cat === currentFilter);
+  const done = bucket.filter(i=>i.done).length;
+  $('bl-count').textContent = `${done} completadas de ${bucket.length}`;
 
-  const done = bucketList.filter(i => i.done).length;
-  document.getElementById('bucket-count-label').textContent = `${done} cosas completadas de ${bucketList.length}`;
-
-  if (items.length === 0) {
-    container.innerHTML = '<div class="empty-state">Nada aquí todavía. Añade algo que quieras vivir antes de morir.</div>';
+  if (!items.length) {
+    $('blist').innerHTML = '<div class="empty">Nada aquí. ¿Qué quieres haber hecho antes de morir?</div>';
     return;
   }
 
-  container.innerHTML = items.map(item => `
-    <div class="bucket-item ${item.done ? 'done' : ''}" onclick="toggleBucket(${item.id})">
-      <div class="bucket-check ${item.done ? 'checked' : ''}">
-        <svg class="check-svg" width="8" height="6" viewBox="0 0 8 6" fill="none">
-          <polyline points="1,3 3,5 7,1" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+  $('blist').innerHTML = items.map(it=>`
+    <div class="bitem ${it.done?'done':''}" onclick="toggleItem(${it.id})">
+      <div class="bcheck ${it.done?'on':''}">
+        ${it.done?`<svg width="8" height="6" viewBox="0 0 8 6" fill="none"><polyline points="1,3 3,5 7,1" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
       </div>
-      <div class="bucket-info">
-        <div class="bucket-name">${item.text}</div>
-        <div class="bucket-meta">
-          <span class="bucket-cat">${item.cat}</span>
-          ${item.doneDate ? `<span class="bucket-date">completado ${formatDate(new Date(item.doneDate))}</span>` : ''}
+      <div>
+        <div class="bname">${it.text}</div>
+        <div class="bmeta">
+          <span class="bcat">${it.cat}</span>
+          ${it.doneDate?`<span class="bdate">completado ${fmtShort(new Date(it.doneDate))}</span>`:''}
         </div>
       </div>
-      <div class="bucket-delete" onclick="event.stopPropagation(); deleteBucket(${item.id})">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" stroke-width="1"/>
-          <line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" stroke-width="1"/>
+      <div class="bdel" onclick="event.stopPropagation();delItem(${it.id})">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <line x1="1.5" y1="1.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="0.9"/>
+          <line x1="9.5" y1="1.5" x2="1.5" y2="9.5" stroke="currentColor" stroke-width="0.9"/>
         </svg>
       </div>
     </div>
   `).join('');
 }
 
-function updateStatCards() {
-  const done = bucketList.filter(i => i.done).length;
-  document.getElementById('stat-bucket').textContent = `${done} / ${bucketList.length}`;
-}
-
-// ══════════════════════════════════════
 // DAILY
-// ══════════════════════════════════════
-function updateStreak() {
-  const today = new Date().toDateString();
-  if (streakData.lastDate !== today) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (streakData.lastDate === yesterday.toDateString()) {
-      streakData.count++;
-    } else if (streakData.lastDate !== today) {
-      streakData.count = 1;
-    }
-    streakData.lastDate = today;
-    localStorage.setItem('memento_streak', JSON.stringify(streakData));
-  }
-}
-
 function renderDaily() {
-  if (!userData) return;
+  if (!user) return;
   const now = new Date();
-  const birthYear = new Date(userData.deathDate).getFullYear() - userData.deathAge;
-  const birth = new Date(birthYear, 0, 1);
-  const daysLived = Math.floor((now - birth) / 86400000);
+  const dLived = daysLivedFromBirthDate(user.birthday);
+  $('daily-daynum').textContent = `día ${dLived.toLocaleString('es-ES')} de tu vida`;
+  $('d-streak').textContent = streak.count;
 
-  document.getElementById('daily-day-num').textContent = `día ${daysLived.toLocaleString('es-ES')} de tu vida`;
-  document.getElementById('daily-streak').textContent = streakData.count;
-  document.getElementById('sb-streak').textContent = streakData.count;
+  const q = QUOTES[now.getDate() % QUOTES.length];
+  $('d-quote').textContent = '"' + q[0] + '"';
 
-  const quote = QUOTES[now.getDate() % QUOTES.length];
-  document.getElementById('daily-quote').textContent = `"${quote[0]}"`;
+  const qu = QUESTIONS[now.getDay() % QUESTIONS.length];
+  $('d-question').textContent = qu;
 
-  const question = QUESTIONS[now.getDay() % QUESTIONS.length];
-  document.getElementById('reflection-question').textContent = question;
-
-  // Load saved reflection for today
   const todayKey = now.toDateString();
-  const todayRef = reflections.find(r => r.date === todayKey);
-  if (todayRef) document.getElementById('reflection-text').value = todayRef.text;
+  const saved = refls.find(r=>r.date===todayKey);
+  if (saved) $('d-refl-text').value = saved.text;
 
-  // Week dots
-  const days = ['L','M','X','J','V','S','D'];
-  const weekDots = document.getElementById('week-dots');
-  weekDots.innerHTML = days.map((d, i) => {
-    const isToday = i === (now.getDay() === 0 ? 6 : now.getDay() - 1);
-    const dateCheck = new Date();
-    dateCheck.setDate(now.getDate() - (isToday ? 0 : (now.getDay() - 1 - i + 7) % 7));
-    const hasRef = reflections.some(r => r.date === dateCheck.toDateString());
-    return `<div class="week-dot ${hasRef ? 'done' : ''} ${isToday ? 'today' : ''}">${d}</div>`;
+  // week dots
+  const dayNames = ['L','M','X','J','V','S','D'];
+  const todayIdx = now.getDay()===0 ? 6 : now.getDay()-1;
+  $('wdots').innerHTML = dayNames.map((d,i)=>{
+    const offset = (i - todayIdx + 7) % 7;
+    const checkDate = new Date(now); checkDate.setDate(now.getDate()-((7-offset)%7));
+    if (i===todayIdx) checkDate.setDate(now.getDate());
+    const hasR = refls.some(r=>r.date===checkDate.toDateString());
+    return `<div class="wd ${hasR?'on':''} ${i===todayIdx?'today':''}">${d}</div>`;
   }).join('');
 }
 
-function saveReflection() {
-  const text = document.getElementById('reflection-text').value.trim();
+function saveRefl() {
+  const text = $('d-refl-text').value.trim();
   if (!text) return;
   const today = new Date().toDateString();
-  const existing = reflections.findIndex(r => r.date === today);
-  const entry = { date: today, text, question: document.getElementById('reflection-question').textContent };
-  if (existing >= 0) reflections[existing] = entry;
-  else reflections.push(entry);
-  localStorage.setItem('memento_reflections', JSON.stringify(reflections));
-
-  const msg = document.getElementById('reflection-saved-msg');
-  msg.style.display = 'block';
-  setTimeout(() => msg.style.display = 'none', 2000);
-
+  const idx = refls.findIndex(r=>r.date===today);
+  const entry = { date: today, text };
+  if (idx>=0) refls[idx]=entry; else refls.push(entry);
+  localStorage.setItem('m_refls', JSON.stringify(refls));
+  $('saved-msg').style.display='block';
+  setTimeout(()=>$('saved-msg').style.display='none',2000);
   renderDaily();
   renderProfile();
 }
 
-// ══════════════════════════════════════
 // PROFILE
-// ══════════════════════════════════════
 function renderProfile() {
-  if (!userData) return;
-  document.getElementById('prof-name').textContent = userData.name;
-  document.getElementById('prof-age').textContent = userData.age;
-  document.getElementById('prof-death-age').textContent = userData.deathAge + ' (±3)';
-  document.getElementById('prof-happiness').textContent = userData.happiness;
-  document.getElementById('prof-deathdate').textContent = formatDateFull(new Date(userData.deathDate));
-  document.getElementById('prof-joined').textContent = formatDateFull(new Date(userData.joinDate));
-  document.getElementById('prof-bucket').textContent = `${bucketList.filter(i=>i.done).length} completadas de ${bucketList.length}`;
+  if (!user) return;
+  const age   = ageFromBirthDate(user.birthday);
+  const dLived= daysLivedFromBirthDate(user.birthday);
+  const dLeft = Math.floor((new Date(user.deathDate)-new Date())/86400000);
 
-  const now = new Date();
-  const birthYear = new Date(userData.deathDate).getFullYear() - userData.deathAge;
-  const birth = new Date(birthYear, 0, 1);
-  const daysLived = Math.floor((now - birth) / 86400000);
-  const daysLeft = Math.floor((new Date(userData.deathDate) - now) / 86400000);
+  $('p-name').textContent   = user.name;
+  $('p-bday').textContent   = fmtLong(new Date(user.birthday+'T12:00:00'));
+  $('p-hap').textContent    = user.happiness;
+  $('p-ddate').textContent  = fmtLong(new Date(user.deathDate));
+  $('p-joined').textContent = fmtLong(new Date(user.joinDate));
+  $('p-age').textContent    = age;
+  $('p-dage').textContent   = user.deathAge + ' (±3)';
+  $('p-lived').textContent  = dLived.toLocaleString('es-ES');
+  $('p-left').textContent   = dLeft.toLocaleString('es-ES');
 
-  document.getElementById('prof-days-lived').textContent = daysLived.toLocaleString('es-ES');
-  document.getElementById('prof-days-left').textContent = daysLeft.toLocaleString('es-ES');
-
-  // Reflections archive
-  const list = document.getElementById('reflections-list');
-  if (reflections.length === 0) {
-    list.innerHTML = '<div style="font-family:var(--serif);font-size:0.85rem;color:var(--text3);font-style:italic;padding-top:0.5rem;">No hay reflexiones guardadas todavía.</div>';
+  const list = $('refl-archive-list');
+  if (!refls.length) {
+    list.innerHTML='<div style="font-family:var(--serif);font-size:.85rem;color:var(--text3);font-style:italic;padding-top:.5rem;">Sin reflexiones todavía.</div>';
   } else {
-    list.innerHTML = [...reflections].reverse().map(r => `
-      <div class="happiness-row" style="flex-direction:column; align-items:flex-start; gap:0.4rem; padding:1rem 0;">
-        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);letter-spacing:0.1em;">${r.date}</div>
-        <div style="font-family:var(--serif);font-size:0.85rem;color:var(--text2);font-style:italic;line-height:1.6;">"${r.text}"</div>
-      </div>
-    `).join('');
+    list.innerHTML=[...refls].reverse().map(r=>`
+      <div class="ra-entry">
+        <div class="ra-date">${r.date}</div>
+        <div class="ra-text">"${r.text}"</div>
+      </div>`).join('');
   }
 }
 
-// ══════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════
-function showPage(page, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
+// NAV
+function goPage(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  $('page-'+page).classList.add('active');
   el.classList.add('active');
 }
 
-// ══════════════════════════════════════
 // RESET
-// ══════════════════════════════════════
 function resetApp() {
-  if (!confirm('¿Seguro? Se borrarán todos tus datos y empezarás de nuevo.')) return;
-  localStorage.clear();
-  location.reload();
+  if (!confirm('¿Seguro? Se borran todos tus datos.')) return;
+  localStorage.clear(); location.reload();
 }
 
-// ══════════════════════════════════════
-// INIT
-// ══════════════════════════════════════
-if (userData) {
-  document.getElementById('screen-onboarding').classList.remove('active');
-  initApp();
+// ── INIT ──
+if (user) {
+  $('screen-onboarding').classList.remove('active');
+  launchApp();
 } else {
-  // Start onboarding
-  const firstStep = STEPS[0];
-  setTimeout(async () => {
-    const typing = await addMessage('typing', '', 500);
-    await new Promise(r => setTimeout(r, 1200));
-    typing.remove();
-    await addMessage('entity', firstStep.entity);
-    setupStep(firstStep);
-  }, 300);
+  startOnboarding();
 }
 </script>
 </body>
