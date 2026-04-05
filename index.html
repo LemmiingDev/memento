@@ -2,1129 +2,1534 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0909">
 <title>Memento</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ─────────────────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────────────────── */
 :root {
-  --bg:      #080808;
-  --bg1:     #0e0e0e;
-  --bg2:     #141414;
-  --line:    #1e1e1e;
-  --line2:   #2a2a2a;
-  --text:    #d8d4cc;
-  --text2:   #7a7670;
-  --text3:   #3e3c38;
-  --accent:  #c0392b;
-  --accent2: #8b1a10;
-  --gold:    #a8916a;
-  --green:   #2d5a2d;
-  --green2:  #3d7a3d;
-  --radius:  4px;
-  --mono:    'DM Mono', monospace;
-  --serif:   'Cormorant Garamond', Georgia, serif;
-  --sans:    'Instrument Sans', sans-serif;
+  /* surface */
+  --ink:        #0a0909;
+  --ink-1:      #111010;
+  --ink-2:      #191818;
+  --ink-3:      #222120;
+
+  /* rule */
+  --rule:       #1e1d1c;
+  --rule-2:     #2c2b2a;
+
+  /* text */
+  --on:         #ddd9d3;
+  --on-2:       #7e7a75;
+  --on-3:       #413f3c;
+  --on-4:       #252422;
+
+  /* signal */
+  --ox:         #c0392b;   /* oxblood — primary intent */
+  --ox-dim:     #7a1e14;   /* oxblood dim */
+  --ox-wash:    rgba(192,57,43,.06);
+
+  /* life */
+  --sage:       #2e5c30;
+  --sage-2:     #3d7a40;
+
+  /* time */
+  --sand:       #a48f6a;
+
+  /* type */
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --mono:  'DM Mono', 'Courier New', monospace;
+
+  /* space scale (8pt grid) */
+  --s1: 0.5rem;   /* 8px  */
+  --s2: 1rem;     /* 16px */
+  --s3: 1.5rem;   /* 24px */
+  --s4: 2rem;     /* 32px */
+  --s5: 2.5rem;   /* 40px */
+  --s6: 3rem;     /* 48px */
+  --s8: 4rem;     /* 64px */
+
+  /* type scale */
+  --t-xs:  0.625rem;   /* 10px */
+  --t-sm:  0.75rem;    /* 12px */
+  --t-base:0.875rem;   /* 14px */
+  --t-md:  1.0625rem;  /* 17px */
+  --t-lg:  1.25rem;    /* 20px */
+  --t-xl:  1.625rem;   /* 26px */
+  --t-2xl: 2.25rem;    /* 36px */
+  --t-3xl: 3.5rem;     /* 56px */
+  --t-4xl: 5.5rem;     /* 88px */
+
+  /* motion — heavy, intentional */
+  --ease: cubic-bezier(.4,0,.2,1);
+  --dur:  0.4s;
 }
 
-html { scroll-behavior: smooth; }
+/* ─────────────────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--on);
+  font-family: var(--mono);
   font-weight: 300;
+  font-size: var(--t-base);
+  line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* noise */
+/* grain — barely there */
 body::after {
   content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999; opacity: 0.5;
+  position: fixed; inset: 0; z-index: 9000;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.022'/%3E%3C/svg%3E");
+  opacity: 1;
 }
 
-/* ── SCREENS ── */
-.screen { display: none; min-height: 100vh; }
-.screen.active { display: flex; flex-direction: column; }
+/* ─────────────────────────────────────────────────────
+   SCREEN SYSTEM
+───────────────────────────────────────────────────── */
+.screen { display: none; }
+.screen.active { display: flex; flex-direction: column; min-height: 100vh; }
 
-/* ══════════════════════════════════════════════
-   ONBOARDING
-══════════════════════════════════════════════ */
-#screen-onboarding {
+/* ═════════════════════════════════════════════════════
+   ONBOARDING — the conversation
+═════════════════════════════════════════════════════ */
+#scr-onb {
+  background: var(--ink);
   align-items: center;
-  justify-content: flex-end;
-  background: var(--bg);
 }
 
-/* thin top bar - just memento wordmark, no entity name */
-.onb-topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  padding: 1.6rem 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 20;
-  background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+/* wordmark bar */
+.onb-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--s3) var(--s5);
+  background: linear-gradient(to bottom, var(--ink) 55%, transparent);
 }
 
-.wordmark {
+.wm {
   font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.4em;
-  color: var(--text3);
+  font-size: var(--t-xs);
+  letter-spacing: .45em;
+  color: var(--on-3);
   text-transform: uppercase;
 }
 
-.onb-progress {
-  display: flex;
-  gap: 5px;
-  align-items: center;
+/* step indicator — five dashes */
+.onb-steps { display: flex; gap: 6px; align-items: center; }
+
+.onb-step {
+  display: block;
+  width: 20px; height: 1px;
+  background: var(--rule-2);
+  transition: background var(--dur) var(--ease);
 }
+.onb-step.done   { background: var(--ox-dim); }
+.onb-step.active { background: var(--ox); }
 
-.onb-dot {
-  width: 18px; height: 1px;
-  background: var(--line2);
-  transition: background 0.4s;
-}
-
-.onb-dot.done { background: var(--accent2); }
-.onb-dot.active { background: var(--accent); }
-
-/* chat area */
-.chat-area {
-  width: 100%;
-  max-width: 660px;
-  display: flex;
-  flex-direction: column;
+/* chat column */
+.chat-col {
+  width: 100%; max-width: 640px;
+  display: flex; flex-direction: column;
   flex: 1;
-  padding-top: 5rem;
+  padding-top: var(--s8);
 }
 
 .chat-feed {
   flex: 1;
-  padding: 1.5rem 2rem 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
+  display: flex; flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5) var(--s2);
   overflow-y: auto;
-  max-height: calc(100vh - 180px);
-  scroll-behavior: smooth;
+  max-height: calc(100vh - 11rem);
 }
 
-.chat-feed::-webkit-scrollbar { width: 2px; }
-.chat-feed::-webkit-scrollbar-thumb { background: var(--line2); }
+.chat-feed::-webkit-scrollbar { width: 1px; }
+.chat-feed::-webkit-scrollbar-thumb { background: var(--rule-2); }
 
-/* message animation */
-.msg {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.45s ease, transform 0.45s ease;
-}
-.msg.in { opacity: 1; transform: translateY(0); }
+/* incoming bubble */
+.msg { opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.msg.in { opacity: 1; transform: none; }
 
-/* entity bubble — no label, just the bubble */
-.bubble-in {
-  background: var(--bg1);
-  border: 0.5px solid var(--line2);
-  border-left: 2px solid var(--accent2);
-  padding: 1rem 1.3rem;
-  border-radius: 0 var(--radius) var(--radius) var(--radius);
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  line-height: 1.75;
-  color: var(--text);
-  max-width: 82%;
+.bbl {
+  background: var(--ink-1);
+  border: 0.5px solid var(--rule);
+  border-left: 1.5px solid var(--ox-dim);
+  padding: var(--s2) var(--s3);
+  max-width: 84%;
   width: fit-content;
 }
 
-.bubble-in em   { color: var(--gold); font-style: italic; }
-.bubble-in b    { color: var(--accent); font-weight: 400; }
-.bubble-in .num { font-family: var(--mono); font-size: 0.9rem; color: var(--text2); }
-
-/* stat line inside entity bubble */
-.stat-line {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 0.5px solid var(--line2);
-}
-
-.stat-n {
-  font-family: var(--mono);
-  font-size: 1.4rem;
+.bbl p {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
   font-weight: 300;
-  color: var(--accent);
+  line-height: 1.8;
+  color: var(--on);
+}
+
+.bbl p + p { margin-top: var(--s2); }
+.bbl em  { color: var(--sand); font-style: italic; }
+.bbl b   { color: var(--ox); font-weight: 400; }
+
+/* stat card inside bubble */
+.bbl-stat {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+  margin-top: var(--s2);
+  padding-top: var(--s2);
+  border-top: 0.5px solid var(--rule);
+}
+
+.bbl-stat-divider { background: var(--rule); }
+
+.bbl-stat-col { padding: 0 var(--s2); }
+.bbl-stat-col:first-child { padding-left: 0; }
+.bbl-stat-col:last-child  { padding-right: 0; }
+
+.bbl-stat-n {
+  font-family: var(--mono);
+  font-size: var(--t-xl);
+  font-weight: 300;
+  color: var(--ox);
   line-height: 1;
+  letter-spacing: -.02em;
 }
 
-.stat-l {
+.bbl-stat-l {
   font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--text3);
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .12em;
   text-transform: uppercase;
-  line-height: 1.4;
+  margin-top: 4px;
 }
 
-/* user bubble */
-.bubble-out-wrap { display: flex; justify-content: flex-end; }
+/* outgoing bubble */
+.bbl-out-row { display: flex; justify-content: flex-end; }
 
-.bubble-out {
-  background: var(--bg2);
-  border: 0.5px solid var(--line2);
-  padding: 0.7rem 1rem;
-  border-radius: var(--radius) 0 var(--radius) var(--radius);
+.bbl-out {
+  background: var(--ink-2);
+  border: 0.5px solid var(--rule-2);
+  padding: .6rem 1rem;
+  max-width: 52%;
   font-family: var(--mono);
-  font-size: 0.82rem;
-  color: var(--text2);
-  max-width: 55%;
+  font-size: var(--t-base);
+  color: var(--on-2);
+  line-height: 1.5;
 }
 
 /* typing */
-.typing-wrap { opacity: 0; transition: opacity 0.3s; }
-.typing-wrap.in { opacity: 1; }
-
-.typing-bubble {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  background: var(--bg1);
-  border: 0.5px solid var(--line2);
-  border-left: 2px solid var(--accent2);
-  padding: 0.75rem 1rem;
-  border-radius: 0 var(--radius) var(--radius) var(--radius);
+.typing {
+  display: flex; gap: 5px; align-items: center;
+  background: var(--ink-1);
+  border: 0.5px solid var(--rule);
+  border-left: 1.5px solid var(--ox-dim);
+  padding: .75rem 1.1rem;
   width: fit-content;
+  opacity: 0; transition: opacity .3s var(--ease);
 }
+.typing.in { opacity: 1; }
 
-.t-dot {
+.t-d {
   width: 4px; height: 4px;
-  background: var(--accent2);
-  border-radius: 50%;
-  animation: tdot 1.3s ease-in-out infinite;
+  background: var(--ox-dim); border-radius: 50%;
+  animation: td 1.3s ease-in-out infinite;
 }
-.t-dot:nth-child(2) { animation-delay: 0.18s; }
-.t-dot:nth-child(3) { animation-delay: 0.36s; }
+.t-d:nth-child(2) { animation-delay: .18s; }
+.t-d:nth-child(3) { animation-delay: .36s; }
 
-@keyframes tdot {
-  0%,80%,100% { opacity: 0.2; transform: scale(0.75); }
-  40% { opacity: 1; transform: scale(1); }
+@keyframes td {
+  0%,80%,100% { opacity: .18; transform: scale(.75); }
+  40%          { opacity: 1;   transform: scale(1);   }
 }
 
-/* reveal card */
-.reveal-card {
-  background: rgba(192,57,43,0.05);
-  border: 0.5px solid var(--accent2);
-  border-radius: var(--radius);
-  padding: 2rem;
+/* REVEAL card */
+.reveal {
+  border: 0.5px solid var(--ox-dim);
+  background: var(--ox-wash);
+  padding: var(--s4) var(--s5);
   width: 100%;
-  animation: revealIn 0.8s ease forwards;
+  animation: revIn .7s var(--ease) forwards;
 }
 
-@keyframes revealIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes revIn {
+  from { opacity: 0; transform: scale(.98) translateY(8px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.reveal-eyebrow {
+.rev-eyebrow {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.22em;
+  font-size: var(--t-xs);
+  letter-spacing: .22em;
   text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 1.2rem;
+  color: var(--on-3);
+  margin-bottom: var(--s3);
 }
 
-.reveal-days {
+.rev-number {
   font-family: var(--mono);
-  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  font-size: var(--t-4xl);
   font-weight: 300;
-  color: var(--accent);
-  line-height: 1;
-  letter-spacing: -0.03em;
+  color: var(--ox);
+  line-height: .95;
+  letter-spacing: -.04em;
 }
 
-.reveal-days-label {
+.rev-number-label {
   font-family: var(--serif);
-  font-size: 0.95rem;
-  color: var(--text2);
+  font-size: var(--t-md);
   font-style: italic;
-  margin-top: 0.4rem;
+  color: var(--on-2);
+  margin-top: var(--s1);
 }
 
-.reveal-divider {
-  height: 0.5px;
-  background: var(--line2);
-  margin: 1.4rem 0;
-}
+.rev-rule { height: 0.5px; background: var(--rule-2); margin: var(--s3) 0; }
 
-.reveal-grid {
+.rev-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
 }
 
-.reveal-stat { }
+.rev-col {
+  padding: 0 var(--s2);
+  border-right: 0.5px solid var(--rule);
+}
+.rev-col:first-child { padding-left: 0; }
+.rev-col:last-child  { padding-right: 0; border-right: none; }
 
-.reveal-stat-n {
+.rev-col-n {
   font-family: var(--mono);
-  font-size: 1.1rem;
-  color: var(--text);
+  font-size: var(--t-lg);
+  color: var(--on);
   font-weight: 300;
+  line-height: 1;
 }
 
-.reveal-stat-l {
+.rev-col-l {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .1em;
   text-transform: uppercase;
-  margin-top: 0.3rem;
+  margin-top: 5px;
 }
 
-.reveal-footer {
-  margin-top: 1.4rem;
-  padding-top: 1rem;
-  border-top: 0.5px solid var(--line2);
+.rev-footer {
+  margin-top: var(--s3);
   font-family: var(--serif);
-  font-size: 0.85rem;
-  color: var(--text3);
+  font-size: var(--t-base);
   font-style: italic;
+  color: var(--on-3);
   text-align: center;
+  letter-spacing: .04em;
 }
 
-/* input area */
-.input-area {
-  width: 100%;
-  padding: 1.2rem 2rem 2rem;
-  background: linear-gradient(to top, var(--bg) 50%, transparent);
+/* choice buttons */
+.choices {
+  display: flex; flex-wrap: wrap; gap: var(--s1);
+  padding: 0 var(--s5) var(--s1);
 }
 
-.input-row {
-  display: flex;
-  gap: 0.5rem;
+.ch {
+  background: var(--ink-1);
+  border: 0.5px solid var(--rule-2);
+  padding: .55rem 1rem;
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--on-2);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  letter-spacing: .03em;
 }
+.ch:hover { border-color: var(--ox-dim); color: var(--on); }
+
+/* input bar */
+.input-bar {
+  padding: var(--s2) var(--s5) var(--s4);
+  background: linear-gradient(to top, var(--ink) 60%, transparent);
+}
+
+.input-row { display: flex; gap: var(--s1); }
 
 .ci {
   flex: 1;
-  background: var(--bg1);
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.85rem 1rem;
-  color: var(--text);
+  background: var(--ink-1);
+  border: 0.5px solid var(--rule-2);
+  padding: .85rem var(--s2);
+  color: var(--on);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: var(--t-base);
   font-weight: 300;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color var(--dur) var(--ease);
 }
+.ci:focus { border-color: var(--ox-dim); }
+.ci::placeholder { color: var(--on-4); }
 
-.ci:focus { border-color: var(--accent2); }
-.ci::placeholder { color: var(--text3); }
-
-input[type="date"].ci::-webkit-calendar-picker-indicator {
-  filter: invert(0.3);
-  cursor: pointer;
-}
+input[type="date"].ci { cursor: pointer; }
+input[type="date"].ci::-webkit-calendar-picker-indicator { filter: invert(.2); cursor: pointer; }
 
 .cs {
-  background: var(--accent2);
-  border: none;
-  border-radius: var(--radius);
-  padding: 0 1.1rem;
-  color: #e8c8c4;
+  background: var(--ox-dim);
+  border: 0.5px solid var(--ox-dim);
+  padding: 0 var(--s3);
+  color: #e2c5c0;
   font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
   text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
   white-space: nowrap;
 }
+.cs:hover { background: var(--ox); border-color: var(--ox); }
+.cs:active { transform: scale(.98); }
 
-.cs:hover { background: var(--accent); }
-.cs:active { transform: scale(0.97); }
-
-.choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.7rem;
-}
-
-.choice {
-  background: var(--bg1);
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.55rem 1rem;
-  color: var(--text2);
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.choice:hover { border-color: var(--accent2); color: var(--text); }
-
-/* ══════════════════════════════════════════════
+/* ═════════════════════════════════════════════════════
    APP SHELL
-══════════════════════════════════════════════ */
-#screen-app {
+═════════════════════════════════════════════════════ */
+#scr-app {
   flex-direction: row;
+  animation: fadeIn .5s var(--ease);
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── SIDEBAR ── */
+.sb {
+  width: 200px;
   min-height: 100vh;
-  animation: appIn 0.6s ease forwards;
+  border-right: 0.5px solid var(--rule);
+  background: var(--ink-1);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 50;
 }
 
-@keyframes appIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.sb-head {
+  padding: var(--s4) var(--s3);
+  border-bottom: 0.5px solid var(--rule);
 }
 
-/* SIDEBAR */
-.sidebar {
-  width: 210px;
-  background: var(--bg1);
-  border-right: 0.5px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  z-index: 100;
-}
-
-.sb-logo {
-  padding: 1.8rem 1.5rem 1.4rem;
-  border-bottom: 0.5px solid var(--line);
-}
-
-.sb-logo-mark {
+.sb-wm {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.35em;
-  color: var(--text3);
+  font-size: var(--t-xs);
+  letter-spacing: .35em;
+  color: var(--on-3);
   text-transform: uppercase;
 }
 
-.sb-logo-name {
+.sb-title {
   font-family: var(--serif);
-  font-size: 1.4rem;
-  color: var(--text);
+  font-size: var(--t-xl);
   font-weight: 300;
-  margin-top: 0.15rem;
+  color: var(--on);
+  margin-top: 4px;
+  letter-spacing: .02em;
 }
 
 .sb-user {
-  padding: 1.2rem 1.5rem 1.4rem;
-  border-bottom: 0.5px solid var(--line);
+  padding: var(--s2) var(--s3) var(--s3);
+  border-bottom: 0.5px solid var(--rule);
 }
 
-.sb-user-name {
-  font-size: 0.82rem;
-  color: var(--text2);
+.sb-name {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  color: var(--on);
   font-weight: 300;
 }
 
-.sb-user-days {
+.sb-days {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--accent);
-  margin-top: 0.25rem;
-  letter-spacing: 0.02em;
+  font-size: var(--t-xs);
+  color: var(--ox);
+  margin-top: 3px;
+  letter-spacing: .03em;
 }
 
 .sb-nav {
   flex: 1;
-  padding: 1rem 0.7rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  padding: var(--s2) var(--s1);
+  display: flex; flex-direction: column; gap: 2px;
 }
 
 .ni {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: var(--radius);
-  color: var(--text3);
-  font-size: 0.78rem;
+  display: flex; align-items: center; gap: .65rem;
+  padding: .6rem .85rem;
+  color: var(--on-3);
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  letter-spacing: .04em;
   cursor: pointer;
-  transition: all 0.15s;
   border: 0.5px solid transparent;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
+.ni:hover  { color: var(--on-2); }
+.ni.active { color: var(--on); border-color: var(--rule); background: var(--ink-2); }
 
-.ni:hover { color: var(--text2); background: var(--bg2); }
-.ni.active { color: var(--text); background: var(--bg2); border-color: var(--line2); }
-.ni svg { flex-shrink: 0; opacity: 0.4; transition: opacity 0.15s; }
-.ni.active svg, .ni:hover svg { opacity: 0.9; }
+.ni svg { flex-shrink: 0; transition: opacity var(--dur) var(--ease); opacity: .35; }
+.ni.active svg, .ni:hover svg { opacity: .8; }
 
 .sb-foot {
-  padding: 1.2rem 1.5rem;
-  border-top: 0.5px solid var(--line);
+  padding: var(--s2) var(--s3);
+  border-top: 0.5px solid var(--rule);
 }
 
-.sb-streak {
+.sb-streak-label {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text3);
-  letter-spacing: 0.04em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .05em;
 }
+.sb-streak-label span { color: var(--sand); }
 
-.sb-streak span { color: var(--gold); }
+/* mobile topbar — hidden on desktop */
+.mobile-topbar { display: none; }
 
-/* MAIN */
-.main {
-  margin-left: 210px;
-  flex: 1;
-  min-height: 100vh;
+/* ── MAIN ── */
+.main { margin-left: 200px; flex: 1; min-height: 100vh; }
+
+.page { display: none; }
+.page.active {
+  display: block;
+  padding: var(--s6) var(--s8) var(--s8);
+  max-width: 960px;
+  animation: pgIn .35s var(--ease);
 }
-
-.page { display: none; padding: 2.8rem 3rem; max-width: 940px; }
-.page.active { display: block; animation: pgIn 0.35s ease; }
 
 @keyframes pgIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
 }
 
-/* ── PAGE HOME ── */
-.home-head {
+/* ── PAGE HEADER PATTERN ── */
+.pg-head {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2.5rem;
+  padding-bottom: var(--s3);
+  border-bottom: 0.5px solid var(--rule);
+  margin-bottom: var(--s5);
+}
+
+.pg-title {
+  font-family: var(--serif);
+  font-size: var(--t-2xl);
+  font-weight: 300;
+  color: var(--on);
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.pg-sub {
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  margin-top: var(--s1);
+  letter-spacing: .08em;
+}
+
+/* ghost button */
+.btn {
+  background: transparent;
+  border: 0.5px solid var(--rule-2);
+  padding: .55rem 1.1rem;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--on-2);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.btn:hover { border-color: var(--ox-dim); color: var(--on); }
+.btn.danger { color: var(--ox-dim); border-color: var(--ink-3); }
+.btn.danger:hover { border-color: var(--ox); color: var(--ox); }
+
+/* ═════════════════════════════════════════════════════
+   HOME PAGE
+═════════════════════════════════════════════════════ */
+.home-kicker {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: var(--s6);
 }
 
 .home-greeting {
   font-family: var(--serif);
-  font-size: 0.88rem;
-  color: var(--text2);
+  font-size: var(--t-base);
   font-style: italic;
+  color: var(--on-2);
 }
 
 .home-name {
   font-family: var(--serif);
-  font-size: 2rem;
+  font-size: var(--t-2xl);
   font-weight: 300;
-  color: var(--text);
-  line-height: 1.2;
-  margin-top: 0.2rem;
+  color: var(--on);
+  margin-top: 3px;
 }
 
-.home-date-block {
-  text-align: right;
-}
-
-.home-date {
+.home-datestamp {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text3);
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  text-align: right;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-/* COUNTDOWN HERO */
-.hero {
-  background: var(--bg1);
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 2.5rem;
-  margin-bottom: 1.2rem;
+/* COUNTDOWN MONUMENT */
+.countdown-block {
+  border: 0.5px solid var(--rule);
+  background: var(--ink-1);
+  padding: var(--s6) var(--s6) var(--s4);
+  margin-bottom: var(--s3);
   position: relative;
-  overflow: hidden;
 }
 
-.hero::before {
+/* single oxblood thread at top — the only decoration */
+.countdown-block::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent2) 40%, transparent);
+  background: var(--ox-dim);
+  opacity: .5;
 }
 
-.hero-label {
+.cd-eyebrow {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.2em;
-  color: var(--text3);
+  font-size: var(--t-xs);
+  letter-spacing: .2em;
   text-transform: uppercase;
-  margin-bottom: 1.4rem;
+  color: var(--on-3);
+  margin-bottom: var(--s5);
 }
 
-.cd-grid {
+/* four columns divided by hairline rules */
+.cd-cols {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  border-left: 0.5px solid var(--rule);
 }
 
-.cd-unit {
-  padding: 0.8rem 0;
-  border-right: 0.5px solid var(--line);
-  text-align: center;
+.cd-col {
+  padding: 0 var(--s4) var(--s3);
+  border-right: 0.5px solid var(--rule);
 }
-.cd-unit:last-child { border-right: none; }
 
 .cd-n {
   font-family: var(--mono);
-  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-size: var(--t-3xl);
   font-weight: 300;
-  color: var(--text);
   line-height: 1;
-  letter-spacing: -0.02em;
-  transition: color 0.5s;
+  letter-spacing: -.04em;
+  color: var(--on);
+  transition: color var(--dur) var(--ease);
 }
-
-.cd-n.red { color: var(--accent); }
+.cd-n.signal { color: var(--ox); }
 
 .cd-l {
   font-family: var(--mono);
-  font-size: 0.52rem;
-  color: var(--text3);
-  letter-spacing: 0.14em;
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
   text-transform: uppercase;
-  margin-top: 0.5rem;
+  color: var(--on-3);
+  margin-top: var(--s1);
 }
 
-.hero-foot {
-  margin-top: 1.8rem;
-  padding-top: 1.4rem;
-  border-top: 0.5px solid var(--line);
+.cd-foot {
+  padding-top: var(--s3);
+  border-top: 0.5px solid var(--rule);
+  margin-top: var(--s3);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.death-label {
+.death-stamp {
   font-family: var(--serif);
-  font-size: 0.9rem;
-  color: var(--text2);
+  font-size: var(--t-base);
   font-style: italic;
+  color: var(--on-2);
+}
+.death-stamp strong { font-style: normal; font-weight: 400; color: var(--on); }
+
+/* life progress — editorial bar */
+.life-meter { display: flex; align-items: center; gap: var(--s2); }
+
+.lm-bar {
+  width: 90px; height: 1px;
+  background: var(--rule-2);
+  position: relative; overflow: hidden;
+}
+.lm-fill {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  background: var(--ox);
+  transition: width 1.5s var(--ease);
 }
 
-.death-label strong { color: var(--text); font-style: normal; font-weight: 400; }
-
-.life-bar-wrap { display: flex; align-items: center; gap: 0.8rem; }
-
-.lbar {
-  width: 100px; height: 2px;
-  background: var(--line2); border-radius: 1px; overflow: hidden;
-}
-
-.lbar-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 1px;
-  transition: width 1.2s ease;
-}
-
-.lbar-pct {
+.lm-pct {
   font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--text3);
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .05em;
+  white-space: nowrap;
 }
 
-/* STAT ROW */
-.stat-row {
+/* ── THREE SECONDARY STATS ── */
+.tri-stats {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 1rem;
-  margin-bottom: 1.2rem;
+  grid-template-columns: repeat(3, 1fr);
+  border-left: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
+  margin-bottom: var(--s5);
 }
 
-.scard {
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.3rem;
+.tri-stat {
+  padding: var(--s3) var(--s4);
+  border-right: 0.5px solid var(--rule);
+  border-top: 0.5px solid var(--rule);
 }
 
-.scard-l {
+.tri-l {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.14em;
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
   text-transform: uppercase;
-  margin-bottom: 0.6rem;
+  color: var(--on-3);
+  margin-bottom: var(--s1);
 }
 
-.scard-v {
+.tri-n {
   font-family: var(--mono);
-  font-size: 1.5rem;
+  font-size: var(--t-2xl);
   font-weight: 300;
-  color: var(--text);
+  color: var(--on);
   line-height: 1;
+  letter-spacing: -.03em;
 }
-.scard-v.red { color: var(--accent); }
-.scard-v.gold { color: var(--gold); }
+.tri-n.ox   { color: var(--ox); }
+.tri-n.sand { color: var(--sand); }
 
-.scard-s {
+.tri-s {
   font-family: var(--serif);
-  font-size: 0.72rem;
-  color: var(--text3);
-  margin-top: 0.35rem;
+  font-size: var(--t-base);
   font-style: italic;
+  color: var(--on-3);
+  margin-top: 4px;
 }
 
-/* QUOTE BLOCK */
-.quote-block {
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.8rem 2.2rem;
-  position: relative;
+/* ── DAILY QUOTE ── */
+.quote-vessel {
+  border-top: 0.5px solid var(--rule);
+  padding: var(--s5) 0 0;
 }
 
-.quote-block::before {
-  content: '\201C';
-  position: absolute;
-  top: 0.3rem; left: 1.3rem;
+.quote-mark {
   font-family: var(--serif);
-  font-size: 5rem;
-  color: var(--line2);
-  line-height: 1;
-  pointer-events: none;
+  font-size: 6rem;
+  color: var(--rule-2);
+  line-height: .6;
+  margin-bottom: var(--s2);
+  user-select: none;
 }
 
-.quote-text {
+.quote-body {
   font-family: var(--serif);
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: var(--text2);
+  font-size: var(--t-xl);
+  font-weight: 300;
   font-style: italic;
-  padding-left: 1.2rem;
+  color: var(--on-2);
+  line-height: 1.75;
+  max-width: 640px;
 }
 
 .quote-attr {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.12em;
-  margin-top: 1rem;
-  padding-left: 1.2rem;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .12em;
+  margin-top: var(--s3);
+  text-transform: uppercase;
 }
 
-/* ── PAGE BUCKET ── */
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  padding-bottom: 1.4rem;
-  border-bottom: 0.5px solid var(--line);
-}
-
-.page-title {
-  font-family: var(--serif);
-  font-size: 1.7rem;
-  font-weight: 300;
-  color: var(--text);
-}
-
-.page-sub {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text3);
-  margin-top: 0.3rem;
-  letter-spacing: 0.08em;
-}
-
-.btn-ghost {
-  background: transparent;
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.55rem 1.1rem;
-  color: var(--text2);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-ghost:hover { border-color: var(--accent2); color: var(--text); }
-
+/* ═════════════════════════════════════════════════════
+   BUCKET LIST
+═════════════════════════════════════════════════════ */
 .add-form {
   display: none;
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.1rem;
-  margin-bottom: 1.2rem;
-  gap: 0.7rem;
+  border: 0.5px solid var(--rule);
+  background: var(--ink-1);
+  padding: var(--s3);
+  margin-bottom: var(--s3);
+  gap: var(--s2);
   align-items: flex-end;
 }
 .add-form.open { display: flex; }
 
-.fg { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
+.fgrp { display: flex; flex-direction: column; gap: 5px; flex: 1; }
 
 .fl {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 
-.fi, .fs {
-  background: var(--bg);
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.6rem 0.8rem;
-  color: var(--text);
+.fi, .fsel {
+  background: var(--ink);
+  border: 0.5px solid var(--rule-2);
+  padding: .7rem var(--s2);
+  color: var(--on);
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--t-sm);
   font-weight: 300;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--dur) var(--ease);
+  line-height: 1;
 }
-.fi:focus, .fs:focus { border-color: var(--accent2); }
-.fs { cursor: pointer; }
-option { background: var(--bg1); }
+.fi:focus, .fsel:focus { border-color: var(--ox-dim); }
+.fsel { cursor: pointer; }
+option { background: var(--ink-1); }
 
 .btn-add {
-  background: var(--accent2);
-  border: none;
-  border-radius: var(--radius);
-  padding: 0.6rem 1.1rem;
-  color: #e8c8c4;
+  background: var(--ox-dim);
+  border: 0.5px solid var(--ox-dim);
+  padding: .7rem var(--s3);
+  color: #e2c5c0;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--dur) var(--ease);
   white-space: nowrap;
+  line-height: 1;
 }
-.btn-add:hover { background: var(--accent); }
+.btn-add:hover { background: var(--ox); border-color: var(--ox); }
 
+/* filter tabs */
 .filter-row {
   display: flex;
-  gap: 0;
-  margin-bottom: 1.2rem;
-  border-bottom: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--rule);
+  margin-bottom: var(--s3);
+  overflow-x: auto;
 }
+.filter-row::-webkit-scrollbar { display: none; }
 
 .ft {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--text3);
-  padding: 0.45rem 0.8rem;
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--on-3);
+  padding: .5rem .85rem;
   cursor: pointer;
-  border-bottom: 1.5px solid transparent;
+  border-bottom: 1px solid transparent;
   margin-bottom: -0.5px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  transition: all 0.15s;
-}
-.ft:hover { color: var(--text2); }
-.ft.active { color: var(--text); border-bottom-color: var(--accent); }
-
-.blist { display: flex; flex-direction: column; gap: 0.4rem; }
-
-.bitem {
-  display: grid;
-  grid-template-columns: 22px 1fr auto;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.9rem 1.1rem;
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.bitem:hover { border-color: var(--line2); background: var(--bg2); }
-.bitem.done { opacity: 0.55; }
-
-.bcheck {
-  width: 17px; height: 17px;
-  border-radius: 50%;
-  border: 1px solid var(--line2);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s;
-}
-.bcheck.on { background: var(--green); border-color: var(--green2); }
-
-.bname {
-  font-size: 0.83rem;
-  color: var(--text);
-  font-weight: 300;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.bitem.done .bname { text-decoration: line-through; color: var(--text3); }
+.ft:hover  { color: var(--on-2); }
+.ft.active { color: var(--on); border-bottom-color: var(--ox); }
 
-.bmeta {
-  display: flex; gap: 0.7rem; align-items: center; margin-top: 0.25rem;
+/* bucket item — editorial list row */
+.bl { display: flex; flex-direction: column; }
+
+.bi {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s2);
+  border-bottom: 0.5px solid var(--rule);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.bi:first-child { border-top: 0.5px solid var(--rule); }
+.bi:hover { background: var(--ink-1); }
+.bi.done { opacity: .45; }
+
+.bi-box {
+  width: 16px; height: 16px;
+  border: 0.5px solid var(--rule-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.bi-box.on { background: var(--sage); border-color: var(--sage-2); }
+
+.bi-label {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-weight: 300;
+  color: var(--on);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color var(--dur) var(--ease);
+}
+.bi.done .bi-label { text-decoration: line-through; color: var(--on-3); }
+
+.bi-meta {
+  display: flex; gap: var(--s2); align-items: center; margin-top: 2px;
 }
 
-.bcat {
+.bi-cat {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.07em;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .07em;
   text-transform: uppercase;
 }
 
-.bdate {
+.bi-date {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--green2);
+  font-size: var(--t-xs);
+  color: var(--sage-2);
 }
 
-.bdel {
-  width: 22px; height: 22px;
+.bi-del {
+  width: 20px; height: 20px;
   display: flex; align-items: center; justify-content: center;
-  opacity: 0;
-  color: var(--text3);
+  color: var(--on-3); opacity: 0;
   cursor: pointer;
-  transition: opacity 0.15s, color 0.15s;
   flex-shrink: 0;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.bitem:hover .bdel { opacity: 1; }
-.bdel:hover { color: var(--accent); }
+.bi:hover .bi-del { opacity: 1; }
+.bi-del:hover { color: var(--ox); }
 
 .empty {
-  padding: 2.5rem;
-  text-align: center;
+  padding: var(--s8) 0;
   font-family: var(--serif);
-  font-size: 0.88rem;
-  color: var(--text3);
+  font-size: var(--t-md);
   font-style: italic;
-  border: 0.5px dashed var(--line2);
-  border-radius: var(--radius);
+  color: var(--on-3);
+  border-top: 0.5px solid var(--rule);
 }
 
-/* ── PAGE DAILY ── */
-.daily-grid {
+/* ═════════════════════════════════════════════════════
+   DAILY PAGE
+═════════════════════════════════════════════════════ */
+/* two-column layout */
+.daily-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  margin-bottom: 1.2rem;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  border: 0.5px solid var(--rule);
 }
 
-.card {
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+.daily-cell {
+  padding: var(--s4);
+  border-right: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
 }
+.daily-cell:nth-child(2n) { border-right: none; }
+.daily-cell:nth-last-child(-n+2) { border-bottom: none; }
 
-.card-label {
+.dc-label {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.14em;
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
   text-transform: uppercase;
-  margin-bottom: 0.9rem;
+  color: var(--on-3);
+  margin-bottom: var(--s3);
 }
 
-.streak-n {
+/* streak */
+.streak-hero {
   font-family: var(--mono);
-  font-size: 2.8rem;
+  font-size: var(--t-3xl);
   font-weight: 300;
-  color: var(--gold);
+  color: var(--sand);
   line-height: 1;
+  letter-spacing: -.04em;
 }
 
-.streak-s {
+.streak-sub {
   font-family: var(--serif);
-  font-size: 0.78rem;
-  color: var(--text3);
+  font-size: var(--t-base);
   font-style: italic;
-  margin-top: 0.35rem;
+  color: var(--on-3);
+  margin-top: 5px;
 }
 
-.wdots {
-  display: flex; gap: 0.4rem; margin-top: 1rem;
+/* week grid */
+.week-grid {
+  display: flex;
+  gap: 4px;
+  margin-top: var(--s3);
 }
 
 .wd {
-  width: 26px; height: 26px;
-  border-radius: var(--radius);
-  border: 0.5px solid var(--line);
-  display: flex; align-items: center; justify-content: center;
+  flex: 1;
+  aspect-ratio: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 0.5px solid var(--rule);
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .05em;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.wd.on { background: rgba(45,90,45,0.25); border-color: var(--green); color: var(--green2); }
-.wd.today { border-color: var(--accent2); color: var(--accent); }
+.wd.on    { background: rgba(46,92,48,.2); border-color: var(--sage); color: var(--sage-2); }
+.wd.today { border-color: var(--ox-dim); color: var(--ox); }
 
-.refl-card {
+/* daily quote cell */
+.daily-quote-text {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--on-2);
+  line-height: 1.75;
+}
+
+/* reflection cell — full width */
+.refl-cell {
   grid-column: 1 / -1;
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: var(--s4);
+  border-top: 0.5px solid var(--rule);
 }
 
 .refl-q {
   font-family: var(--serif);
-  font-size: 1.05rem;
-  line-height: 1.75;
-  color: var(--text2);
+  font-size: var(--t-lg);
+  font-weight: 300;
   font-style: italic;
-  margin-bottom: 1.1rem;
+  color: var(--on-2);
+  line-height: 1.75;
+  margin-bottom: var(--s3);
+  max-width: 600px;
 }
 
 .rta {
   width: 100%;
-  background: var(--bg);
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.85rem 1rem;
-  color: var(--text);
+  background: var(--ink);
+  border: 0.5px solid var(--rule-2);
+  padding: var(--s2) var(--s2);
+  color: var(--on);
   font-family: var(--serif);
-  font-size: 0.92rem;
+  font-size: var(--t-md);
   font-weight: 300;
-  line-height: 1.7;
+  line-height: 1.75;
   resize: none;
   outline: none;
-  transition: border-color 0.2s;
-  min-height: 110px;
+  min-height: 120px;
+  transition: border-color var(--dur) var(--ease);
 }
-.rta:focus { border-color: var(--accent2); }
-.rta::placeholder { color: var(--text3); font-style: italic; }
+.rta:focus { border-color: var(--ox-dim); }
+.rta::placeholder { color: var(--on-4); font-style: italic; }
 
-.refl-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.7rem;
+.refl-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: var(--s2);
 }
 
-.btn-save {
-  background: transparent;
-  border: 0.5px solid var(--line2);
-  border-radius: var(--radius);
-  padding: 0.5rem 1rem;
-  color: var(--text3);
+.saved-note {
   font-family: var(--mono);
-  font-size: 0.62rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.btn-save:hover { border-color: var(--accent2); color: var(--text2); }
-
-.saved-msg {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--green2);
+  font-size: var(--t-xs);
+  color: var(--sage-2);
+  letter-spacing: .08em;
   display: none;
 }
 
-/* ── PAGE PROFILE ── */
+/* ═════════════════════════════════════════════════════
+   PROFILE PAGE
+═════════════════════════════════════════════════════ */
 .prof-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
+  border-left: 0.5px solid var(--rule);
+  border-top: 0.5px solid var(--rule);
+  margin-bottom: var(--s5);
 }
 
-.prof-stat {
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.3rem;
+.prof-cell {
+  padding: var(--s4);
+  border-right: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
 }
 
-.ps-n {
+.pc-l {
   font-family: var(--mono);
-  font-size: 1.9rem;
-  font-weight: 300;
-  color: var(--text);
-  line-height: 1;
-}
-
-.ps-l {
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.12em;
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
   text-transform: uppercase;
-  margin-top: 0.45rem;
+  color: var(--on-3);
+  margin-bottom: var(--s1);
 }
 
-.prof-wide {
-  grid-column: 1 / -1;
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.4rem;
+.pc-n {
+  font-family: var(--mono);
+  font-size: var(--t-2xl);
+  font-weight: 300;
+  color: var(--on);
+  line-height: 1;
+  letter-spacing: -.03em;
 }
 
-.prow {
+/* data table */
+.data-table {
+  border: 0.5px solid var(--rule);
+  margin-bottom: var(--s5);
+}
+
+.dt-head {
+  padding: var(--s2) var(--s3);
+  border-bottom: 0.5px solid var(--rule);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--on-3);
+}
+
+.dt-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 0.5px solid var(--line);
+  align-items: baseline;
+  padding: .85rem var(--s3);
+  border-bottom: 0.5px solid var(--rule);
+  transition: background var(--dur) var(--ease);
 }
-.prow:last-child { border-bottom: none; }
+.dt-row:last-child { border-bottom: none; }
+.dt-row:hover { background: var(--ink-1); }
 
-.pr-label { font-family: var(--serif); font-size: 0.88rem; color: var(--text2); }
-.pr-value { font-family: var(--mono); font-size: 0.75rem; color: var(--text3); }
-.pr-value.hi { color: var(--gold); }
+.dt-k {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  color: var(--on-2);
+  font-weight: 300;
+}
 
-.refl-archive {
-  grid-column: 1 / -1;
-  background: var(--bg1);
-  border: 0.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.4rem;
+.dt-v {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  color: var(--on-3);
+  text-align: right;
+}
+.dt-v.hi { color: var(--sand); }
+
+/* reflection archive */
+.refl-archive { border: 0.5px solid var(--rule); }
+
+.ra-head {
+  padding: var(--s2) var(--s3);
+  border-bottom: 0.5px solid var(--rule);
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--on-3);
 }
 
 .ra-entry {
-  padding: 0.9rem 0;
-  border-bottom: 0.5px solid var(--line);
+  padding: var(--s3);
+  border-bottom: 0.5px solid var(--rule);
 }
 .ra-entry:last-child { border-bottom: none; }
 
-.ra-date {
+.ra-d {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--text3);
-  letter-spacing: 0.1em;
-  margin-bottom: 0.4rem;
+  font-size: var(--t-xs);
+  color: var(--on-3);
+  letter-spacing: .08em;
+  margin-bottom: 6px;
 }
 
-.ra-text {
+.ra-t {
   font-family: var(--serif);
-  font-size: 0.85rem;
-  color: var(--text2);
+  font-size: var(--t-md);
   font-style: italic;
+  color: var(--on-2);
   line-height: 1.65;
 }
 
-/* scrollbar */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+/* ─────────────────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 2px; height: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule-2); }
+
+/* ═════════════════════════════════════════════════════
+   MOBILE — iPhone-first
+   Strategy:
+   · Sidebar → fixed bottom tab bar (iOS pattern)
+   · Typography scales down proportionally
+   · Grids collapse: 4-col→2-col→1-col
+   · Touch targets ≥ 44px
+   · Safe area insets for notch + home indicator
+   · No hover states, only :active feedback
+═════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── TOKENS override ── */
+  :root {
+    --s2: 0.875rem;
+    --s3: 1.25rem;
+    --s4: 1.5rem;
+    --s5: 1.75rem;
+    --s6: 2rem;
+    --s8: 2.5rem;
+    --t-3xl: 2.6rem;
+    --t-4xl: 3.8rem;
+    --t-2xl: 1.75rem;
+  }
+
+  /* ── ONBOARDING ── */
+  .onb-bar {
+    padding: calc(env(safe-area-inset-top) + 0.875rem) 1.25rem 0.875rem;
+  }
+
+  .chat-col {
+    padding-top: calc(env(safe-area-inset-top) + 3.5rem);
+  }
+
+  .chat-feed {
+    padding: 1rem 1.25rem 0.5rem;
+    gap: 1rem;
+    max-height: calc(100dvh - 10rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .bbl {
+    max-width: 96%;
+    padding: 0.85rem 1rem;
+  }
+
+  .bbl p { font-size: 1.05rem; line-height: 1.7; }
+
+  .bbl-stat { gap: 0; }
+  .bbl-stat-col { padding: 0 0.75rem; }
+  .bbl-stat-n { font-size: 1.3rem; }
+
+  .bbl-out { max-width: 72%; font-size: 0.82rem; }
+
+  .input-bar {
+    padding: 0.75rem 1.25rem calc(env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .choices { padding: 0 1.25rem 0.5rem; gap: 0.4rem; }
+  .ch { padding: 0.6rem 0.85rem; font-size: 0.78rem; min-height: 44px; display: flex; align-items: center; }
+
+  .ci { padding: 0.9rem 1rem; font-size: 1rem; min-height: 44px; }
+  .cs { min-height: 44px; padding: 0 1rem; font-size: 0.68rem; }
+
+  /* reveal */
+  .reveal { padding: 1.5rem 1.25rem; }
+  .rev-number { font-size: 3.2rem; }
+  .rev-grid { grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .rev-col { padding: 0 0.6rem; }
+  .rev-col-n { font-size: 1rem; }
+  .rev-col-l { font-size: 0.55rem; }
+  .rev-footer { font-size: 0.82rem; }
+
+  /* ── APP SHELL ── */
+  #scr-app { flex-direction: column; }
+
+  /* SIDEBAR → BOTTOM TAB BAR */
+  .sb {
+    width: 100%;
+    height: auto;
+    min-height: unset;
+    position: fixed;
+    top: auto; left: 0; right: 0; bottom: 0;
+    flex-direction: column;
+    border-right: none;
+    border-top: 0.5px solid var(--rule);
+    z-index: 200;
+    /* iOS home indicator padding */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* hide desktop-only sidebar sections */
+  .sb-head,
+  .sb-user,
+  .sb-foot { display: none; }
+
+  .sb-nav {
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+    justify-content: stretch;
+  }
+
+  .ni {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0.6rem 0.25rem 0.5rem;
+    border: none;
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+    min-height: 52px;
+    border-radius: 0;
+    text-align: center;
+  }
+
+  .ni.active {
+    background: transparent;
+    border: none;
+    color: var(--ox);
+  }
+
+  .ni.active svg { opacity: 1; }
+  .ni svg { opacity: 0.3; width: 18px; height: 18px; }
+  .ni.active svg path, .ni.active svg circle,
+  .ni.active svg line, .ni.active svg rect { stroke: var(--ox); }
+
+  /* active indicator — thin top line per tab */
+  .ni.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%; height: 1px;
+    background: var(--ox);
+  }
+  .ni { position: relative; }
+
+  /* MAIN — make room for top bar + bottom nav */
+  .main {
+    margin-left: 0;
+    margin-bottom: calc(52px + env(safe-area-inset-bottom));
+  }
+
+  /* mobile top bar — name + days */
+  .mobile-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(env(safe-area-inset-top) + 0.75rem) 1.25rem 0.75rem;
+    border-bottom: 0.5px solid var(--rule);
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .mtb-name {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--on);
+    font-weight: 300;
+  }
+
+  .mtb-days {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--ox);
+    letter-spacing: 0.03em;
+  }
+
+  /* PAGE padding */
+  .page.active {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  /* ── HOME PAGE ── */
+  .home-kicker {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .home-datestamp {
+    text-align: left;
+    margin-top: 0.25rem;
+    font-size: 0.6rem;
+  }
+
+  .home-name { font-size: 1.6rem; }
+
+  /* Countdown: 4-col → 2×2 grid */
+  .countdown-block {
+    padding: 1.25rem 1.25rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cd-eyebrow { margin-bottom: 1.25rem; }
+
+  .cd-cols {
+    grid-template-columns: 1fr 1fr;
+    border-left: 0.5px solid var(--rule);
+  }
+
+  .cd-col {
+    padding: 0 1rem 1rem;
+    border-right: 0.5px solid var(--rule);
+    border-bottom: 0.5px solid var(--rule);
+  }
+
+  /* bottom row: no bottom border */
+  .cd-col:nth-child(3),
+  .cd-col:nth-child(4) { border-bottom: none; }
+
+  /* right column of each row: no right border on rightmost */
+  .cd-col:nth-child(2),
+  .cd-col:nth-child(4) { border-right: none; }
+
+  .cd-n { font-size: 2.6rem; }
+
+  .cd-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+
+  .lm-bar { width: 100px; }
+
+  /* Secondary stats: 3-col stays but smaller */
+  .tri-stats { border-left: 0.5px solid var(--rule); }
+
+  .tri-stat { padding: 1rem 1rem; }
+
+  .tri-n { font-size: 1.5rem; }
+  .tri-s { font-size: 0.72rem; }
+
+  /* Quote */
+  .quote-vessel { padding: 1.5rem 0 0; }
+  .quote-mark   { font-size: 4rem; }
+  .quote-body   { font-size: 1.15rem; }
+
+  /* ── BUCKET LIST ── */
+  .add-form {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .add-form .fgrp { flex: unset; width: 100%; }
+
+  .fi, .fsel { min-height: 44px; font-size: 1rem; }
+  .btn-add   { min-height: 44px; width: 100%; }
+
+  .bi {
+    padding: 0.85rem 0.5rem;
+    gap: 0.75rem;
+    /* reveal delete on mobile via swipe indicator */
+  }
+
+  .bi-label  { font-size: 1rem; white-space: normal; }
+  .bi-del    { opacity: 1; min-width: 36px; min-height: 44px; }
+
+  /* ── DAILY PAGE ── */
+  .daily-layout {
+    grid-template-columns: 1fr;
+    border: 0.5px solid var(--rule);
+  }
+
+  .daily-cell {
+    border-right: none;
+    border-bottom: 0.5px solid var(--rule);
+  }
+
+  /* restore border-bottom on all cells when single column */
+  .daily-cell:nth-child(2n)      { border-right: none; }
+  .daily-cell:nth-last-child(-n+2) { border-bottom: 0.5px solid var(--rule); }
+
+  .refl-cell { grid-column: 1; border-top: none; }
+
+  .streak-hero { font-size: 2.8rem; }
+
+  .refl-q { font-size: 1.05rem; }
+  .rta    { font-size: 1rem; min-height: 100px; }
+
+  /* ── PROFILE PAGE ── */
+  .prof-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pc-n { font-size: 1.5rem; }
+  .prof-cell { padding: 1rem; }
+
+  .dt-row { flex-direction: column; gap: 0.2rem; align-items: flex-start; padding: 0.75rem 1rem; }
+  .dt-v   { text-align: left; }
+
+  .pg-head { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .pg-head .btn { align-self: flex-start; min-height: 44px; }
+
+  /* btn global touch target */
+  .btn { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* eliminate :hover on touch — use :active instead */
+  .ni:hover { color: var(--on-3); background: transparent; }
+  .ch:hover { border-color: var(--rule-2); color: var(--on-2); }
+  .bi:hover { background: transparent; }
+  .bi-del:hover { color: var(--on-3); }
+  .ft:hover { color: var(--on-3); }
+  .btn:hover { border-color: var(--rule-2); color: var(--on-2); }
+
+  .ni:active  { color: var(--ox); }
+  .ch:active  { border-color: var(--ox-dim); color: var(--on); background: var(--ink-2); }
+  .bi:active  { background: var(--ink-1); }
+  .btn:active { border-color: var(--ox-dim); color: var(--on); }
+
+}
+
+/* Very small screens (iPhone SE) */
+@media (max-width: 375px) {
+  :root { --t-3xl: 2.2rem; }
+  .cd-n { font-size: 2.2rem; }
+  .rev-number { font-size: 2.8rem; }
+  .tri-n { font-size: 1.3rem; }
+  .cd-col { padding: 0 0.65rem 0.75rem; }
+}
 
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
+<!-- ══════════════════════════════════════════════════
      ONBOARDING
-══════════════════════════════════════════ -->
-<div id="screen-onboarding" class="screen active">
+══════════════════════════════════════════════════ -->
+<div id="scr-onb" class="screen active">
 
-  <div class="onb-topbar">
-    <div class="wordmark">Memento</div>
-    <div class="onb-progress" id="onb-progress">
-      <div class="onb-dot active"></div>
-      <div class="onb-dot"></div>
-      <div class="onb-dot"></div>
-      <div class="onb-dot"></div>
-      <div class="onb-dot"></div>
+  <div class="onb-bar">
+    <span class="wm">Memento</span>
+    <div class="onb-steps" id="onb-steps">
+      <span class="onb-step active"></span>
+      <span class="onb-step"></span>
+      <span class="onb-step"></span>
+      <span class="onb-step"></span>
+      <span class="onb-step"></span>
     </div>
   </div>
 
-  <div class="chat-area">
+  <div class="chat-col">
     <div class="chat-feed" id="chat-feed"></div>
-    <div class="input-area">
+
+    <div class="input-bar">
       <div class="choices" id="choices" style="display:none;"></div>
       <div class="input-row" id="input-row">
         <input class="ci" id="chat-in" type="text" placeholder="escribe aquí..." autocomplete="off"/>
@@ -1135,144 +1540,156 @@ option { background: var(--bg1); }
 
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ══════════════════════════════════════════════════
      APP
-══════════════════════════════════════════ -->
-<div id="screen-app" class="screen">
+══════════════════════════════════════════════════ -->
+<div id="scr-app" class="screen">
 
-  <nav class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-mark">aplicación</div>
-      <div class="sb-logo-name">Memento</div>
+  <!-- SIDEBAR -->
+  <nav class="sb">
+    <div class="sb-head">
+      <div class="sb-wm">aplicación</div>
+      <div class="sb-title">Memento</div>
     </div>
     <div class="sb-user">
-      <div class="sb-user-name" id="sb-name">—</div>
-      <div class="sb-user-days" id="sb-days">— días restantes</div>
+      <div class="sb-name" id="sb-name">—</div>
+      <div class="sb-days" id="sb-days">—</div>
     </div>
     <div class="sb-nav">
-      <div class="ni active" data-page="home" onclick="goPage('home',this)">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="6.5" y1="3" x2="6.5" y2="6.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
-          <line x1="6.5" y1="6.5" x2="9" y2="8.5" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
+      <div class="ni active" onclick="goPage('home',this)">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width=".7"/>
+          <line x1="6" y1="3" x2="6" y2="6" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/>
+          <line x1="6" y1="6" x2="8" y2="8" stroke="currentColor" stroke-width=".7" stroke-linecap="round"/>
         </svg>
         Contador
       </div>
-      <div class="ni" data-page="bucket" onclick="goPage('bucket',this)">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <rect x="1.5" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="4" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="4" y1="7.5" x2="9" y2="7.5" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" onclick="goPage('bucket',this)">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="1.5" y="1.5" width="9" height="9" rx=".5" stroke="currentColor" stroke-width=".7"/>
+          <line x1="3.5" y1="5" x2="8.5" y2="5" stroke="currentColor" stroke-width=".7"/>
+          <line x1="3.5" y1="7.5" x2="8.5" y2="7.5" stroke="currentColor" stroke-width=".7"/>
         </svg>
         Lista de vida
       </div>
-      <div class="ni" data-page="daily" onclick="goPage('daily',this)">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <rect x="2" y="2" width="9" height="9" rx="1" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="4.5" y1="1" x2="4.5" y2="3" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="8.5" y1="1" x2="8.5" y2="3" stroke="currentColor" stroke-width="0.8"/>
-          <line x1="2" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" onclick="goPage('daily',this)">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <rect x="1.5" y="2" width="9" height="8.5" rx=".5" stroke="currentColor" stroke-width=".7"/>
+          <line x1="4" y1="1" x2="4" y2="3" stroke="currentColor" stroke-width=".7"/>
+          <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width=".7"/>
+          <line x1="1.5" y1="5" x2="10.5" y2="5" stroke="currentColor" stroke-width=".7"/>
         </svg>
         Hoy
       </div>
-      <div class="ni" data-page="profile" onclick="goPage('profile',this)">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <circle cx="6.5" cy="4.5" r="2.2" stroke="currentColor" stroke-width="0.8"/>
-          <path d="M1.5 11c0-2.485 2.239-4.5 5-4.5s5 2.015 5 4.5" stroke="currentColor" stroke-width="0.8"/>
+      <div class="ni" onclick="goPage('profile',this)">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="4.5" r="2" stroke="currentColor" stroke-width=".7"/>
+          <path d="M1.5 10.5c0-2.485 2.015-4.5 4.5-4.5s4.5 2.015 4.5 4.5" stroke="currentColor" stroke-width=".7"/>
         </svg>
         Perfil
       </div>
     </div>
     <div class="sb-foot">
-      <div class="sb-streak">racha — <span id="sb-streak">0</span> días</div>
+      <div class="sb-streak-label">racha — <span id="sb-streak">0</span> días</div>
     </div>
   </nav>
 
+  <!-- MAIN CONTENT -->
   <div class="main">
 
-    <!-- HOME -->
+    <!-- mobile-only top bar -->
+    <div class="mobile-topbar">
+      <div class="mtb-name" id="mtb-name">—</div>
+      <div class="mtb-days" id="mtb-days">—</div>
+    </div>
+
+    <!-- ── HOME ── -->
     <div class="page active" id="page-home">
-      <div class="home-head">
+
+      <div class="home-kicker">
         <div>
           <div class="home-greeting" id="h-greeting">—</div>
           <div class="home-name" id="h-name">—</div>
         </div>
-        <div class="home-date-block">
-          <div class="home-date" id="h-date">—</div>
-        </div>
+        <div class="home-datestamp" id="h-date">—</div>
       </div>
 
-      <div class="hero">
-        <div class="hero-label">tiempo restante estimado</div>
-        <div class="cd-grid">
-          <div class="cd-unit">
-            <div class="cd-n red" id="cd-y">—</div>
+      <div class="countdown-block">
+        <div class="cd-eyebrow">tiempo restante estimado</div>
+        <div class="cd-cols">
+          <div class="cd-col">
+            <div class="cd-n signal" id="cd-y">—</div>
             <div class="cd-l">años</div>
           </div>
-          <div class="cd-unit">
+          <div class="cd-col">
             <div class="cd-n" id="cd-d">—</div>
             <div class="cd-l">días</div>
           </div>
-          <div class="cd-unit">
+          <div class="cd-col">
             <div class="cd-n" id="cd-h">—</div>
             <div class="cd-l">horas</div>
           </div>
-          <div class="cd-unit">
+          <div class="cd-col">
             <div class="cd-n" id="cd-s">—</div>
             <div class="cd-l">segundos</div>
           </div>
         </div>
-        <div class="hero-foot">
-          <div class="death-label">Fecha estimada: <strong id="h-ddate">—</strong></div>
-          <div class="life-bar-wrap">
-            <div class="lbar"><div class="lbar-fill" id="lbar-fill" style="width:0%"></div></div>
-            <div class="lbar-pct" id="lbar-pct">0% vivido</div>
+        <div class="cd-foot">
+          <div class="death-stamp">
+            Fecha estimada — <strong id="h-ddate">—</strong>
+          </div>
+          <div class="life-meter">
+            <div class="lm-bar"><div class="lm-fill" id="lm-fill" style="width:0%"></div></div>
+            <div class="lm-pct" id="lm-pct">0% vivido</div>
           </div>
         </div>
       </div>
 
-      <div class="stat-row">
-        <div class="scard">
-          <div class="scard-l">días vividos</div>
-          <div class="scard-v" id="s-lived">—</div>
-          <div class="scard-s">desde que naciste</div>
+      <div class="tri-stats">
+        <div class="tri-stat">
+          <div class="tri-l">días vividos</div>
+          <div class="tri-n" id="s-lived">—</div>
+          <div class="tri-s">desde tu nacimiento</div>
         </div>
-        <div class="scard">
-          <div class="scard-l">lista de vida</div>
-          <div class="scard-v red" id="s-bucket">0 / 0</div>
-          <div class="scard-s">cosas completadas</div>
+        <div class="tri-stat">
+          <div class="tri-l">lista de vida</div>
+          <div class="tri-n ox" id="s-bucket">0 / 0</div>
+          <div class="tri-s">cosas completadas</div>
         </div>
-        <div class="scard">
-          <div class="scard-l">racha</div>
-          <div class="scard-v gold" id="s-streak">0</div>
-          <div class="scard-s">días consecutivos</div>
+        <div class="tri-stat">
+          <div class="tri-l">racha</div>
+          <div class="tri-n sand" id="s-streak">0</div>
+          <div class="tri-s">días consecutivos</div>
         </div>
       </div>
 
-      <div class="quote-block">
-        <div class="quote-text" id="h-quote">—</div>
+      <div class="quote-vessel">
+        <div class="quote-mark" aria-hidden="true">"</div>
+        <div class="quote-body" id="h-quote">—</div>
         <div class="quote-attr" id="h-quote-attr">—</div>
       </div>
-    </div>
 
-    <!-- BUCKET -->
+    </div><!-- /home -->
+
+    <!-- ── BUCKET LIST ── -->
     <div class="page" id="page-bucket">
-      <div class="page-head">
+
+      <div class="pg-head">
         <div>
-          <div class="page-title">Lista de vida</div>
-          <div class="page-sub" id="bl-count">0 completadas de 0</div>
+          <div class="pg-title">Lista de vida</div>
+          <div class="pg-sub" id="bl-count">0 completadas de 0</div>
         </div>
-        <button class="btn-ghost" onclick="toggleForm()">+ Añadir</button>
+        <button class="btn" onclick="toggleForm()">+ añadir</button>
       </div>
 
       <div class="add-form" id="add-form">
-        <div class="fg" style="flex:2;">
+        <div class="fgrp" style="flex:2">
           <label class="fl">qué quieres vivir</label>
           <input class="fi" id="ni-text" type="text" placeholder="ver el amanecer en el desierto..."/>
         </div>
-        <div class="fg">
+        <div class="fgrp">
           <label class="fl">categoría</label>
-          <select class="fs" id="ni-cat">
+          <select class="fsel" id="ni-cat">
             <option value="aventura">aventura</option>
             <option value="relaciones">relaciones</option>
             <option value="creativo">creativo</option>
@@ -1281,484 +1698,436 @@ option { background: var(--bg1); }
             <option value="espiritual">espiritual</option>
           </select>
         </div>
-        <button class="btn-add" onclick="addItem()">Añadir</button>
+        <button class="btn-add" onclick="addItem()">añadir</button>
       </div>
 
       <div class="filter-row">
         <div class="ft active" onclick="filterBy('all',this)">Todas</div>
         <div class="ft" onclick="filterBy('pending',this)">Pendientes</div>
-        <div class="ft" onclick="filterBy('done',this)">Completadas</div>
+        <div class="ft" onclick="filterBy('done',this)">Hechas</div>
         <div class="ft" onclick="filterBy('aventura',this)">Aventura</div>
         <div class="ft" onclick="filterBy('relaciones',this)">Relaciones</div>
         <div class="ft" onclick="filterBy('creativo',this)">Creativo</div>
         <div class="ft" onclick="filterBy('personal',this)">Personal</div>
       </div>
 
-      <div class="blist" id="blist">
-        <div class="empty">Tu lista de vida está vacía. ¿Qué quieres haber hecho antes de morir?</div>
+      <div class="bl" id="blist">
+        <div class="empty">¿Qué quieres haber hecho antes de morir?</div>
       </div>
-    </div>
 
-    <!-- DAILY -->
+    </div><!-- /bucket -->
+
+    <!-- ── DAILY ── -->
     <div class="page" id="page-daily">
-      <div class="page-head">
+
+      <div class="pg-head">
         <div>
-          <div class="page-title">Hoy</div>
-          <div class="page-sub" id="daily-daynum">día — de tu vida</div>
+          <div class="pg-title">Hoy</div>
+          <div class="pg-sub" id="daily-daynum">día — de tu vida</div>
         </div>
       </div>
 
-      <div class="daily-grid">
-        <div class="card">
-          <div class="card-label">racha activa</div>
-          <div class="streak-n" id="d-streak">0</div>
-          <div class="streak-s">días consecutivos</div>
-          <div class="wdots" id="wdots"></div>
+      <div class="daily-layout">
+        <div class="daily-cell">
+          <div class="dc-label">racha activa</div>
+          <div class="streak-hero" id="d-streak">0</div>
+          <div class="streak-sub">días consecutivos</div>
+          <div class="week-grid" id="wdots"></div>
         </div>
-        <div class="card">
-          <div class="card-label">frase del día</div>
-          <div class="quote-text" id="d-quote" style="font-size:0.88rem;padding-left:0;line-height:1.7;"></div>
+
+        <div class="daily-cell">
+          <div class="dc-label">frase del día</div>
+          <div class="daily-quote-text" id="d-quote"></div>
         </div>
-        <div class="refl-card">
-          <div class="card-label">reflexión</div>
+
+        <div class="refl-cell">
+          <div class="dc-label">reflexión</div>
           <div class="refl-q" id="d-question">—</div>
           <textarea class="rta" id="d-refl-text" placeholder="Escribe tu reflexión de hoy..."></textarea>
-          <div class="refl-row">
-            <button class="btn-save" onclick="saveRefl()">Guardar</button>
-            <span class="saved-msg" id="saved-msg">Guardado ✓</span>
+          <div class="refl-actions">
+            <button class="btn" onclick="saveRefl()">guardar reflexión</button>
+            <span class="saved-note" id="saved-note">guardado</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- PROFILE -->
+    </div><!-- /daily -->
+
+    <!-- ── PROFILE ── -->
     <div class="page" id="page-profile">
-      <div class="page-head">
+
+      <div class="pg-head">
         <div>
-          <div class="page-title">Perfil</div>
-          <div class="page-sub">tu historia</div>
+          <div class="pg-title">Perfil</div>
+          <div class="pg-sub">tu historia con memento</div>
         </div>
-        <button class="btn-ghost" onclick="resetApp()" style="color:var(--accent);border-color:#3a1a1a;">Reiniciar</button>
+        <button class="btn danger" onclick="resetApp()">reiniciar</button>
       </div>
 
       <div class="prof-grid">
-        <div class="prof-stat">
-          <div class="ps-n" id="p-age">—</div>
-          <div class="ps-l">edad actual</div>
+        <div class="prof-cell">
+          <div class="pc-l">edad actual</div>
+          <div class="pc-n" id="p-age">—</div>
         </div>
-        <div class="prof-stat">
-          <div class="ps-n" id="p-dage">—</div>
-          <div class="ps-l">edad de muerte estimada</div>
+        <div class="prof-cell">
+          <div class="pc-l">edad de muerte estimada</div>
+          <div class="pc-n" id="p-dage">—</div>
         </div>
-        <div class="prof-stat">
-          <div class="ps-n" id="p-lived">—</div>
-          <div class="ps-l">días vividos</div>
+        <div class="prof-cell">
+          <div class="pc-l">días vividos</div>
+          <div class="pc-n" id="p-lived">—</div>
         </div>
-        <div class="prof-stat">
-          <div class="ps-n" id="p-left">—</div>
-          <div class="ps-l">días restantes</div>
-        </div>
-
-        <div class="prof-wide">
-          <div class="prow">
-            <div class="pr-label">Nombre</div>
-            <div class="pr-value hi" id="p-name">—</div>
-          </div>
-          <div class="prow">
-            <div class="pr-label">Fecha de nacimiento</div>
-            <div class="pr-value" id="p-bday">—</div>
-          </div>
-          <div class="prow">
-            <div class="pr-label">Felicidad declarada</div>
-            <div class="pr-value" id="p-hap">—</div>
-          </div>
-          <div class="prow">
-            <div class="pr-label">Fecha de muerte estimada</div>
-            <div class="pr-value" id="p-ddate">—</div>
-          </div>
-          <div class="prow">
-            <div class="pr-label">Registrado</div>
-            <div class="pr-value" id="p-joined">—</div>
-          </div>
-        </div>
-
-        <div class="refl-archive prof-wide">
-          <div class="card-label">reflexiones guardadas</div>
-          <div id="refl-archive-list"></div>
+        <div class="prof-cell">
+          <div class="pc-l">días restantes</div>
+          <div class="pc-n" id="p-left">—</div>
         </div>
       </div>
-    </div>
 
-  </div>
-</div>
+      <div class="data-table" style="margin-bottom: var(--s5);">
+        <div class="dt-head">datos del registro</div>
+        <div class="dt-row">
+          <span class="dt-k">Nombre</span>
+          <span class="dt-v hi" id="p-name">—</span>
+        </div>
+        <div class="dt-row">
+          <span class="dt-k">Fecha de nacimiento</span>
+          <span class="dt-v" id="p-bday">—</span>
+        </div>
+        <div class="dt-row">
+          <span class="dt-k">Felicidad declarada</span>
+          <span class="dt-v" id="p-hap">—</span>
+        </div>
+        <div class="dt-row">
+          <span class="dt-k">Fecha de muerte estimada</span>
+          <span class="dt-v" id="p-ddate">—</span>
+        </div>
+        <div class="dt-row">
+          <span class="dt-k">Registrado en Memento</span>
+          <span class="dt-v" id="p-joined">—</span>
+        </div>
+      </div>
+
+      <div class="refl-archive">
+        <div class="ra-head">reflexiones guardadas</div>
+        <div id="refl-archive-list"></div>
+      </div>
+
+    </div><!-- /profile -->
+
+  </div><!-- /main -->
+</div><!-- /scr-app -->
 
 <script>
-// ══════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════
-let user    = JSON.parse(localStorage.getItem('m_user')   || 'null');
-let bucket  = JSON.parse(localStorage.getItem('m_bucket') || '[]');
-let refls   = JSON.parse(localStorage.getItem('m_refls')  || '[]');
-let streak  = JSON.parse(localStorage.getItem('m_streak') || '{"count":0,"last":null}');
-let filter  = 'all';
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let user   = JSON.parse(localStorage.getItem('m_user')   || 'null');
+let bucket = JSON.parse(localStorage.getItem('m_bucket') || '[]');
+let refls  = JSON.parse(localStorage.getItem('m_refls')  || '[]');
+let streak = JSON.parse(localStorage.getItem('m_streak') || '{"count":0,"last":null}');
+let filter = 'all';
 
-const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio',
-                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const MONTHS_SH = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MO = ['enero','febrero','marzo','abril','mayo','junio',
+            'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DA = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
 const QUOTES = [
   ["No hay nada más democrático que la muerte. Nadie escapa.", "memento"],
   ["Cada día que pasa es uno menos. No uno más.", "memento"],
-  ["La mayoría de la gente muere a los 25 años, pero la entierran a los 75.", "Benjamin Franklin"],
-  ["Vive como si fueras a morir mañana. Aprende como si fueras a vivir para siempre.", "Gandhi"],
+  ["La mayoría de la gente muere a los 25, pero la entierran a los 75.", "Benjamin Franklin"],
+  ["Vive como si fueras a morir mañana. Aprende como si vivieras para siempre.", "Gandhi"],
   ["El mayor desperdicio es aplazar la vida esperando el momento perfecto.", "memento"],
   ["No temas la muerte. Teme no haber vivido.", "memento"],
-  ["Dentro de 10 años lamentarás más lo que no hiciste que lo que sí.", "Mark Twain"],
+  ["Lamentarás más lo que no hiciste que lo que sí.", "Mark Twain"],
   ["Hay más tiempo que vida. Pero no para ti, hoy.", "memento"],
-  ["Haz de tu vida un sueño. Haz del sueño una realidad.", "Antoine de Saint-Exupéry"],
   ["El tiempo es el único capital que tienes. Gástalo bien.", "Thomas Edison"],
   ["No cuentes los días. Haz que los días cuenten.", "Muhammad Ali"],
-  ["La vida es aquello que te pasa mientras estás ocupado haciendo otros planes.", "John Lennon"],
+  ["La vida es lo que te pasa mientras estás ocupado haciendo otros planes.", "John Lennon"],
+  ["Entre el nacer y el morir, la distancia es un instante.", "memento"],
 ];
 
 const QUESTIONS = [
   "Si hoy fuera tu último día, ¿estarías en paz con lo que has hecho esta semana?",
-  "¿Qué llevas tiempo postergando que en el fondo sabes que debes hacer ya?",
+  "¿Qué llevas tiempo postergando que sabes, en el fondo, que debes hacer ya?",
   "¿A quién deberías llamar hoy que llevas demasiado tiempo sin hablar?",
   "¿Estás donde quieres estar, o simplemente donde acabaste?",
   "¿Cuál fue la última cosa que hiciste que te enorgulleció de verdad?",
-  "Si tu yo de hace 5 años te viera hoy, ¿qué pensaría?",
+  "Si tu yo de hace cinco años te viera hoy, ¿qué pensaría?",
   "¿Qué harías diferente si supieras que te queda exactamente un año?",
   "¿Estás eligiendo tu vida, o simplemente siguiendo la corriente?",
   "¿Cuándo fue la última vez que hiciste algo por primera vez?",
   "¿Qué necesitas soltar para poder avanzar de verdad?",
 ];
 
-// ══════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════
-const fmtShort  = d => `${d.getDate()} ${MONTHS_SH[d.getMonth()]} ${d.getFullYear()}`;
-const fmtLong   = d => `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}`;
-const pad2      = n => String(n).padStart(2,'0');
+/* ══════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
+const pad2 = n => String(n).padStart(2,'0');
+const wait = ms => new Promise(r => setTimeout(r,ms));
 
-function ageFromBirthDate(bd) {
-  const now = new Date(), b = new Date(bd);
-  let age = now.getFullYear() - b.getFullYear();
-  if (now.getMonth() < b.getMonth() || (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())) age--;
-  return age;
+function ageFromBD(bd) {
+  const now=new Date(), b=new Date(bd+'T12:00:00');
+  let a=now.getFullYear()-b.getFullYear();
+  if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate())) a--;
+  return a;
 }
 
-function daysLivedFromBirthDate(bd) {
-  return Math.floor((new Date() - new Date(bd)) / 86400000);
+function daysLived(bd) {
+  return Math.floor((new Date()-new Date(bd+'T12:00:00'))/86400000);
 }
 
-// ══════════════════════════════════════════════════
-// ONBOARDING — conversación
-// ══════════════════════════════════════════════════
-let step = 0;
-let onb  = {};  // name, birthday, happiness, deathAge
+const fmtS = d => `${d.getDate()} ${MS[d.getMonth()]} ${d.getFullYear()}`;
+const fmtL = d => `${d.getDate()} de ${MO[d.getMonth()]} de ${d.getFullYear()}`;
 
-// Each entry: { msg(d), key, type, placeholder/choices, validate, error, extra }
-// type: text | date | choice | final
+/* ══════════════════════════════════════════════════════
+   ONBOARDING FLOW
+══════════════════════════════════════════════════════ */
+let step=0, onb={};
+
 const FLOW = [
   {
-    msg: () => `Hola.\n\nEsto no es una app de bienestar. No va a decirte que todo va a salir bien.\n\nSolo voy a ayudarte a recordar que el tiempo corre.\n\n¿Cuál es tu nombre?`,
-    key: 'name',
-    type: 'text',
-    placeholder: 'tu nombre...',
-    validate: v => v.trim().length > 0,
-    error: 'Necesito un nombre para continuar.',
+    msg: () => [
+      "Hola.",
+      "Esto no es una aplicación de bienestar. No va a decirte que todo irá bien.",
+      "Solo va a ayudarte a recordar que el tiempo corre —y que no espera.",
+      "¿Cuál es tu nombre?"
+    ],
+    key: 'name', type: 'text', ph: 'tu nombre...',
+    val: v => v.trim().length > 0,
+    err: "Necesito un nombre para continuar."
   },
   {
-    msg: d => `${d.name}.\n\nBien.\n\n¿Cuándo naciste? Dame tu fecha de nacimiento.`,
-    key: 'birthday',
-    type: 'date',
-    placeholder: '',
-    validate: v => {
-      if (!v) return false;
-      const b = new Date(v), now = new Date();
-      return b < now && ageFromBirthDate(v) < 120;
+    msg: d => [
+      `${d.name}.`,
+      "¿Cuándo naciste? Dame tu fecha de nacimiento exacta."
+    ],
+    key: 'birthday', type: 'date',
+    val: v => {
+      if(!v) return false;
+      const b=new Date(v+'T12:00:00'), now=new Date();
+      return b<now && ageFromBD(v)<120 && ageFromBD(v)>0;
     },
-    error: 'Esa fecha no parece correcta.',
+    err: "Esa fecha no parece válida.",
     extra: d => {
-      // after validating birthday, show lived days
-      const age    = ageFromBirthDate(d.birthday);
-      const lived  = daysLivedFromBirthDate(d.birthday);
-      return `<div class="stat-line">
-        <div><div class="stat-n">${age}</div><div class="stat-l">años vividos</div></div>
-        <div style="width:0.5px;background:var(--line2);align-self:stretch;margin:0 0.4rem;"></div>
-        <div><div class="stat-n">${lived.toLocaleString('es-ES')}</div><div class="stat-l">días que ya pasaron</div></div>
+      const age=ageFromBD(d.birthday), dl=daysLived(d.birthday);
+      return `<div class="bbl-stat">
+        <div class="bbl-stat-col">
+          <div class="bbl-stat-n">${age}</div>
+          <div class="bbl-stat-l">años vividos</div>
+        </div>
+        <div class="bbl-stat-divider"></div>
+        <div class="bbl-stat-col">
+          <div class="bbl-stat-n">${dl.toLocaleString('es-ES')}</div>
+          <div class="bbl-stat-l">días que ya pasaron</div>
+        </div>
       </div>`;
     }
   },
   {
     msg: d => {
-      const age = ageFromBirthDate(d.birthday);
-      return `${age} años.\n\n${lived(d.birthday).toLocaleString('es-ES')} días que ya no vuelven.\n\n¿Has sido feliz en todo este tiempo? Sé honesto.`;
+      const age=ageFromBD(d.birthday), dl=daysLived(d.birthday);
+      return [
+        `${age} años. ${dl.toLocaleString('es-ES')} días que ya no vuelven.`,
+        "¿Has sido feliz en todo este tiempo?",
+        "Sé honesto. Aquí no hay respuesta correcta."
+      ];
     },
-    key: 'happiness',
-    type: 'choice',
-    choices: ['Muy feliz', 'Bastante feliz', 'Regular, la verdad', 'Poco feliz', 'No, no lo he sido'],
+    key: 'happiness', type: 'choice',
+    choices: ['Muy feliz','Bastante feliz','Regular, la verdad','Poco feliz','No, no lo he sido']
   },
   {
     msg: d => {
-      const hap = d.happiness.toLowerCase();
-      const age = ageFromBirthDate(d.birthday);
-      const msgs = {
-        'muy feliz':         `Qué bien. ${age} años de felicidad es un privilegio enorme.\n\nAhora viene la pregunta que nadie quiere responder:\n\n¿A qué edad crees que morirás?`,
-        'bastante feliz':    `Bastante feliz. Eso es mucho más de lo que tienen muchos.\n\nPero hay una pregunta que necesito hacerte:\n\n¿A qué edad crees que morirás?`,
-        'regular, la verdad':`Regular. Entendido. Todavía hay tiempo de cambiar eso.\n\nPero antes, una pregunta incómoda:\n\n¿A qué edad crees que morirás?`,
-        'poco feliz':        `Poco feliz. Eso duele oírlo. Y más aún vivirlo.\n\nTodavía queda tiempo, ${d.name}. Pero hay que saber cuánto.\n\n¿A qué edad crees que morirás?`,
-        'no, no lo he sido': `Gracias por ser honesto. Hace falta mucho valor para reconocerlo.\n\nEso significa que aún queda algo por hacer. Pero hay que saber cuánto tiempo queda.\n\n¿A qué edad crees que morirás?`,
+      const h=d.happiness.toLowerCase(), age=ageFromBD(d.birthday);
+      const lines = {
+        'muy feliz':          [`${age} años de felicidad. Eso es un privilegio enorme.`, "Ahora viene la pregunta que nadie quiere responder.", "¿A qué edad crees que morirás?"],
+        'bastante feliz':     ["Bastante feliz. Eso es mucho más de lo que tienen muchos.", "Pero hay algo que necesito preguntarte.", "¿A qué edad crees que morirás?"],
+        'regular, la verdad': ["Regular. Todavía queda tiempo de cambiar eso.", "Pero antes, la pregunta incómoda:", "¿A qué edad crees que morirás?"],
+        'poco feliz':         ["Poco feliz. Eso duele. Y más aún vivirlo.", "Todavía queda tiempo. Pero hay que saber cuánto.", "¿A qué edad crees que morirás?"],
+        'no, no lo he sido':  ["Gracias por ser honesto. Hace falta valor para reconocerlo.", "Eso significa que aún queda algo por hacer.", "¿A qué edad crees que morirás?"]
       };
-      return msgs[hap] || `Entendido.\n\n¿A qué edad crees que morirás?`;
+      return lines[h] || ["Entendido.", "¿A qué edad crees que morirás?"];
     },
-    key: 'deathAge',
-    type: 'text',
-    placeholder: 'edad estimada...',
-    validate: v => !isNaN(v) && +v > ageFromBirthDate(onb.birthday) && +v <= 120,
-    error: 'Debe ser un número mayor que tu edad actual.',
+    key: 'deathAge', type: 'text', ph: 'edad estimada de muerte...',
+    val: v => !isNaN(v) && +v > ageFromBD(onb.birthday) && +v <= 120,
+    err: "Debe ser un número mayor que tu edad actual."
   },
-  {
-    msg: d => 'FINAL',
-    key: null,
-    type: 'final',
-  }
+  { msg: () => ['FINAL'], key: null, type: 'final' }
 ];
 
-function lived(bd) { return daysLivedFromBirthDate(bd); }
-
-// ── chat mechanics ──
-async function addBubble(html, type='in') {
-  const feed = $('chat-feed');
-  const el = document.createElement('div');
-  el.className = 'msg';
-
-  if (type === 'in') {
-    el.innerHTML = `<div class="bubble-in">${html}</div>`;
-  } else if (type === 'out') {
-    el.innerHTML = `<div class="bubble-out-wrap"><div class="bubble-out">${html}</div></div>`;
-  } else if (type === 'reveal') {
-    el.innerHTML = html;
-  }
-
+/* ── chat engine ── */
+async function bubble(html, type='in') {
+  const feed=$('chat-feed'), el=document.createElement('div');
+  el.className='msg';
+  if(type==='in')  el.innerHTML=`<div class="bbl">${html}</div>`;
+  else if(type==='out') el.innerHTML=`<div class="bbl-out-row"><div class="bbl-out">${html}</div></div>`;
+  else             el.innerHTML=html;
   feed.appendChild(el);
-  requestAnimationFrame(() => {
-    el.classList.add('in');
-    feed.scrollTop = feed.scrollHeight;
-  });
+  requestAnimationFrame(()=>{ el.classList.add('in'); feed.scrollTop=feed.scrollHeight; });
   return el;
 }
 
-let typingEl = null;
-
-async function showTyping(delay=900) {
-  const feed = $('chat-feed');
-  typingEl = document.createElement('div');
-  typingEl.className = 'typing-wrap msg';
-  typingEl.innerHTML = `<div class="typing-bubble"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>`;
-  feed.appendChild(typingEl);
-  requestAnimationFrame(() => {
-    typingEl.classList.add('in');
-    feed.scrollTop = feed.scrollHeight;
-  });
-  await wait(delay);
-  typingEl.remove();
-  typingEl = null;
+async function showTyping(ms=900) {
+  const feed=$('chat-feed'), el=document.createElement('div');
+  el.className='msg';
+  el.innerHTML='<div class="typing"><div class="t-d"></div><div class="t-d"></div><div class="t-d"></div></div>';
+  feed.appendChild(el);
+  requestAnimationFrame(()=>{ el.classList.add('in'); feed.scrollTop=feed.scrollHeight; });
+  await wait(ms);
+  el.remove();
 }
 
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
 function setProgress(n) {
-  const dots = document.querySelectorAll('.onb-dot');
-  dots.forEach((d,i) => {
-    d.classList.remove('done','active');
-    if (i < n)     d.classList.add('done');
-    else if (i===n) d.classList.add('active');
+  document.querySelectorAll('.onb-step').forEach((s,i)=>{
+    s.classList.remove('done','active');
+    if(i<n) s.classList.add('done');
+    else if(i===n) s.classList.add('active');
   });
 }
 
 function setupInput(s) {
-  const choicesEl = $('choices');
-  const inputRow  = $('input-row');
-  const ci        = $('chat-in');
+  const ch=$('choices'), ir=$('input-row'), ci=$('chat-in');
+  ch.style.display='none'; ch.innerHTML='';
+  ir.style.display='flex';
 
-  choicesEl.style.display = 'none';
-  choicesEl.innerHTML = '';
-  inputRow.style.display = 'flex';
+  if(!s || s.type==='final') { ir.style.display='none'; return; }
 
-  if (!s || s.type === 'final') {
-    inputRow.style.display = 'none';
-    return;
-  }
-
-  if (s.type === 'choice') {
-    choicesEl.style.display = 'flex';
-    inputRow.style.display = 'none';
-    s.choices.forEach(c => {
-      const btn = document.createElement('button');
-      btn.className = 'choice';
-      btn.textContent = c;
-      btn.onclick = () => handleInput(c);
-      choicesEl.appendChild(btn);
+  if(s.type==='choice') {
+    ch.style.display='flex'; ir.style.display='none';
+    s.choices.forEach(c=>{
+      const b=document.createElement('button');
+      b.className='ch'; b.textContent=c;
+      b.onclick=()=>handleInput(c);
+      ch.appendChild(b);
     });
-  } else if (s.type === 'date') {
-    ci.type = 'date';
-    ci.placeholder = '';
-    ci.value = '';
-    ci.focus();
   } else {
-    ci.type = s.type === 'text' ? 'text' : 'number';
-    ci.placeholder = s.placeholder || '';
-    ci.value = '';
-    ci.focus();
+    ci.type = s.type==='date' ? 'date' : 'text';
+    ci.placeholder = s.ph||'';
+    ci.value=''; ci.focus();
   }
 }
 
-async function handleInput(value) {
-  const s = FLOW[step];
-  if (!s) return;
-
-  if (s.validate && !s.validate(value)) {
+async function handleInput(val) {
+  const s=FLOW[step]; if(!s) return;
+  if(s.val && !s.val(val)) {
     await showTyping(400);
-    await addBubble(s.error.replace(/\n/g,'<br>'));
+    await bubble(`<p>${s.err}</p>`);
     return;
   }
+  if(s.key) onb[s.key]=val;
 
-  if (s.key) onb[s.key] = value;
+  let disp=val;
+  if(s.type==='date') disp=fmtS(new Date(val+'T12:00:00'));
+  await bubble(disp,'out');
 
-  // show user bubble
-  let displayVal = value;
-  if (s.type === 'date') {
-    const d = new Date(value + 'T12:00:00');
-    displayVal = fmtShort(d);
-  }
-  await addBubble(displayVal, 'out');
-
-  // optional extra info after birthday
-  if (s.extra) {
-    await wait(300);
-    const extraHtml = s.extra(onb);
-    // append extra to last entity bubble
-    const lastBubble = $('chat-feed').querySelector('.bubble-in:last-of-type');
-    if (lastBubble) {
-      lastBubble.insertAdjacentHTML('beforeend', extraHtml);
-    } else {
-      await showTyping(400);
-      await addBubble(extraHtml);
-    }
+  // inject stat data into last entity bubble
+  if(s.extra) {
+    await wait(250);
+    const last=$('chat-feed').querySelector('.bbl:last-of-type');
+    if(last) last.insertAdjacentHTML('beforeend',s.extra(onb));
   }
 
-  step++;
-  setProgress(step);
+  step++; setProgress(step);
+  if(step>=FLOW.length) return;
 
-  if (step >= FLOW.length) return;
-
-  const next = FLOW[step];
-  if (next.type === 'final') {
+  const next=FLOW[step];
+  if(next.type==='final') {
     setupInput(next);
-    await showTyping(1200);
+    await showTyping(1400);
     await doReveal();
     return;
   }
 
-  const msgText = typeof next.msg === 'function' ? next.msg(onb) : next.msg;
-  const typingTime = msgText.length > 100 ? 1400 : 900;
-  await showTyping(typingTime);
-  await addBubble(msgText.replace(/\n/g,'<br>'));
+  const lines=typeof next.msg==='function' ? next.msg(onb) : next.msg;
+  const text=lines.map(l=>`<p>${l}</p>`).join('');
+  const delay=lines.join('').length>120 ? 1400 : 900;
+  await showTyping(delay);
+  await bubble(text);
   setupInput(next);
 }
 
-// ── compute death date ──
-function computeDeathDate(birthday, deathAge) {
-  const birth = new Date(birthday + 'T12:00:00');
-  const variance = Math.floor(Math.random() * 7) - 3;
-  const finalAge = parseInt(deathAge) + variance;
-  const deathYear = birth.getFullYear() + finalAge;
-  const deathMonth = Math.floor(Math.random() * 12);
-  const maxDay = new Date(deathYear, deathMonth + 1, 0).getDate();
-  const deathDay = Math.floor(Math.random() * maxDay) + 1;
-  return new Date(deathYear, deathMonth, deathDay);
+/* death date */
+function makeDeathDate(bd, deathAge) {
+  const birth=new Date(bd+'T12:00:00');
+  const variance=Math.floor(Math.random()*7)-3;
+  const yr=birth.getFullYear()+parseInt(deathAge)+variance;
+  const mo=Math.floor(Math.random()*12);
+  const mx=new Date(yr,mo+1,0).getDate();
+  return new Date(yr, mo, Math.floor(Math.random()*mx)+1);
 }
 
 async function doReveal() {
-  const birth     = new Date(onb.birthday + 'T12:00:00');
-  const deathDate = computeDeathDate(onb.birthday, onb.deathAge);
-  const now       = new Date();
-  const daysLeft  = Math.floor((deathDate - now) / 86400000);
-  const daysLivedN= daysLivedFromBirthDate(onb.birthday);
-  const totalDays = Math.floor((deathDate - birth) / 86400000);
-  const pct       = Math.floor((daysLivedN / totalDays) * 100);
+  const birth=new Date(onb.birthday+'T12:00:00');
+  const dd=makeDeathDate(onb.birthday, onb.deathAge);
+  const now=new Date();
+  const dLeft=Math.floor((dd-now)/86400000);
+  const dLivedN=daysLived(onb.birthday);
+  const total=Math.floor((dd-birth)/86400000);
+  const pct=Math.floor((dLivedN/total)*100);
 
-  const revealHtml = `<div class="reveal-card">
-    <div class="reveal-eyebrow">lo que queda</div>
-    <div class="reveal-days">${daysLeft.toLocaleString('es-ES')}</div>
-    <div class="reveal-days-label">días que te quedan estimados</div>
-    <div class="reveal-divider"></div>
-    <div class="reveal-grid">
-      <div class="reveal-stat">
-        <div class="reveal-stat-n">${daysLivedN.toLocaleString('es-ES')}</div>
-        <div class="reveal-stat-l">días vividos</div>
+  const html=`<div class="reveal">
+    <div class="rev-eyebrow">tiempo restante</div>
+    <div class="rev-number">${dLeft.toLocaleString('es-ES')}</div>
+    <div class="rev-number-label">días que te quedan estimados</div>
+    <div class="rev-rule"></div>
+    <div class="rev-grid">
+      <div class="rev-col">
+        <div class="rev-col-n">${dLivedN.toLocaleString('es-ES')}</div>
+        <div class="rev-col-l">días vividos</div>
       </div>
-      <div class="reveal-stat">
-        <div class="reveal-stat-n">${pct}%</div>
-        <div class="reveal-stat-l">de tu vida consumida</div>
+      <div class="rev-col">
+        <div class="rev-col-n">${pct}%</div>
+        <div class="rev-col-l">de tu vida consumida</div>
       </div>
-      <div class="reveal-stat">
-        <div class="reveal-stat-n">${fmtShort(deathDate)}</div>
-        <div class="reveal-stat-l">fecha estimada</div>
+      <div class="rev-col">
+        <div class="rev-col-n">${fmtS(dd)}</div>
+        <div class="rev-col-l">fecha estimada</div>
       </div>
     </div>
-    <div class="reveal-footer">El reloj ya corre. Siempre lo ha hecho.</div>
+    <div class="rev-footer">El reloj ya corre. Siempre lo ha hecho.</div>
   </div>`;
 
-  await addBubble(revealHtml, 'reveal');
+  await bubble(html,'reveal');
 
-  // save user and launch app after a beat
-  user = {
-    name:      onb.name,
-    birthday:  onb.birthday,
+  user={
+    name: onb.name,
+    birthday: onb.birthday,
     happiness: onb.happiness,
-    deathAge:  parseInt(onb.deathAge),
-    deathDate: deathDate.toISOString(),
-    joinDate:  now.toISOString(),
+    deathAge: parseInt(onb.deathAge),
+    deathDate: dd.toISOString(),
+    joinDate: now.toISOString()
   };
-  localStorage.setItem('m_user', JSON.stringify(user));
+  localStorage.setItem('m_user',JSON.stringify(user));
 
-  await wait(2800);
-  launchApp();
+  await wait(2600);
+  launch();
 }
 
-// ── send button ──
-$('chat-send').addEventListener('click', () => {
-  const v = $('chat-in').value.trim();
-  if (v) { $('chat-in').value = ''; handleInput(v); }
+$('chat-send').addEventListener('click', ()=>{
+  const v=$('chat-in').value.trim();
+  if(v){ $('chat-in').value=''; handleInput(v); }
 });
-$('chat-in').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const v = e.target.value.trim();
-    if (v) { e.target.value = ''; handleInput(v); }
-  }
+$('chat-in').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ const v=e.target.value.trim(); if(v){ e.target.value=''; handleInput(v); } }
 });
 
-// ── start onboarding ──
 async function startOnboarding() {
   setProgress(0);
-  const first = FLOW[0];
-  await showTyping(1400);
-  await addBubble(first.msg().replace(/\n/g,'<br>'));
+  const first=FLOW[0];
+  await showTyping(1500);
+  const lines=first.msg();
+  await bubble(lines.map(l=>`<p>${l}</p>`).join(''));
   setupInput(first);
 }
 
-// ══════════════════════════════════════════════════
-// APP
-// ══════════════════════════════════════════════════
-function launchApp() {
+/* ══════════════════════════════════════════════════════
+   APP
+══════════════════════════════════════════════════════ */
+function launch() {
   updateStreak();
-  $('screen-onboarding').classList.remove('active');
-  $('screen-app').classList.add('active');
+  $('scr-onb').classList.remove('active');
+  $('scr-app').classList.add('active');
   renderHome();
   renderBucket();
   renderDaily();
@@ -1766,226 +2135,203 @@ function launchApp() {
   setInterval(tick, 1000);
 }
 
-// countdown tick
+/* countdown tick */
 function tick() {
-  if (!user) return;
-  const dd = new Date(user.deathDate), now = new Date();
-  const diff = dd - now;
-  if (diff <= 0) return;
+  if(!user) return;
+  const dd=new Date(user.deathDate), now=new Date(), diff=dd-now;
+  if(diff<=0) return;
 
-  const totalSec  = Math.floor(diff / 1000);
-  const years     = Math.floor(totalSec / 31536000);
-  const rem       = totalSec % 31536000;
-  const days      = Math.floor(rem / 86400);
-  const hours     = Math.floor((rem % 86400) / 3600);
-  const secs      = totalSec % 60;
+  const tsec=Math.floor(diff/1000);
+  const years=Math.floor(tsec/31536000);
+  const rem=tsec%31536000;
+  const days=Math.floor(rem/86400);
+  const hours=Math.floor((rem%86400)/3600);
+  const secs=tsec%60;
 
-  $('cd-y').textContent = years.toLocaleString('es-ES');
-  $('cd-d').textContent = days.toLocaleString('es-ES');
-  $('cd-h').textContent = pad2(hours);
-  $('cd-s').textContent = pad2(secs);
+  $('cd-y').textContent=years.toLocaleString('es-ES');
+  $('cd-d').textContent=days.toLocaleString('es-ES');
+  $('cd-h').textContent=pad2(hours);
+  $('cd-s').textContent=pad2(secs);
 
-  const birth = new Date(user.birthday + 'T12:00:00');
-  const totalLife = dd - birth;
-  const lived = now - birth;
-  const pct = Math.min(100, Math.floor((lived / totalLife)*100));
-  $('lbar-fill').style.width = pct + '%';
-  $('lbar-pct').textContent  = pct + '% vivido';
+  const birth=new Date(user.birthday+'T12:00:00');
+  const totalLife=dd-birth, livedMs=now-birth;
+  const pct=Math.min(100,Math.floor((livedMs/totalLife)*100));
+  $('lm-fill').style.width=pct+'%';
+  $('lm-pct').textContent=pct+'% vivido';
 
-  const totalDaysLeft = Math.floor(diff / 86400000);
-  $('sb-days').textContent = totalDaysLeft.toLocaleString('es-ES') + ' días restantes';
+  const totalDaysLeft=Math.floor(diff/86400000);
+  const daysStr=totalDaysLeft.toLocaleString('es-ES')+' días restantes';
+  $('sb-days').textContent=daysStr;
+  const mtbDays=$('mtb-days');
+  if(mtbDays) mtbDays.textContent=daysStr;
 }
 
 function renderHome() {
-  if (!user) return;
-  const now = new Date();
-  const h   = now.getHours();
-  const gr  = h<13 ? 'buenos días,' : h<20 ? 'buenas tardes,' : 'buenas noches,';
-
-  $('h-greeting').textContent = gr;
-  $('h-name').textContent     = user.name;
-  $('sb-name').textContent    = user.name;
-  $('h-date').textContent     = `${DAYS_ES[now.getDay()]} ${now.getDate()} ${MONTHS_ES[now.getMonth()]} ${now.getFullYear()}`;
-  $('h-ddate').textContent    = fmtLong(new Date(user.deathDate));
-
-  const dLived = daysLivedFromBirthDate(user.birthday);
-  $('s-lived').textContent  = dLived.toLocaleString('es-ES');
-  $('s-streak').textContent = streak.count;
-  $('sb-streak').textContent= streak.count;
-
-  const done = bucket.filter(i=>i.done).length;
-  $('s-bucket').textContent = `${done} / ${bucket.length}`;
-
-  const q = QUOTES[now.getDate() % QUOTES.length];
-  $('h-quote').textContent     = q[0];
-  $('h-quote-attr').textContent= '— ' + q[1];
-
+  if(!user) return;
+  const now=new Date(), h=now.getHours();
+  const gr=h<13?'buenos días,':h<20?'buenas tardes,':'buenas noches,';
+  $('h-greeting').textContent=gr;
+  $('h-name').textContent=user.name;
+  $('sb-name').textContent=user.name;
+  // mobile topbar
+  const mtbName=$('mtb-name'), mtbDays=$('mtb-days');
+  if(mtbName) mtbName.textContent=user.name;
+  $('h-date').textContent=`${DA[now.getDay()]} ${now.getDate()} ${MO[now.getMonth()]} ${now.getFullYear()}`;
+  $('h-ddate').textContent=fmtL(new Date(user.deathDate));
+  $('s-lived').textContent=daysLived(user.birthday).toLocaleString('es-ES');
+  $('s-streak').textContent=streak.count;
+  $('sb-streak').textContent=streak.count;
+  const done=bucket.filter(i=>i.done).length;
+  $('s-bucket').textContent=`${done} / ${bucket.length}`;
+  const q=QUOTES[now.getDate()%QUOTES.length];
+  $('h-quote').textContent=q[0];
+  $('h-quote-attr').textContent='— '+q[1];
   tick();
 }
 
-// STREAK
 function updateStreak() {
-  const today = new Date().toDateString();
-  if (streak.last === today) return;
-  const yest = new Date(); yest.setDate(yest.getDate()-1);
-  if (streak.last === yest.toDateString()) streak.count++;
-  else streak.count = 1;
-  streak.last = today;
-  localStorage.setItem('m_streak', JSON.stringify(streak));
+  const today=new Date().toDateString();
+  if(streak.last===today) return;
+  const yest=new Date(); yest.setDate(yest.getDate()-1);
+  streak.count = streak.last===yest.toDateString() ? streak.count+1 : 1;
+  streak.last=today;
+  localStorage.setItem('m_streak',JSON.stringify(streak));
 }
 
-// BUCKET
+/* BUCKET */
 function toggleForm() {
-  const f = $('add-form');
-  f.classList.toggle('open');
-  if (f.classList.contains('open')) $('ni-text').focus();
+  const f=$('add-form'); f.classList.toggle('open');
+  if(f.classList.contains('open')) $('ni-text').focus();
 }
 
 function addItem() {
-  const text = $('ni-text').value.trim();
-  const cat  = $('ni-cat').value;
-  if (!text) return;
-  bucket.push({ id: Date.now(), text, cat, done: false, doneDate: null });
-  localStorage.setItem('m_bucket', JSON.stringify(bucket));
-  $('ni-text').value = '';
+  const text=$('ni-text').value.trim(), cat=$('ni-cat').value;
+  if(!text) return;
+  bucket.push({id:Date.now(),text,cat,done:false,doneDate:null});
+  localStorage.setItem('m_bucket',JSON.stringify(bucket));
+  $('ni-text').value='';
   renderBucket();
-  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
+  $('s-bucket').textContent=`${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
 function toggleItem(id) {
-  const it = bucket.find(i=>i.id===id);
-  if (!it) return;
-  it.done = !it.done;
-  it.doneDate = it.done ? new Date().toISOString() : null;
-  localStorage.setItem('m_bucket', JSON.stringify(bucket));
+  const it=bucket.find(i=>i.id===id); if(!it) return;
+  it.done=!it.done; it.doneDate=it.done?new Date().toISOString():null;
+  localStorage.setItem('m_bucket',JSON.stringify(bucket));
   renderBucket();
-  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
+  $('s-bucket').textContent=`${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
 function delItem(id) {
-  bucket = bucket.filter(i=>i.id!==id);
-  localStorage.setItem('m_bucket', JSON.stringify(bucket));
+  bucket=bucket.filter(i=>i.id!==id);
+  localStorage.setItem('m_bucket',JSON.stringify(bucket));
   renderBucket();
-  $('s-bucket').textContent = `${bucket.filter(i=>i.done).length} / ${bucket.length}`;
+  $('s-bucket').textContent=`${bucket.filter(i=>i.done).length} / ${bucket.length}`;
 }
 
-function filterBy(f, el) {
-  filter = f;
+function filterBy(f,el) {
+  filter=f;
   document.querySelectorAll('.ft').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  renderBucket();
+  el.classList.add('active'); renderBucket();
 }
 
 function renderBucket() {
-  let items = bucket;
-  if (filter==='pending')    items = items.filter(i=>!i.done);
-  else if (filter==='done')  items = items.filter(i=>i.done);
-  else if (filter!=='all')   items = items.filter(i=>i.cat===filter);
+  let items=bucket;
+  if(filter==='pending') items=items.filter(i=>!i.done);
+  else if(filter==='done') items=items.filter(i=>i.done);
+  else if(filter!=='all') items=items.filter(i=>i.cat===filter);
 
-  const done = bucket.filter(i=>i.done).length;
-  $('bl-count').textContent = `${done} completadas de ${bucket.length}`;
+  const done=bucket.filter(i=>i.done).length;
+  $('bl-count').textContent=`${done} completadas de ${bucket.length}`;
 
-  if (!items.length) {
-    $('blist').innerHTML = '<div class="empty">Nada aquí. ¿Qué quieres haber hecho antes de morir?</div>';
+  if(!items.length) {
+    $('blist').innerHTML='<div class="empty">¿Qué quieres haber hecho antes de morir?</div>';
     return;
   }
 
-  $('blist').innerHTML = items.map(it=>`
-    <div class="bitem ${it.done?'done':''}" onclick="toggleItem(${it.id})">
-      <div class="bcheck ${it.done?'on':''}">
-        ${it.done?`<svg width="8" height="6" viewBox="0 0 8 6" fill="none"><polyline points="1,3 3,5 7,1" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
+  $('blist').innerHTML=items.map(it=>`
+    <div class="bi${it.done?' done':''}" onclick="toggleItem(${it.id})">
+      <div class="bi-box${it.done?' on':''}">
+        ${it.done?`<svg width="7" height="5" viewBox="0 0 7 5" fill="none"><polyline points="1,2.5 2.8,4.3 6,1" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
       </div>
       <div>
-        <div class="bname">${it.text}</div>
-        <div class="bmeta">
-          <span class="bcat">${it.cat}</span>
-          ${it.doneDate?`<span class="bdate">completado ${fmtShort(new Date(it.doneDate))}</span>`:''}
+        <div class="bi-label">${it.text}</div>
+        <div class="bi-meta">
+          <span class="bi-cat">${it.cat}</span>
+          ${it.doneDate?`<span class="bi-date">completado ${fmtS(new Date(it.doneDate))}</span>`:''}
         </div>
       </div>
-      <div class="bdel" onclick="event.stopPropagation();delItem(${it.id})">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-          <line x1="1.5" y1="1.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="0.9"/>
-          <line x1="9.5" y1="1.5" x2="1.5" y2="9.5" stroke="currentColor" stroke-width="0.9"/>
+      <div class="bi-del" onclick="event.stopPropagation();delItem(${it.id})">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <line x1="1.5" y1="1.5" x2="8.5" y2="8.5" stroke="currentColor" stroke-width=".8"/>
+          <line x1="8.5" y1="1.5" x2="1.5" y2="8.5" stroke="currentColor" stroke-width=".8"/>
         </svg>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// DAILY
+/* DAILY */
 function renderDaily() {
-  if (!user) return;
-  const now = new Date();
-  const dLived = daysLivedFromBirthDate(user.birthday);
-  $('daily-daynum').textContent = `día ${dLived.toLocaleString('es-ES')} de tu vida`;
-  $('d-streak').textContent = streak.count;
+  if(!user) return;
+  const now=new Date(), dl=daysLived(user.birthday);
+  $('daily-daynum').textContent=`día ${dl.toLocaleString('es-ES')} de tu vida`;
+  $('d-streak').textContent=streak.count;
+  const q=QUOTES[now.getDate()%QUOTES.length];
+  $('d-quote').textContent='"'+q[0]+'"';
+  $('d-question').textContent=QUESTIONS[now.getDay()%QUESTIONS.length];
+  const saved=refls.find(r=>r.date===now.toDateString());
+  if(saved) $('d-refl-text').value=saved.text;
 
-  const q = QUOTES[now.getDate() % QUOTES.length];
-  $('d-quote').textContent = '"' + q[0] + '"';
-
-  const qu = QUESTIONS[now.getDay() % QUESTIONS.length];
-  $('d-question').textContent = qu;
-
-  const todayKey = now.toDateString();
-  const saved = refls.find(r=>r.date===todayKey);
-  if (saved) $('d-refl-text').value = saved.text;
-
-  // week dots
-  const dayNames = ['L','M','X','J','V','S','D'];
-  const todayIdx = now.getDay()===0 ? 6 : now.getDay()-1;
-  $('wdots').innerHTML = dayNames.map((d,i)=>{
-    const offset = (i - todayIdx + 7) % 7;
-    const checkDate = new Date(now); checkDate.setDate(now.getDate()-((7-offset)%7));
-    if (i===todayIdx) checkDate.setDate(now.getDate());
-    const hasR = refls.some(r=>r.date===checkDate.toDateString());
-    return `<div class="wd ${hasR?'on':''} ${i===todayIdx?'today':''}">${d}</div>`;
+  const dayNames=['L','M','X','J','V','S','D'];
+  const todayIdx=now.getDay()===0?6:now.getDay()-1;
+  $('wdots').innerHTML=dayNames.map((d,i)=>{
+    const off=(i-todayIdx+7)%7;
+    const cd=new Date(now); cd.setDate(now.getDate()-((7-off)%7));
+    if(i===todayIdx) cd.setDate(now.getDate());
+    const hasR=refls.some(r=>r.date===cd.toDateString());
+    return `<div class="wd${hasR?' on':''}${i===todayIdx?' today':''}">${d}</div>`;
   }).join('');
 }
 
 function saveRefl() {
-  const text = $('d-refl-text').value.trim();
-  if (!text) return;
-  const today = new Date().toDateString();
-  const idx = refls.findIndex(r=>r.date===today);
-  const entry = { date: today, text };
-  if (idx>=0) refls[idx]=entry; else refls.push(entry);
-  localStorage.setItem('m_refls', JSON.stringify(refls));
-  $('saved-msg').style.display='block';
-  setTimeout(()=>$('saved-msg').style.display='none',2000);
-  renderDaily();
-  renderProfile();
+  const text=$('d-refl-text').value.trim(); if(!text) return;
+  const today=new Date().toDateString();
+  const idx=refls.findIndex(r=>r.date===today);
+  const entry={date:today,text};
+  if(idx>=0) refls[idx]=entry; else refls.push(entry);
+  localStorage.setItem('m_refls',JSON.stringify(refls));
+  $('saved-note').style.display='block';
+  setTimeout(()=>$('saved-note').style.display='none',2000);
+  renderDaily(); renderProfile();
 }
 
-// PROFILE
+/* PROFILE */
 function renderProfile() {
-  if (!user) return;
-  const age   = ageFromBirthDate(user.birthday);
-  const dLived= daysLivedFromBirthDate(user.birthday);
-  const dLeft = Math.floor((new Date(user.deathDate)-new Date())/86400000);
+  if(!user) return;
+  const age=ageFromBD(user.birthday);
+  const dl=daysLived(user.birthday);
+  const left=Math.floor((new Date(user.deathDate)-new Date())/86400000);
+  $('p-age').textContent=age;
+  $('p-dage').textContent=user.deathAge+' ±3';
+  $('p-lived').textContent=dl.toLocaleString('es-ES');
+  $('p-left').textContent=left.toLocaleString('es-ES');
+  $('p-name').textContent=user.name;
+  $('p-bday').textContent=fmtL(new Date(user.birthday+'T12:00:00'));
+  $('p-hap').textContent=user.happiness;
+  $('p-ddate').textContent=fmtL(new Date(user.deathDate));
+  $('p-joined').textContent=fmtL(new Date(user.joinDate));
 
-  $('p-name').textContent   = user.name;
-  $('p-bday').textContent   = fmtLong(new Date(user.birthday+'T12:00:00'));
-  $('p-hap').textContent    = user.happiness;
-  $('p-ddate').textContent  = fmtLong(new Date(user.deathDate));
-  $('p-joined').textContent = fmtLong(new Date(user.joinDate));
-  $('p-age').textContent    = age;
-  $('p-dage').textContent   = user.deathAge + ' (±3)';
-  $('p-lived').textContent  = dLived.toLocaleString('es-ES');
-  $('p-left').textContent   = dLeft.toLocaleString('es-ES');
-
-  const list = $('refl-archive-list');
-  if (!refls.length) {
-    list.innerHTML='<div style="font-family:var(--serif);font-size:.85rem;color:var(--text3);font-style:italic;padding-top:.5rem;">Sin reflexiones todavía.</div>';
-  } else {
-    list.innerHTML=[...refls].reverse().map(r=>`
-      <div class="ra-entry">
-        <div class="ra-date">${r.date}</div>
-        <div class="ra-text">"${r.text}"</div>
-      </div>`).join('');
-  }
+  const list=$('refl-archive-list');
+  list.innerHTML=!refls.length
+    ? `<div style="padding:var(--s3);font-family:var(--serif);font-size:var(--t-base);color:var(--on-3);font-style:italic;">Sin reflexiones todavía.</div>`
+    : [...refls].reverse().map(r=>`
+        <div class="ra-entry">
+          <div class="ra-d">${r.date}</div>
+          <div class="ra-t">"${r.text}"</div>
+        </div>`).join('');
 }
 
-// NAV
+/* NAV */
 function goPage(page, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -1993,16 +2339,16 @@ function goPage(page, el) {
   el.classList.add('active');
 }
 
-// RESET
+/* RESET */
 function resetApp() {
-  if (!confirm('¿Seguro? Se borran todos tus datos.')) return;
+  if(!confirm('¿Seguro? Se borran todos tus datos de Memento.')) return;
   localStorage.clear(); location.reload();
 }
 
-// ── INIT ──
-if (user) {
-  $('screen-onboarding').classList.remove('active');
-  launchApp();
+/* ── INIT ── */
+if(user) {
+  $('scr-onb').classList.remove('active');
+  launch();
 } else {
   startOnboarding();
 }
