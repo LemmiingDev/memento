@@ -5,15 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cazadores de la Anaconda</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos rápidos para el panel online */
+        #online-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #2ecc71;
+        }
+        #peer-id-input {
+            padding: 8px;
+            width: 70%;
+            border-radius: 4px;
+            border: none;
+            margin-bottom: 10px;
+        }
+        .status-msg { font-size: 0.9em; color: #2ecc71; margin-top: 5px; }
+        #my-id-display { font-weight: bold; color: #fff; background: #222; padding: 2px 5px; }
+    </style>
 </head>
 <body>
-    <div id="id-screen" style="background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-    <p style="color: #00ff00; font-weight: bold;">TU ID: <span id="my-id-display">Cargando...</span></p>
-    <input type="text" id="peer-id-input" placeholder="Pega el ID de tu amigo" style="padding: 10px; width: 80%; border-radius: 5px; border: none;">
-    <button id="join-btn" style="background: #2ecc71; margin-top: 10px; padding: 10px 20px;">UNIRSE A AMIGO</button>
-</div>
+    <div id="menu-screen" class="screen active">
+        <h1>🐍 Cazadores de la Anaconda</h1>
+        <p>Juego cooperativo Online</p>
 
-<button id="start-btn">INICIAR AVENTURA</button>
+        <div id="online-panel">
+            <p>Tu ID: <span id="my-id-display">Cargando...</span></p>
+            <input type="text" id="peer-id-input" placeholder="Pega el ID de tu amigo">
+            <button id="join-btn" style="background: #27ae60; padding: 8px;">CONECTAR</button>
+            <div id="connection-status" class="status-msg">Esperando conexión...</div>
+        </div>
+
+        <button id="start-btn">INICIAR AVENTURA</button>
+
+        <div class="instructions">
+            <p>Host: Controla lado izquierdo | Invitado: Lado derecho</p>
+            <p>¡Copien el ID y pásenlo por WhatsApp!</p>
+        </div>
+    </div>
 
     <div id="game-screen" class="screen">
         <div id="game-header">
@@ -55,7 +85,8 @@
         <div id="final-stats"></div>
         <button id="replay-btn">JUGAR DE NUEVO</button>
     </div>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="js/player.js"></script>
     <script src="js/levels.js"></script>
     <script src="js/cooperative.js"></script>
