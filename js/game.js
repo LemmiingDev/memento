@@ -1,45 +1,3 @@
-// --- CONFIGURACIÓN ONLINE ---
-const socket = io("URL_DE_TU_SERVIDOR_AQUÍ"); // Si pruebas local, usa "http://localhost:3000"
-let miRol = null; 
-
-socket.on('initRole', (role) => {
-    miRol = role;
-    console.log("Soy el jugador: " + miRol);
-});
-
-// Escuchar al oponente
-socket.on('opponentUpdate', (data) => {
-    // Si yo soy p1, muevo al p2 con los datos que llegan
-    if (miRol === 'p1') {
-        actualizarPosicionRemota(jugador2, data);
-    } else {
-        actualizarPosicionRemota(jugador1, data);
-    }
-});
-
-function actualizarPosicionRemota(personaje, datos) {
-    personaje.x = datos.x;
-    personaje.y = datos.y;
-    personaje.estaAtacando = datos.action; 
-}
-
-// --- DENTRO DE TU BUCLE PRINCIPAL (Game Loop) ---
-function gameLoop() {
-    // Tu lógica actual de movimiento...
-    
-    // Al final del loop, enviamos nuestra posición
-    let yo = (miRol === 'p1') ? jugador1 : jugador2;
-    
-    if (miRol) {
-        socket.emit('updatePos', {
-            x: yo.x,
-            y: yo.y,
-            action: yo.estaAtacando // Ajusta según el nombre de tu variable de acción
-        });
-    }
-    
-    requestAnimationFrame(gameLoop);
-}
 class Game {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
@@ -283,4 +241,61 @@ class Game {
 // Iniciar cuando cargue la página
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new Game();
+    let peer = new Peer(); 
+let conn;
+let miRol = 'p1'; // Por defecto eres P1
+
+// 1. Crear la sala y generar ID
+peer.on('open', (id) => {
+    const shareId = prompt("Tu ID de juego es este. Pásalo a tu amigo:", id);
+    // Si el usuario introduce un ID, es porque quiere UNIRSE a alguien
+    if (shareId && shareId !== id) {
+        conectarAAmigo(shareId);
+    }
+});
+
+// 2. Esperar a que el amigo se conecte (Si eres el Host)
+peer.on('connection', (connection) => {
+    conn = connection;
+    miRol = 'p1';
+    configurarEventos();
+});
+
+// 3. Función para unirse a una partida existente
+function conectarAAmigo(idAmigo) {
+    conn = peer.connect(idAmigo);
+    miRol = 'p2'; // El que se une es P2
+    configurarEventos();
+}
+
+function configurarEventos() {
+    conn.on('data', (data) => {
+        // Recibimos la posición del otro jugador
+        if (miRol === 'p1') {
+            // Si soy P1, muevo al P2 con lo que llega
+            jugador2.x = data.x;
+            jugador2.y = data.y;
+            jugador2.accion = data.accion;
+        } else {
+            // Si soy P2, muevo al P1
+            jugador1.x = data.x;
+            jugador1.y = data.y;
+            jugador1.accion = data.accion;
+        }
+    });
+}
+
+// 4. Enviar tus datos en cada frame (Añade esto dentro de tu update/gameLoop)
+function enviarDatos() {
+    if (conn && conn.open) {
+        let yo = (miRol === 'p1') ? jugador1 : jugador2;
+        conn.send({
+            x: yo.x,
+            y: yo.y,
+            accion: yo.accion
+        });
+    }
+}
+
+// Llama a enviarDatos() dentro de tu función que actualiza el juego (requestAnimationFrame)
 });
